@@ -76,67 +76,62 @@
 
   &__hint {
     margin: 12px 0 44px;
-    color: #80807a;
+    color: #8e8b7e;
     font-size: 16px;
     font-weight: 400;
-    line-height: 24px;
+    line-height: 1.6;
     letter-spacing: -0.4px;
   }
 
   &__diary {
     width: 353px;
-    min-height: 54px;
+    min-height: 56px;
     border-radius: 13px;
-    background: #f0f0f0;       /* 기본: 회색 */
+    background: #f0f0f0;
     transition: background 0.15s ease, box-shadow 0.15s ease;
 
-    /* 포커스 중: 노란색 */
     &--focused {
       background: #fef8e7;
       box-shadow: 0 0 2px #f19d00;
     }
 
-    /* 입력된 내용이 있으면 박스 높이는 유지 (텍스트 잘림 방지) */
     &--filled {
-      min-height: 106px;
+      min-height: 108px;
     }
 
     textarea {
       display: block;
       width: 100%;
-      min-height: 54px;
-      padding: 14px 20px;
+      min-height: 56px;
+      padding: 15px 20px;
       border: 0;
       outline: 0;
       resize: none;
       background: transparent;
-      color: #666661;
+      color: #42403a;
       font-size: 16px;
       font-weight: 400;
-      line-height: 24px;
+      line-height: 1.6;
       letter-spacing: -0.4px;
       box-sizing: border-box;
     }
 
-    /* 포커스 중일 때 textarea도 키우고 글자 굵게 */
     &--focused textarea {
-      min-height: 106px;
       font-weight: 600;
     }
 
-    /* 내용은 있지만 블러된 상태 — 높이는 유지하되 회색 톤 */
     &--filled textarea {
-      min-height: 106px;
+      min-height: 108px;
     }
 
     textarea::placeholder {
-      color: #80807a;
+      color: #8e8b7e;
     }
   }
 
   &__counter {
-    margin: 8px 0 0;
-    color: #80807a;
+    margin: 4px 0 0;
+    color: #8e8b7e;
     font-size: 12px;
     line-height: 18px;
     letter-spacing: -0.3px;
@@ -147,7 +142,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    margin-top: 47px;
+    margin-top: 0;
   }
 
   &__emotion-row {
@@ -158,12 +153,12 @@
 
   &__chip {
     min-width: 68px;
-    height: 48px;
+    height: 50px;
     padding: 12px 20px;
     border: 0;
     border-radius: 24px;
-    background: #f0f0f0;
-    color: #80807a;
+    background: #f2f1ec;
+    color: #8e8b7e;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
@@ -178,7 +173,7 @@
 
     &--active {
       background: #fef8e7;
-      color: #31312e;
+      color: #42403a;
       font-weight: 600;
       box-shadow: 0 0 3px #f19d00;
     }
@@ -197,8 +192,8 @@
     padding: 14px 20px;
     border: 0;
     border-radius: 13px;
-    background: #f0f0f0;
-    color: #80807a;
+    background: #f2f1ec;
+    color: #8e8b7e;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
@@ -208,32 +203,67 @@
 
     &--active {
       background: #fef8e7;
-      color: #31312e;
+      color: #42403a;
       font-weight: 600;
       box-shadow: 0 0 2px #f19d00;
     }
   }
 
-  &__next {
+  &__actions {
     position: absolute;
-    top: 738px;
+    bottom: calc(54px + var(--safe-bottom));
     left: 50%;
+    display: grid;
+    grid-template-columns: 170px 170px;
+    gap: 13px;
+    width: 353px;
+    transform: translateX(-50%);
+
+    &--single {
+      display: block;
+
+      .analyze__next {
+        width: 353px;
+      }
+    }
+  }
+
+  &__prev,
+  &__next {
     width: 353px;
     height: 60px;
-    transform: translateX(-50%);
     border: 0;
     border-radius: 15px;
-    background: #e6e6e4;
-    color: #31312e;
+    background: #e6e5df;
+    color: #42403a;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.6;
     letter-spacing: -0.4px;
     cursor: default;
+  }
 
+  &__prev,
+  &__next {
+    width: 170px;
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  &__prev--active,
+  &__next--active {
+    cursor: pointer;
+  }
+
+  &__prev--active {
+    background: #f2f1ec;
+  }
+
+  &__next {
     &--active {
       background: #fbd76c;
-      cursor: pointer;
     }
   }
   &__overlay {

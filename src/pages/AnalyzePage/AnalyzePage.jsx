@@ -14,7 +14,7 @@ const QUESTIONS = [
 const EMOTION_GROUPS = [
   ['신나는', '뿌듯한', '행복한', '차분한'],
   ['슬픈', '스트레스', '공허한'],
-  ['피곤한', '우울', '화난'],
+  ['피곤한', '우울', '분노'],
 ]
 
 const COMFORT_OPTIONS = ['위로와 공감', '현실적 조언']
@@ -36,11 +36,11 @@ export default function AnalyzePage() {
   }, [comfort, diary, emotions.length, step])
 
   const handleBack = () => {
-    if (step === 1) {
-      setShowConfirm(true)
-      return
-    }
+    setShowConfirm(true)
+  }
 
+  const handlePrevious = () => {
+    if (step === 1) return
     setStep(current => current - 1)
   }
 
@@ -150,14 +150,25 @@ export default function AnalyzePage() {
         )}
       </main>
 
-      <button
-        className={`analyze__next${canNext ? ' analyze__next--active' : ''}`}
-        type="button"
-        disabled={!canNext}
-        onClick={handleNext}
-      >
-        다음 단계로
-      </button>
+      <div className={`analyze__actions${step === 1 ? ' analyze__actions--single' : ''}`}>
+        {step > 1 && (
+          <button
+            className="analyze__prev analyze__prev--active"
+            type="button"
+            onClick={handlePrevious}
+          >
+            이전
+          </button>
+        )}
+        <button
+          className={`analyze__next${canNext ? ' analyze__next--active' : ''}`}
+          type="button"
+          disabled={!canNext}
+          onClick={handleNext}
+        >
+          다음 단계로
+        </button>
+      </div>
 
       {showConfirm && (
         <div className="analyze__overlay" role="dialog" aria-modal="true">
