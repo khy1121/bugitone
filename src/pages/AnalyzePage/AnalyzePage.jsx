@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import './AnalyzePage.scss'
 
-const TODAY = '2026.05.11'
-
 const QUESTIONS = [
   ['오늘 하루 있었던', '일기를 간단하게 적어주세요.'],
   ['현재 어떤 기분 상태와', '가장 가까우신가요?'],
@@ -21,9 +19,18 @@ const COMFORT_OPTIONS = ['위로와 공감', '현실적 조언']
 const DIARY_MIN_HEIGHT = 56
 const DIARY_MAX_HEIGHT = 106
 
+const formatToday = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const date = String(today.getDate()).padStart(2, '0')
+  return `${year}.${month}.${date}`
+}
+
 export default function AnalyzePage() {
   const navigate = useNavigate()
   const textareaRef = useRef(null)
+  const today = useMemo(() => formatToday(), [])
   const [step, setStep] = useState(1)
   const [diary, setDiary] = useState('')
   const [emotions, setEmotions] = useState([])
@@ -100,7 +107,7 @@ export default function AnalyzePage() {
       </div>
 
       <main className="analyze__body">
-        <p className="analyze__date">{TODAY}</p>
+        <p className="analyze__date">{today}</p>
 
         <h1 className="analyze__question">
           {QUESTIONS[step - 1].map(line => (
