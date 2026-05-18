@@ -214,26 +214,62 @@
     }
   }
 
-  &__next {
+  &__actions {
     position: absolute;
-    top: 738px;
-    left: 50%;
+    left: 20px;
+    bottom: calc(54px + var(--safe-bottom));
+    z-index: 5;
+    display: flex;
+    gap: 12px;
     width: 353px;
     height: 60px;
-    transform: translateX(-50%);
+
+    &--single {
+      .analyze__next {
+        flex-basis: 100%;
+      }
+    }
+  }
+
+  &__prev,
+  &__next {
+    flex: 1 1 0;
+    height: 60px;
     border: 0;
     border-radius: 15px;
-    background: #e6e6e4;
     color: #31312e;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.6;
     letter-spacing: -0.4px;
+  }
+
+  &__prev {
+    background: #f0f0f0;
+    cursor: pointer;
+
+    &--active {
+      background: #fef8e7;
+      box-shadow: 0 0 2px #f19d00;
+
+      &:hover {
+        background: #fcefcf;
+      }
+    }
+  }
+
+  &__next {
+    min-width: 0;
+    background: #e6e6e4;
     cursor: default;
 
     &--active {
       background: #fbd76c;
       cursor: pointer;
+
+      &:hover {
+        background: #f8cc3f;
+      }
     }
   }
   &__overlay {

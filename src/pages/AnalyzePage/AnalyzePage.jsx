@@ -36,11 +36,10 @@ export default function AnalyzePage() {
   }, [comfort, diary, emotions.length, step])
 
   const handleBack = () => {
-    if (step === 1) {
       setShowConfirm(true)
-      return
-    }
-
+  }
+  const handlePrevious = () => {
+    if (step === 1) return
     setStep(current => current - 1)
   }
 
@@ -68,7 +67,7 @@ export default function AnalyzePage() {
   return (
     <div className="analyze">
       <button className="analyze__back" type="button" onClick={handleBack}>
-        ← 뒤로
+        ← 나가기
       </button>
 
       <div className="analyze__progress" aria-label={`${step} / 3 단계`}>
@@ -150,14 +149,25 @@ export default function AnalyzePage() {
         )}
       </main>
 
-      <button
-        className={`analyze__next${canNext ? ' analyze__next--active' : ''}`}
-        type="button"
-        disabled={!canNext}
-        onClick={handleNext}
-      >
-        다음 단계로
-      </button>
+      <div className={`analyze__actions${step === 1 ? ' analyze__actions--single' : ''}`}>
+        {step > 1 && (
+          <button
+            className="analyze__prev analyze__prev--active"
+            type="button"
+            onClick={handlePrevious}
+          >
+            이전
+          </button>
+        )}
+        <button
+          className={`analyze__next${canNext ? ' analyze__next--active' : ''}`}
+          type="button"
+          disabled={!canNext}
+          onClick={handleNext}
+        >
+          다음 단계로
+        </button>
+      </div>
 
       {showConfirm && (
         <div className="analyze__overlay" role="dialog" aria-modal="true">
