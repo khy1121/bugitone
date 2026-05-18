@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import './AnalyzePage.scss'
@@ -18,6 +18,8 @@ const EMOTION_GROUPS = [
 ]
 
 const COMFORT_OPTIONS = ['위로와 공감', '현실적 조언']
+const DIARY_MIN_HEIGHT = 56
+const DIARY_MAX_HEIGHT = 106
 
 export default function AnalyzePage() {
   const navigate = useNavigate()
@@ -27,6 +29,7 @@ export default function AnalyzePage() {
   const [emotions, setEmotions] = useState([])
   const [comfort, setComfort] = useState('')
   const [isDiaryFocused, setIsDiaryFocused] = useState(false)
+  const [diaryHeight, setDiaryHeight] = useState(DIARY_MIN_HEIGHT)
   const [showConfirm, setShowConfirm] = useState(false)
 
   const canNext = useMemo(() => {
@@ -35,8 +38,26 @@ export default function AnalyzePage() {
     return Boolean(comfort)
   }, [comfort, diary, emotions.length, step])
 
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    if (!diary) {
+      setDiaryHeight(DIARY_MIN_HEIGHT)
+      return
+    }
+
+    textarea.style.height = 'auto'
+    const nextHeight = Math.min(
+      DIARY_MAX_HEIGHT,
+      Math.max(DIARY_MIN_HEIGHT, Math.ceil(textarea.scrollHeight)),
+    )
+    textarea.style.height = ''
+    setDiaryHeight(nextHeight)
+  }, [diary])
+
   const handleBack = () => {
-      setShowConfirm(true)
+    setShowConfirm(true)
   }
   const handlePrevious = () => {
     if (step === 1) return
@@ -54,6 +75,10 @@ export default function AnalyzePage() {
     navigate(ROUTES.RESULT, {
       state: { prompt: diary, emotions, comfort, loading: true },
     })
+  }
+
+  const handleDiaryChange = (event) => {
+    setDiary(event.target.value)
   }
 
   const toggleEmotion = (emotion) => {
@@ -92,12 +117,14 @@ export default function AnalyzePage() {
                 isDiaryFocused && 'analyze__diary--focused',
                 diary && 'analyze__diary--filled',
               ].filter(Boolean).join(' ')}
+              style={{ '--diary-height': `${diaryHeight}px` }}
             >
               <textarea
                 ref={textareaRef}
                 value={diary}
+                rows={1}
                 maxLength={300}
-                onChange={event => setDiary(event.target.value)}
+                onChange={handleDiaryChange}
                 onFocus={() => setIsDiaryFocused(true)}
                 onBlur={() => setIsDiaryFocused(false)}
                 placeholder="일기를 입력해주세요."

@@ -85,10 +85,11 @@
 
   &__diary {
     width: 353px;
-    min-height: 54px;
+    height: var(--diary-height, 56px);
+    overflow: hidden;
     border-radius: 13px;
     background: #f0f0f0;       /* 기본: 회색 */
-    transition: background 0.15s ease, box-shadow 0.15s ease;
+    transition: height 0.16s ease, background 0.15s ease, box-shadow 0.15s ease;
 
     /* 포커스 중: 노란색 */
     &--focused {
@@ -96,41 +97,31 @@
       box-shadow: 0 0 2px #f19d00;
     }
 
-    /* 입력된 내용이 있으면 박스 높이는 유지 (텍스트 잘림 방지) */
-    &--filled {
-      min-height: 106px;
-    }
-
     textarea {
       display: block;
       width: 100%;
-      min-height: 54px;
-      padding: 14px 20px;
+      height: 100%;
+      padding: 15px 20px;
       border: 0;
       outline: 0;
       resize: none;
+      overflow: hidden;
       background: transparent;
       color: #666661;
       font-size: 16px;
       font-weight: 400;
-      line-height: 24px;
+      line-height: 26px;
       letter-spacing: -0.4px;
       box-sizing: border-box;
     }
 
     /* 포커스 중일 때 textarea도 키우고 글자 굵게 */
     &--focused textarea {
-      min-height: 106px;
       font-weight: 600;
     }
 
-    /* 내용은 있지만 블러된 상태 — 높이는 유지하되 회색 톤 */
-    &--filled textarea {
-      min-height: 106px;
-    }
-
     textarea::placeholder {
-      color: #80807a;
+      color: #8e8b7e;
     }
   }
 
