@@ -55,21 +55,21 @@ export default function BottomNav({ active = "library", className = "" }) {
     <nav className={classNames} aria-label="하단 메뉴">
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === active;
+        const isCharacterLandingActive =
+          isCharacterLanding && item.key === "character" && isActive;
         const Icon = item.Icon;
 
-        const iconColor =
-          isCharacterLanding && isActive
-            ? "#F9C93B" // 얼굴 눈/입 색
-            : isActive
-              ? "#FEFEFE"
-              : "#282723";
+        const iconColor = isCharacterLandingActive
+          ? "#F9C93B" // 얼굴 눈/입 색
+          : isActive
+            ? "#282723"
+            : "#282723";
 
-        const activeFillColor =
-          isCharacterLanding && isActive
-            ? "#FEFEFE" // 얼굴 원 내부 흰색
-            : isActive
-              ? "#F9C93B"
-              : "transparent";
+        const activeFillColor = isCharacterLandingActive
+          ? "#FEFEFE" // 얼굴 원 내부 흰색
+          : isActive
+            ? "#F8BC0A"
+            : "transparent";
 
         return (
           <button

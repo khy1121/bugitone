@@ -8,30 +8,31 @@ html,
 body,
 #root {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   margin: 0;
 }
 
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 :root {
   --design-width: 393px;
   --design-height: 852px;
   --app-height: calc(var(--vh, 1vh) * 100);
-  --app-frame-height: min(var(--app-height), var(--design-height));
+  --app-frame-height: var(--design-height);
+  --app-scale: 1;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  --bottom-nav-height: 68px;
+  --bottom-nav-height: 84px;
   --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--safe-bottom));
 }
 
 body {
-  min-height: var(--app-height);
+  height: var(--app-height);
   font-family: $font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   background: #d9d9d9;
   color: $color-text;
@@ -39,19 +40,25 @@ body {
 
 #root {
   width: 100%;
-  min-height: var(--app-height);
+  height: var(--app-height);
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
 }
 
 .app-frame {
-  width: 100%;
-  max-width: var(--design-width);
-  height: var(--app-frame-height);
+  width: var(--design-width);
+  min-width: var(--design-width);
+  max-width: none;
+  height: var(--design-height);
+  min-height: var(--design-height);
   margin: 0 auto;
   position: relative;
   overflow: hidden;
   background: $color-surface;
+  transform: scale(var(--app-scale));
+  transform-origin: top center;
 }
 
 .mobile-page {
