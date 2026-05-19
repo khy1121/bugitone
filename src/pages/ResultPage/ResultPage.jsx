@@ -43,6 +43,7 @@ export default function ResultPage() {
   const moodTags = useMemo(() => {
     const normalized =
       emotions.length > 0 ? emotions : ["공허함", "우울", "무기력"];
+
     return normalized.slice(0, 3);
   }, [emotions]);
 
@@ -55,61 +56,64 @@ export default function ResultPage() {
   };
 
   const handleSaveImage = () => {
-    // 추후 이미지 저장 로직 연결
     console.log("이미지 저장하기");
   };
 
   if (loading) {
     return (
-      <div className="result-loading">
-        <button
-          className="result-loading__back-btn"
-          type="button"
-          onClick={handleBack}
-        >
-          ← 나가기
-        </button>
+      <main className="result-loading">
+        <div className="result-loading__inner">
+          <button
+            className="result-loading__back-btn"
+            type="button"
+            onClick={handleBack}
+          >
+            ← 나가기
+          </button>
 
-        <p className="result-loading__date">{getCurrentDate()}</p>
+          <p className="result-loading__date">{getCurrentDate()}</p>
 
-        <h1 className="result-loading__title">
-          오늘의 당신을
-          <br />
-          정독하고 있어요.......
-        </h1>
+          <h1 className="result-loading__title">
+            오늘의 당신을
+            <br />
+            정독하고 있어요.......
+          </h1>
 
-        <div className="result-loading__visual" aria-hidden="true">
-          <div className="result-loading__spinner-wrap">
-            <Loading
-              size={238}
-              label="오늘의 당신을 정독하는 중"
-              className="result-loading__spinner"
-            />
+          <div className="result-loading__visual" aria-hidden="true">
+            <div className="result-loading__spinner-wrap">
+              <Loading
+                size={238}
+                label="오늘의 당신을 정독하는 중"
+                className="result-loading__spinner"
+              />
 
-            <img
-              className="result-loading__character"
-              src={LOAD_CHAR_SRC}
-              alt=""
-            />
+              <img
+                className="result-loading__character"
+                src={LOAD_CHAR_SRC}
+                alt=""
+              />
+            </div>
           </div>
+
+          <p className="result-loading__quote">
+            모든 게 낯설게 느껴지는 오늘, 앨리스도 처음엔
+            <br />
+            아무것도 이해하지 못한 채 그 세계에 뛰어들었어요.
+          </p>
         </div>
-
-        <p className="result-loading__quote">
-          모든 게 낯설게 느껴지는 오늘, 앨리스도 처음엔
-          <br />
-          아무것도 이해하지 못한 채 그 세계에 뛰어들었어요.
-        </p>
-
-        <div className="result-loading__home-indicator" aria-hidden="true" />
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="result">
+    <main className="result">
       <div className="result__content">
         <header className="result__header">
-          <button type="button" onClick={handleBack}>
+          <button
+            className="result__back"
+            type="button"
+            onClick={handleBack}
+          >
             ← 나가기
           </button>
 
@@ -200,7 +204,8 @@ export default function ResultPage() {
               뿌듯함과 지침이 동시에 느껴지는 오늘,
               <br />
               어린 왕자처럼 작은 것들의 소중함을 알면서도
-              <br />그 무게에 지쳐있는 당신과 닮았어요.
+              <br />
+              그 무게에 지쳐있는 당신과 닮았어요.
             </p>
           </div>
         </section>
@@ -218,9 +223,7 @@ export default function ResultPage() {
             이미지 저장하기
           </button>
         </div>
-
-        <div className="result__home-indicator" aria-hidden="true" />
       </div>
-    </div>
+    </main>
   );
 }
