@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import BottomNav from '../../components/common/BottomNav/BottomNav'
-import Loading from '../../components/common/Loading/Loading'
+import Loading from '../../components/common/LoadingSpinner/LoadingSpinner'
 import { ArrowUpIcon } from '../../assets/icons'
 import './ChatPage.scss'
 

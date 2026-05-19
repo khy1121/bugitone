@@ -1,50 +1,80 @@
 import React from 'react'
-import { NavMemoIcon, StarIcon, HandwritingIcon, HighlighterIcon, TrashIcon } from '../../../assets/icons'
+import {
+  PencilIcon,
+  StarIcon,
+  HandwritingIcon,
+  HighlighterIcon,
+  TrashIcon,
+} from '../../../assets/icons'
 import './MemoToolbar.scss'
 
-const ACTIVE_COLOR   = '#F7BB0A'
-const INACTIVE_COLOR = '#161615'
-
-const TOOLS = [
-  { id: 'write',       label: '글쓰기',   Icon: NavMemoIcon,      stroke: false },
-  { id: 'bookmark',    label: '즐겨찾기',  Icon: StarIcon,         stroke: false },
-  { id: 'handwriting', label: '손글씨',   Icon: HandwritingIcon,  stroke: true  },
-  { id: 'highlight',   label: '형광펜',   Icon: HighlighterIcon,  stroke: true  },
-  { id: 'trash',       label: '휴지통',   Icon: TrashIcon,        stroke: true  },
+const TOOL_ITEMS = [
+  {
+    key: 'write',
+    label: '글쓰기',
+    Icon: PencilIcon,
+  },
+  {
+    key: 'favorite',
+    label: '즐겨찾기',
+    Icon: StarIcon,
+  },
+  {
+    key: 'handwriting',
+    label: '손글씨',
+    Icon: HandwritingIcon,
+  },
+  {
+    key: 'highlight',
+    label: '형광펜',
+    Icon: HighlighterIcon,
+  },
+  {
+    key: 'trash',
+    label: '휴지통',
+    Icon: TrashIcon,
+  },
 ]
 
-export default function MemoToolbar({ activeTool = 'write', onToolChange, bookmarked = false, onBookmark, onDelete }) {
-  return (
-    <div className="memo-toolbar">
-      {TOOLS.map(({ id, label, Icon, stroke }) => {
-        const isBookmark = id === 'bookmark'
-        const isDelete   = id === 'trash'
-        const isActive   = isBookmark ? bookmarked : activeTool === id
-        const iconColor  = isActive ? ACTIVE_COLOR : INACTIVE_COLOR
+export default function MemoToolbar({
+  active = 'write',
+  favorite = false,
+  onSelect,
+  className = '',
+}) {
+  const classNames = ['memo-toolbar', className].filter(Boolean).join(' ')
 
-        const handleClick = () => {
-          if (isBookmark) onBookmark?.()
-          else if (isDelete) onDelete?.()
-          else onToolChange?.(id)
-        }
+  return (
+    <nav className={classNames} aria-label="메모 도구">
+      {TOOL_ITEMS.map((item) => {
+        const isActive = item.key === active
+        const Icon = item.Icon
+
+        const iconColor = isActive ? '#F8BC0A' : '#282723'
+        const textColor = isActive ? '#F8BC0A' : '#282723'
 
         return (
           <button
-            key={id}
+            key={item.key}
+            className={`memo-toolbar__item ${isActive ? 'memo-toolbar__item--active' : ''}`}
             type="button"
-            className={`memo-toolbar__btn${isActive ? ' memo-toolbar__btn--active' : ''}`}
-            aria-label={label}
-            onClick={handleClick}
+            onClick={() => onSelect?.(item.key)}
+            aria-pressed={isActive}
           >
-            <Icon
-              size={id === 'write' || id === 'handwriting' ? 26 : 24}
-              color={iconColor}
-              {...(isBookmark ? { filled: bookmarked } : {})}
-            />
-            <span className="memo-toolbar__label">{label}</span>
+            <span className="memo-toolbar__icon" style={{ color: iconColor }}>
+              {item.key === 'favorite' ? (
+                <Icon size={24} color={iconColor} filled={favorite || isActive} />
+              ) : (
+                <Icon size={item.key === 'handwriting' ? 26 : 24} color={iconColor} />
+              )}
+            </span>
+
+            <span className="memo-toolbar__label" style={{ color: textColor }}>
+              {item.label}
+            </span>
           </button>
         )
       })}
-    </div>
+    </nav>
   )
 }

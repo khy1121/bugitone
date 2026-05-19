@@ -1,11 +1,1 @@
-﻿/* Card styles */
-@use '../../../styles/variables' as *;
-
-.fe-card {
-  background: white;
-  border: 1px solid $color-border;
-  border-radius: 8px;
-  padding: 1rem;
-}
-.fe-card__title { font-weight: 600; margin-bottom: 0.5rem; }
-.fe-card__body { color: $color-sub-text; }
+﻿

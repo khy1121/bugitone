@@ -1,20 +1,38 @@
-/*
- Textarea 컴포넌트
- - props: value, onChange, placeholder, name, maxLength
- - 폼에서 다중행 입력을 받을 때 사용합니다.
-*/
 import React from 'react'
 import './Textarea.scss'
 
-export default function Textarea({ value, onChange, placeholder, name, maxLength }) {
+export default function Textarea({
+  value,
+  defaultValue,
+  placeholder = '일기를 입력해주세요.',
+  disabled = false,
+  error = false,
+  rows = 6,
+  className = '',
+  ...rest
+}) {
+  const hasValue = value !== undefined
+    ? String(value).length > 0
+    : defaultValue !== undefined && String(defaultValue).length > 0
+
+  const classNames = [
+    'textarea',
+    hasValue ? 'textarea--filled' : '',
+    error ? 'textarea--error' : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <textarea
-      className="fe-textarea"
-      name={name}
+      className={classNames}
       value={value}
-      onChange={onChange}
+      defaultValue={defaultValue}
       placeholder={placeholder}
-      maxLength={maxLength}
+      disabled={disabled}
+      rows={rows}
+      {...rest}
     />
   )
 }

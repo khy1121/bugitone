@@ -4,57 +4,128 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 $spacing-lg;
-  border: 1px solid transparent;
-  border-radius: $radius-md;
-  font-size: $font-size-md;
-  font-weight: 600;
+
+  border: 0;
+  border-radius: 24px;
+
+  font-family: $font-family-base;
+  font-size: $font-size-button;
+  font-weight: $font-weight-button;
+  line-height: 1.6;
+  letter-spacing: $letter-spacing-base;
+
+  white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(1px);
+  }
 }
 
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* size */
+.btn--sm {
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: $font-size-body2;
 }
 
-.btn--primary {
-  background: $color-primary;
-  color: $color-white;
+.btn--md {
+  min-height: 50px;
+  padding: 12px 20px;
 }
 
-.btn--primary:not(:disabled):hover {
-  background: $color-primary-dark;
+.btn--lg {
+  min-height: 52px;
+  padding: 12px 24px;
+  border-radius: 12px;
 }
 
-.btn--secondary {
-  background: $color-secondary;
-  color: $color-primary-dark;
+.btn--full {
+  width: 100%;
 }
 
+/* Figma Component5 - N */
+.btn--default,
+.btn--inactive {
+  background: $gray-50;
+  color: $gray-500;
+  font-weight: $font-weight-body1;
+  box-shadow: none;
+}
+
+/* Figma Component5 - Y */
+.btn--primary,
+.btn--active,
+.btn--selected {
+  background: $main-50;
+  color: $gray-800;
+  font-weight: $font-weight-button;
+  box-shadow: 0 0 2px #f19d00;
+}
+
+/* Modal / Confirm primary */
+.btn--solid {
+  background: $main-500;
+  color: $gray-900;
+  font-weight: $font-weight-button;
+  border-radius: 12px;
+  box-shadow: none;
+
+  &:not(:disabled):hover {
+    background: $main-400;
+  }
+}
+
+/* Modal / Cancel */
+.btn--outline {
+  background: $color-white;
+  color: $gray-500;
+  font-weight: $font-weight-button;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+/* Danger */
 .btn--danger {
   background: $color-danger;
   color: $color-white;
+  font-weight: $font-weight-button;
+  border-radius: 12px;
+  box-shadow: none;
 }
 
-.btn--ghost {
-  background: transparent;
-  border-color: $color-border;
-  color: $color-text;
-}
+.btn--glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
 
-// Figma 버튼 컴포넌트 — active/inactive 토글 패턴
-.btn--active {
-  background: $main-10;
-  color: $gray-800;
-  font-weight: 600;
-  border-color: transparent;
-}
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 247, 247, 0.29) 100%
+    );
+  color: $gray-900;
+  border: 1px solid rgba(254, 254, 254, 0.72);
+  box-shadow:
+    0 4px 9.5px rgba(125, 88, 18, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18);
 
-.btn--inactive {
-  background: #f0f0f0;
-  color: #80807a;
-  font-weight: 400;
-  border-color: transparent;
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  backdrop-filter: blur(14px) saturate(135%);
 }

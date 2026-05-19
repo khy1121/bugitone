@@ -1,35 +1,76 @@
+@use '../../../styles/variables' as *;
+
 .memo-toolbar {
-  display: flex;
+  position: fixed;
+  left: 50%;
+  bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 120;
+
   width: 393px;
   height: 68px;
-  background: #fff;
-  border-top: 1px solid #e6e6e4;
 
-  &__btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    padding: 8px 0;
+  display: flex;
+  align-items: center;
 
-    &--active {
-      .memo-toolbar__label {
-        color: #f7bb0a;
-      }
-    }
+  transform: translateX(-50%);
+
+  background: $color-white;
+  border-radius: 20px 20px 0 0;
+  filter: drop-shadow(0 0 4.05px rgba(40, 40, 40, 0.23));
+}
+
+.memo-toolbar__item {
+  width: 78.6px;
+  height: 68px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  padding: 12px 26px;
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.memo-toolbar__icon {
+  width: 26px;
+  height: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  color: $gray-900;
+
+  svg {
+    display: block;
   }
+}
 
-  &__label {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 12px;
-    font-weight: 400;
-    color: #161615;
-    line-height: 18px;
-    letter-spacing: -0.3px;
+.memo-toolbar__label {
+  font-family: $font-family-base;
+  font-size: $font-size-caption;
+  font-weight: $font-weight-caption;
+  line-height: 18px;
+  letter-spacing: $letter-spacing-base;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.memo-toolbar__item--active {
+  .memo-toolbar__label {
+    color: $main-500;
   }
+}
+
+.memo-toolbar--static {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  transform: none;
 }

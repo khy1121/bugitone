@@ -53,13 +53,39 @@ export const NavLibraryIcon = ({ size = 26, color = 'currentColor', active = fal
   </svg>
 )
 
-export const NavCharacterIcon = ({ size = 24, color = 'currentColor', active = false, fillColor = '#F9C93B', ...p }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...p}>
-    <circle cx="12" cy="12" r="7.25" fill={active ? fillColor : 'none'} />
-    <circle cx="12" cy="12" r="9.25" stroke={color} strokeWidth="1.5" />
-    <path d="M9 15c2.347 1.254 3.707 1.222 6 0" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-    <circle cx="9" cy="11" r="0.5" fill={color} stroke={color} />
-    <circle cx="15" cy="11" r="0.5" fill={color} stroke={color} />
+export const NavCharacterIcon = ({
+  size = 26,
+  color = 'currentColor',
+  active = false,
+  fillColor = '#F9C93B',
+  ...p
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...p}
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="9.75"
+      fill={active ? fillColor : 'none'}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+
+    <path
+      d="M9 15c2.347 1.254 3.707 1.222 6 0"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+
+    <circle cx="9" cy="11" r="0.65" fill={color} />
+    <circle cx="15" cy="11" r="0.65" fill={color} />
   </svg>
 )
 

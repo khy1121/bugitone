@@ -1,0 +1,18 @@
+@use '../../../styles/variables' as *;
+
+.icon {
+  width: var(--icon-size, 24px);
+  height: var(--icon-size, 24px);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  line-height: 0;
+
+  svg {
+    display: block;
+    flex-shrink: 0;
+  }
+}

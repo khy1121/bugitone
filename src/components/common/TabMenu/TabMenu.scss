@@ -1,0 +1,60 @@
+@use '../../../styles/variables' as *;
+
+.tab-menu {
+  display: flex;
+  align-items: center;
+
+  width: 393px;
+  height: 48px;
+
+  background: $color-white;
+  filter: drop-shadow(0 4px 4.05px rgba(40, 40, 40, 0.23));
+}
+
+.tab-menu__item {
+  position: relative;
+
+  width: 131px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  background: transparent;
+  padding: 0;
+
+  cursor: pointer;
+}
+
+.tab-menu__label {
+  color: $gray-800;
+
+  font-family: $font-family-base;
+  font-size: $font-size-body1;
+  font-weight: $font-weight-body1;
+  line-height: 1.6;
+  letter-spacing: $letter-spacing-base;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tab-menu__item--active {
+  .tab-menu__label {
+    font-weight: $font-weight-button;
+  }
+}
+
+.tab-menu__indicator {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+
+  width: 80px;
+  height: 5px;
+
+  transform: translateX(-50%);
+  border-radius: 3px 3px 0 0;
+  background: $main-500;
+}

@@ -1,0 +1,68 @@
+@use '../../../styles/variables' as *;
+
+.loading-spinner {
+  width: var(--loading-size, 80px);
+  height: var(--loading-size, 80px);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner__ring {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  border-radius: 50%;
+
+  /*
+    Figma:
+    - 원 지름 약 80px
+    - 회색 링 + 노란 활성 구간
+    - 노란색은 MAIN_500 #F8BC0A 계열
+  */
+  background:
+  conic-gradient(
+    from 0deg,
+    $main-500 0deg 110deg,
+    rgba(248, 188, 10, 0.14) 110deg 360deg
+  );
+
+  animation: loading-spin 1s linear infinite;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: inset 0 0 0 999px transparent;
+  }
+}
+
+/*
+  가운데를 뚫어서 ring 형태로 만들기.
+  mask를 지원하는 브라우저에서는 가장 깔끔하게 처리됨.
+*/
+.loading-spinner__ring {
+  -webkit-mask:
+    radial-gradient(
+      farthest-side,
+      transparent calc(100% - 9px),
+      #000 calc(100% - 8.5px)
+    );
+  mask:
+    radial-gradient(
+      farthest-side,
+      transparent calc(100% - 9px),
+      #000 calc(100% - 8.5px)
+    );
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

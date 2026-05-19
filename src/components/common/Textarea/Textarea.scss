@@ -1,11 +1,51 @@
-﻿/* Textarea styles - 공통 텍스트영역 스타일 */
-@use '../../../styles/variables' as *;
+﻿@use '../../../styles/variables' as *;
 
-.fe-textarea {
-  width: 100%;
-  min-height: 120px;
-  padding: 0.75rem;
-  border: 1px solid $color-border;
-  border-radius: 8px;
-  resize: vertical;
+.textarea {
+  width: 353px;
+  min-height: 160px;
+  padding: 15px 20px;
+
+  border: 0;
+  border-radius: 13px;
+  outline: none;
+  resize: none;
+
+  background: #f0f0f0;
+  color: $gray-800;
+
+  font-family: $font-family-base;
+  font-size: $font-size-body1;
+  font-weight: $font-weight-body1;
+  line-height: 1.6;
+  letter-spacing: $letter-spacing-base;
+
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+
+  &::placeholder {
+    color: $gray-400;
+  }
+
+  &:focus {
+    background: $color-white;
+    box-shadow: 0 0 4px #f19d00;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.textarea--filled {
+  background: $color-white;
+  color: $gray-800;
+}
+
+.textarea--error {
+  background: $color-white;
+  box-shadow: 0 0 0 1px $color-danger;
 }

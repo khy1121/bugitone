@@ -1,24 +1,52 @@
+@use '../../../styles/variables' as *;
+
 .chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 48px;
-  padding: 0 20px;
-  border: none;
-  border-radius: 24px;
-  background: #f0f0f0;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #80807a;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s, font-weight 0.15s;
 
-  &--active {
-    height: 50px;
-    background: #fef8e7;
-    font-weight: 600;
-    color: #31312e;
+  min-height: 50px;
+  padding: 12px 20px;
+
+  border: 0;
+  border-radius: 24px;
+
+  font-family: $font-family-base;
+  font-size: $font-size-body1;
+  line-height: 1.6;
+  letter-spacing: $letter-spacing-base;
+
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
+
+  &:not(:disabled):active {
+    transform: translateY(1px);
+  }
+}
+
+/* Figma Component5 - N */
+.chip--default {
+  background: $gray-50;
+  color: $gray-500;
+  font-weight: $font-weight-body1;
+}
+
+/* Figma Component5 - Y */
+.chip--selected {
+  background: $main-50;
+  color: $gray-800;
+  font-weight: $font-weight-button;
+  box-shadow: 0 0 2px #f19d00;
 }
