@@ -6,7 +6,7 @@
   bottom: calc(40px + env(safe-area-inset-bottom, 0px));
   z-index: 100;
 
-  width: 393px;
+  width: min(100%, 393px);
   height: 84px;
 
   display: flex;
@@ -18,19 +18,17 @@
   filter: drop-shadow(0 -4px 4.05px rgba(40, 39, 35, 0.04));
 }
 
-
-
 .bottom-nav__item {
-  width: 78.6px;
-  height: 100%;
+  flex: 1;
+  height: 84px;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  display: grid;
+  grid-template-rows: 30px 18px;
+  justify-items: center;
+  align-content: center;
+  row-gap: 4px;
 
-  padding: 12px 0;
+  padding: 0;
   border: 0;
   background: transparent;
 
@@ -38,22 +36,27 @@
 }
 
 .bottom-nav__icon {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-
-  color: $gray-900;
 
   svg {
     display: block;
+    width: 24px;
+    height: 24px;
   }
 }
 
 .bottom-nav__label {
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   color: $gray-900;
 
   font-family: $font-family-base;
@@ -71,15 +74,17 @@
   }
 }
 
-/* 캐릭터 랜딩 페이지 전용 */
+/* 캐릭터 랜딩 페이지 전용: 페이지 inner 기준 하단 배치 */
 .bottom-nav--character-landing {
   position: absolute;
-  top: 740px;
-  bottom: auto;
   left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  top: auto;
 
-  width: 393px;
-  height: 72px;
+  width: 100%;
+  max-width: 393px;
+  height: 84px;
 
   transform: none;
 
@@ -89,7 +94,8 @@
   filter: drop-shadow(0 -4px 4.05px rgba(40, 40, 40, 0.11));
 
   .bottom-nav__item {
-    height: 72px;
+    height: 84px;
+    padding: 0;
   }
 
   .bottom-nav__item--active {
@@ -100,10 +106,12 @@
   }
 }
 
-/* 페이지 안에 배치하고 싶을 때 */
 .bottom-nav--static {
   position: relative;
   left: auto;
+  right: auto;
+  top: auto;
   bottom: auto;
   transform: none;
 }
+  

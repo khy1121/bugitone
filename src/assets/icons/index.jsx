@@ -8,7 +8,7 @@
 // ─── Navigation (BottomNav) ────────────────────────────────────────────────
 
 export const NavMemoIcon = ({ size = 26, color = 'currentColor', active = false, fillColor = '#F9C93B', ...p }) => (
-  <svg width={size} height={size} viewBox="0 0 25 26" fill="none" xmlns="http://www.w3.org/2000/svg" {...p}>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...p}>
     <path d="M20.203 8.20631L13.2662 15.4206C12.7375 15.9704 12.0752 16.3605 11.3499 16.549L8.33331 17.3333L9.08745 14.1961C9.26877 13.4418 9.6438 12.753 10.1725 12.2031L17.1093 4.98885L18.1405 3.91636C18.9949 3.02788 20.38 3.02788 21.2343 3.91636C22.0885 4.80484 22.0885 6.24534 21.2343 7.13382L20.203 8.20631ZM17.1093 4.98885L20.203 8.20631" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
     <path d="M19.7916 14.625C19.7916 18.1864 19.7916 19.9671 18.8458 21.1657C18.6727 21.3851 18.4793 21.5862 18.2682 21.7663C17.1158 22.75 15.4035 22.75 11.9791 22.75H11.4583C7.52996 22.75 5.56579 22.75 4.34541 21.4807C3.12503 20.2116 3.125 18.1688 3.125 14.0833V13.5416C3.125 9.98019 3.125 8.19948 4.07077 7.00094C4.24393 6.78152 4.4374 6.58031 4.64837 6.40023C5.80082 5.41663 7.51304 5.41663 10.9375 5.41663" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -34,8 +34,8 @@ export const NavChatIcon = ({ size = 24, color = 'currentColor', active = false,
   </svg>
 )
 
-export const NavLibraryIcon = ({ size = 26, color = 'currentColor', active = false, fillColor = '#F9C93B', ...p }) => (
-  <svg width={size} height={size} viewBox="0 0 26 26" fill="none" {...p}>
+export const NavLibraryIcon = ({ size = 24, color = 'currentColor', active = false, fillColor = '#F9C93B', ...p }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...p}>
     <path
       d="M13 6.117l1.1-.412c2.504-.939 5.297-.939 7.8 0 .665.249 1.1.853 1.1 1.524V19.08c0 .921-.993 1.552-1.905 1.209-1.987-.745-4.203-.745-6.19 0L13.014 21 13 6.117Z"
       fill={active ? fillColor : 'none'}
@@ -58,6 +58,49 @@ export const NavCharacterIcon = ({
   color = 'currentColor',
   active = false,
   fillColor = '#F9C93B',
+  strokeColor,
+  detailColor,
+  ...p
+}) => {
+  const resolvedStrokeColor = strokeColor ?? color
+  const resolvedDetailColor = detailColor ?? color
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...p}
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9.75"
+        fill={active ? fillColor : 'none'}
+        stroke={resolvedStrokeColor}
+        strokeWidth="1.5"
+      />
+
+      <path
+        d="M9 15c2.347 1.254 3.707 1.222 6 0"
+        stroke={resolvedDetailColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+
+      <circle cx="9" cy="11" r="0.65" fill={resolvedDetailColor} />
+      <circle cx="15" cy="11" r="0.65" fill={resolvedDetailColor} />
+    </svg>
+  )
+}
+
+export const NavUserIcon = ({
+  size = 24,
+  color = 'currentColor',
+  active = false,
+  fillColor = '#F9C93B',
   ...p
 }) => (
   <svg
@@ -70,29 +113,19 @@ export const NavCharacterIcon = ({
   >
     <circle
       cx="12"
-      cy="12"
-      r="9.75"
+      cy="7.5"
+      r="3.75"
       fill={active ? fillColor : 'none'}
       stroke={color}
       strokeWidth="1.5"
     />
 
     <path
-      d="M9 15c2.347 1.254 3.707 1.222 6 0"
+      d="M5.25 17.5C5.25 16.55 5.85 15.7 6.75 15.38C10.15 14.16 13.85 14.16 17.25 15.38C18.15 15.7 18.75 16.55 18.75 17.5V19C18.75 20.05 17.82 20.86 16.78 20.71L15.82 20.57C13.29 20.21 10.71 20.21 8.18 20.57L7.22 20.71C6.18 20.86 5.25 20.05 5.25 19V17.5Z"
+      fill={active ? fillColor : 'none'}
       stroke={color}
       strokeWidth="1.5"
-      strokeLinecap="round"
     />
-
-    <circle cx="9" cy="11" r="0.65" fill={color} />
-    <circle cx="15" cy="11" r="0.65" fill={color} />
-  </svg>
-)
-
-export const NavUserIcon = ({ size = 19, color = 'currentColor', active = false, fillColor = '#F9C93B', ...p }) => (
-  <svg width={size} height={size} viewBox="0 0 16 19" fill="none" xmlns="http://www.w3.org/2000/svg" {...p}>
-    <circle cx="4" cy="4" r="4" transform="matrix(-1 0 0 1 11.75 0.75)" stroke={color} strokeWidth="1.5" />
-    <path d="M0.75 14.6847C0.75 13.8243 1.29085 13.0568 2.10109 12.7675C5.75404 11.4628 9.74596 11.4628 13.3989 12.7675C14.2091 13.0568 14.75 13.8243 14.75 14.6847V16.0002C14.75 17.1876 13.6983 18.0998 12.5228 17.9318L11.5684 17.7955C9.03565 17.4337 6.46435 17.4337 3.93162 17.7955L2.97721 17.9318C1.8017 18.0998 0.75 17.1876 0.75 16.0002V14.6847Z" stroke={color} strokeWidth="1.5" />
   </svg>
 )
 

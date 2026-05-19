@@ -49,6 +49,7 @@ export default function BottomNav({ active = "library", className = "" }) {
   const isCharacterLanding = className.includes(
     "bottom-nav--character-landing",
   );
+
   const classNames = ["bottom-nav", className].filter(Boolean).join(" ");
 
   return (
@@ -57,34 +58,46 @@ export default function BottomNav({ active = "library", className = "" }) {
         const isActive = item.key === active;
         const isCharacterLandingActive =
           isCharacterLanding && item.key === "character" && isActive;
+
         const Icon = item.Icon;
 
-        const iconColor = isCharacterLandingActive
-          ? "#F9C93B" // 얼굴 눈/입 색
-          : isActive
-            ? "#282723"
-            : "#282723";
+        const iconColor = "#282723";
 
         const activeFillColor = isCharacterLandingActive
-          ? "#FEFEFE" // 얼굴 원 내부 흰색
+          ? "#FEFEFE"
           : isActive
             ? "#F8BC0A"
             : "transparent";
 
+        const iconProps = {
+          size: 24,
+          active: isActive,
+          color: iconColor,
+          fillColor: activeFillColor,
+        };
+
+        if (item.key === "character") {
+          iconProps.strokeColor = isCharacterLandingActive
+            ? "#FEFEFE"
+            : iconColor;
+
+          iconProps.detailColor = isCharacterLandingActive
+            ? "#F9C93B"
+            : iconColor;
+        }
+
         return (
           <button
             key={item.key}
-            className={`bottom-nav__item ${isActive ? "bottom-nav__item--active" : ""}`}
+            className={`bottom-nav__item ${
+              isActive ? "bottom-nav__item--active" : ""
+            }`}
             type="button"
             onClick={() => navigate(item.path)}
             aria-current={isActive ? "page" : undefined}
           >
             <span className="bottom-nav__icon" aria-hidden="true">
-              <Icon
-                active={isActive}
-                color={iconColor}
-                fillColor={activeFillColor}
-              />
+              <Icon {...iconProps} />
             </span>
 
             <span className="bottom-nav__label">{item.label}</span>
@@ -92,5 +105,5 @@ export default function BottomNav({ active = "library", className = "" }) {
         );
       })}
     </nav>
-  );
+  ); 
 }
