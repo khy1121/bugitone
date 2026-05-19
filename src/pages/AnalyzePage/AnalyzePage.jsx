@@ -12,12 +12,15 @@ const QUESTIONS = [
 const EMOTION_GROUPS = [
   ['신나는', '뿌듯한', '행복한', '차분한'],
   ['슬픈', '스트레스', '공허한'],
-  ['피곤한', '우울', '화난'],
+  ['피곤한', '우울', '분노'],
 ]
 
 const COMFORT_OPTIONS = ['위로와 공감', '현실적 조언']
-const DIARY_MIN_HEIGHT = 56
-const DIARY_MAX_HEIGHT = 106
+
+const DIARY_EMPTY_HEIGHT = 56
+const DIARY_FOCUSED_MIN_HEIGHT = 56
+const DIARY_FILLED_MIN_HEIGHT = 108
+const DIARY_MAX_HEIGHT = 316
 
 const formatToday = () => {
   const today = new Date()
@@ -30,13 +33,15 @@ const formatToday = () => {
 export default function AnalyzePage() {
   const navigate = useNavigate()
   const textareaRef = useRef(null)
+
   const today = useMemo(() => formatToday(), [])
+
   const [step, setStep] = useState(1)
   const [diary, setDiary] = useState('')
   const [emotions, setEmotions] = useState([])
   const [comfort, setComfort] = useState('')
   const [isDiaryFocused, setIsDiaryFocused] = useState(false)
-  const [diaryHeight, setDiaryHeight] = useState(DIARY_MIN_HEIGHT)
+  const [diaryHeight, setDiaryHeight] = useState(DIARY_EMPTY_HEIGHT)
   const [showConfirm, setShowConfirm] = useState(false)
 
   const canNext = useMemo(() => {
@@ -45,27 +50,38 @@ export default function AnalyzePage() {
     return Boolean(comfort)
   }, [comfort, diary, emotions.length, step])
 
+  const diaryCounterText = diary.length >= 300
+    ? `(${diary.length} / 300)`
+    : `(${diary.length}/300)`
+
   useLayoutEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
 
     if (!diary) {
-      setDiaryHeight(DIARY_MIN_HEIGHT)
+      setDiaryHeight(DIARY_EMPTY_HEIGHT)
       return
     }
 
     textarea.style.height = 'auto'
+
+    const minHeight = isDiaryFocused
+      ? DIARY_FOCUSED_MIN_HEIGHT
+      : DIARY_FILLED_MIN_HEIGHT
+
     const nextHeight = Math.min(
       DIARY_MAX_HEIGHT,
-      Math.max(DIARY_MIN_HEIGHT, Math.ceil(textarea.scrollHeight)),
+      Math.max(minHeight, Math.ceil(textarea.scrollHeight)),
     )
+
     textarea.style.height = ''
     setDiaryHeight(nextHeight)
-  }, [diary])
+  }, [diary, isDiaryFocused])
 
   const handleBack = () => {
     setShowConfirm(true)
   }
+
   const handlePrevious = () => {
     if (step === 1) return
     setStep(current => current - 1)
@@ -80,7 +96,12 @@ export default function AnalyzePage() {
     }
 
     navigate(ROUTES.RESULT, {
-      state: { prompt: diary, emotions, comfort, loading: true },
+      state: {
+        prompt: diary,
+        emotions,
+        comfort,
+        loading: true,
+      },
     })
   }
 
@@ -90,15 +111,23 @@ export default function AnalyzePage() {
 
   const toggleEmotion = (emotion) => {
     setEmotions(current => {
-      if (current.includes(emotion)) return current.filter(item => item !== emotion)
+      if (current.includes(emotion)) {
+        return current.filter(item => item !== emotion)
+      }
+
       if (current.length >= 3) return current
+
       return [...current, emotion]
     })
   }
 
   return (
     <div className="analyze">
-      <button className="analyze__back" type="button" onClick={handleBack}>
+      <button
+        className="analyze__back"
+        type="button"
+        onClick={handleBack}
+      >
         ← 나가기
       </button>
 
@@ -118,11 +147,12 @@ export default function AnalyzePage() {
         {step === 1 && (
           <>
             <p className="analyze__hint">최대 300자까지 적을 수 있어요.</p>
+
             <div
               className={[
                 'analyze__diary',
-                isDiaryFocused && 'analyze__diary--focused',
                 diary && 'analyze__diary--filled',
+                isDiaryFocused && 'analyze__diary--focused',
               ].filter(Boolean).join(' ')}
               style={{ '--diary-height': `${diaryHeight}px` }}
             >
@@ -137,18 +167,23 @@ export default function AnalyzePage() {
                 placeholder="일기를 입력해주세요."
               />
             </div>
-            {(isDiaryFocused || diary) && <p className="analyze__counter">({diary.length}/300)</p>}
+
+            {(isDiaryFocused || diary) && (
+              <p className="analyze__counter">{diaryCounterText}</p>
+            )}
           </>
         )}
 
         {step === 2 && (
           <>
             <p className="analyze__hint">최대 3가지 선택할 수 있어요.</p>
+
             <div className="analyze__emotions">
               {EMOTION_GROUPS.map(group => (
                 <div key={group.join('-')} className="analyze__emotion-row">
                   {group.map(emotion => {
                     const active = emotions.includes(emotion)
+
                     return (
                       <button
                         key={emotion}
@@ -183,16 +218,23 @@ export default function AnalyzePage() {
         )}
       </main>
 
-      <div className={`analyze__actions${step === 1 ? ' analyze__actions--single' : ''}`}>
+      <div
+        className={[
+          'analyze__actions',
+          step === 1 && 'analyze__actions--single',
+          step === 1 && isDiaryFocused && 'analyze__actions--keyboard',
+        ].filter(Boolean).join(' ')}
+      >
         {step > 1 && (
           <button
-            className="analyze__prev analyze__prev--active"
+            className="analyze__prev"
             type="button"
             onClick={handlePrevious}
           >
-            이전
+            이전 단계로
           </button>
         )}
+
         <button
           className={`analyze__next${canNext ? ' analyze__next--active' : ''}`}
           type="button"
@@ -203,6 +245,10 @@ export default function AnalyzePage() {
         </button>
       </div>
 
+      {step === 1 && !diary.trim() && !isDiaryFocused && (
+        <p className="analyze__empty-guide">일기를 적어주세요.</p>
+      )}
+
       {showConfirm && (
         <div className="analyze__overlay" role="dialog" aria-modal="true">
           <div className="analyze__dialog">
@@ -211,11 +257,19 @@ export default function AnalyzePage() {
               복원되지 않습니다.{'\n'}
               정말로 나가시겠습니까?
             </p>
+
             <div className="analyze__dialog-actions">
-              <button type="button" onClick={() => navigate(ROUTES.CHARACTER)}>
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.CHARACTER)}
+              >
                 네, 나갈래요
               </button>
-              <button type="button" onClick={() => setShowConfirm(false)}>
+
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+              >
                 아니요, 계속 쓸래요
               </button>
             </div>

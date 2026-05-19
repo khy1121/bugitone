@@ -12,15 +12,22 @@
     position: absolute;
     top: 60px;
     left: 20px;
+    z-index: 10;
+
     width: 81px;
     height: 39px;
     padding: 10px 0;
+
     border: 0;
     background: transparent;
-    color: #9a9a95;
+
+    color: #42403a;
+    font-family: 'Pretendard', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: normal;
+    letter-spacing: 0;
+
     text-align: left;
     cursor: pointer;
   }
@@ -29,9 +36,11 @@
     position: absolute;
     top: 110px;
     left: 20px;
+
     width: 353px;
     height: 6px;
     overflow: hidden;
+
     border-radius: 3px;
     background: #e6e6e4;
   }
@@ -39,23 +48,34 @@
   &__progress-fill {
     display: block;
     height: 6px;
+
     border-radius: 3px;
     background: #f8bc0a;
 
-    &--step-1 { width: 117.67px; }
-    &--step-2 { width: 235.34px; }
-    &--step-3 { width: 353px; }
+    &--step-1 {
+      width: 117.67px;
+    }
+
+    &--step-2 {
+      width: 235.34px;
+    }
+
+    &--step-3 {
+      width: 353px;
+    }
   }
 
   &__body {
     position: absolute;
     top: 157px;
     left: 20px;
+
     width: 353px;
   }
 
   &__date {
     margin: 0 0 6px;
+
     color: #f8bc0a;
     font-size: 16px;
     font-weight: 600;
@@ -66,8 +86,10 @@
   &__question {
     display: flex;
     flex-direction: column;
+
     margin: 0;
-    color: #161615;
+
+    color: #282723;
     font-size: 28px;
     font-weight: 700;
     line-height: 36px;
@@ -76,7 +98,8 @@
 
   &__hint {
     margin: 12px 0 44px;
-    color: #80807a;
+
+    color: #8e8b7e;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
@@ -87,48 +110,87 @@
     width: 353px;
     height: var(--diary-height, 56px);
     overflow: hidden;
-    border-radius: 13px;
-    background: #f0f0f0;       /* 기본: 회색 */
-    transition: height 0.16s ease, background 0.15s ease, box-shadow 0.15s ease;
 
-    /* 포커스 중: 노란색 */
+    border-radius: 12px;
+    background: #f2f1ec;
+
+    transition:
+      height 0.16s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+
+    /*
+      입력 완료 상태
+      - 212-1494, 1285-2292 기준
+      - 값은 있지만 focus가 빠진 상태
+      - 회색 박스, shadow 없음
+    */
+    &--filled {
+      background: #f2f1ec;
+      box-shadow: none;
+    }
+
+    /*
+      입력중 상태
+      - 212-1465 기준
+      - focus 상태일 때만 흰색 + 노란 shadow
+    */
     &--focused {
-      background: #fef8e7;
-      box-shadow: 0 0 2px #f19d00;
+      background: #fefefe;
+      box-shadow: 0 0 4px #f19d00;
     }
 
     textarea {
       display: block;
+
       width: 100%;
       height: 100%;
       padding: 15px 20px;
+
       border: 0;
       outline: 0;
       resize: none;
-      overflow: hidden;
+      overflow-y: auto;
+
       background: transparent;
-      color: #666661;
+      color: #42403a;
+
+      font-family: 'Pretendard', sans-serif;
       font-size: 16px;
       font-weight: 400;
       line-height: 26px;
       letter-spacing: -0.4px;
-      box-sizing: border-box;
-    }
 
-    /* 포커스 중일 때 textarea도 키우고 글자 굵게 */
-    &--focused textarea {
-      font-weight: 600;
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #d2d1cb transparent;
     }
 
     textarea::placeholder {
       color: #8e8b7e;
+      font-weight: 400;
+    }
+
+    textarea::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    textarea::-webkit-scrollbar-thumb {
+      border-radius: 16px;
+      background: #d2d1cb;
+    }
+
+    textarea::-webkit-scrollbar-track {
+      background: transparent;
     }
   }
 
   &__counter {
-    margin: 8px 0 0;
-    color: #80807a;
+    margin: 4px 0 0;
+
+    color: #8e8b7e;
     font-size: 12px;
+    font-weight: 400;
     line-height: 18px;
     letter-spacing: -0.3px;
     text-align: right;
@@ -138,28 +200,34 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+
     margin-top: 47px;
   }
 
   &__emotion-row {
     display: flex;
     gap: 11px;
+
     min-height: 44px;
   }
 
   &__chip {
-    min-width: 68px;
-    height: 48px;
+    height: 50px;
     padding: 12px 20px;
-    border: 0;
-    border-radius: 24px;
-    background: #f0f0f0;
-    color: #80807a;
+
+    border: 1px solid transparent;
+    border-radius: 20px;
+    background: #f2f1ec;
+
+    color: #8e8b7e;
+    font-family: 'Pretendard', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
     letter-spacing: -0.4px;
     white-space: nowrap;
+
+    box-sizing: border-box;
     cursor: pointer;
 
     &:disabled {
@@ -168,8 +236,9 @@
     }
 
     &--active {
+      border-color: rgba(248, 188, 10, 0.42);
       background: #fef8e7;
-      color: #31312e;
+      color: #42403a;
       font-weight: 600;
       box-shadow: 0 0 3px #f19d00;
     }
@@ -179,6 +248,7 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
+
     margin-top: 78px;
   }
 
@@ -186,20 +256,26 @@
     width: 353px;
     height: 56px;
     padding: 14px 20px;
-    border: 0;
+
+    border: 1px solid transparent;
     border-radius: 13px;
-    background: #f0f0f0;
-    color: #80807a;
+    background: #f2f1ec;
+
+    color: #8e8b7e;
+    font-family: 'Pretendard', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
     letter-spacing: -0.4px;
     text-align: left;
+
+    box-sizing: border-box;
     cursor: pointer;
 
     &--active {
+      border-color: rgba(248, 188, 10, 0.42);
       background: #fef8e7;
-      color: #31312e;
+      color: #42403a;
       font-weight: 600;
       box-shadow: 0 0 2px #f19d00;
     }
@@ -207,51 +283,65 @@
 
   &__actions {
     position: absolute;
+    top: 734px;
     left: 20px;
-    bottom: calc(54px + var(--safe-bottom));
     z-index: 5;
+
     display: flex;
-    gap: 12px;
+    gap: 17px;
+
     width: 353px;
     height: 60px;
 
     &--single {
       .analyze__next {
-        flex-basis: 100%;
+        flex: 0 0 353px;
+        width: 353px;
       }
+    }
+
+    /*
+      212-1465 입력중 화면 기준
+      Figma에서는 버튼이 top 738px로 4px 내려감
+    */
+    &--keyboard {
+      top: 738px;
     }
   }
 
   &__prev,
   &__next {
-    flex: 1 1 0;
+    flex: 0 0 168px;
+    width: 168px;
     height: 60px;
+
     border: 0;
     border-radius: 15px;
-    color: #31312e;
+
+    color: #42403a;
+    font-family: 'Pretendard', sans-serif;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.6;
     letter-spacing: -0.4px;
+    text-align: center;
+
+    box-sizing: border-box;
   }
 
   &__prev {
-    background: #f0f0f0;
+    background: #f2f1ec;
     cursor: pointer;
 
-    &--active {
-      background: #fef8e7;
-      box-shadow: 0 0 2px #f19d00;
-
-      &:hover {
-        background: #fcefcf;
-      }
+    &:hover {
+      background: #edece7;
     }
   }
 
   &__next {
     min-width: 0;
-    background: #e6e6e4;
+
+    background: #f2f1ec;
     cursor: default;
 
     &--active {
@@ -262,21 +352,46 @@
         background: #f8cc3f;
       }
     }
+
+    &:disabled {
+      cursor: default;
+    }
   }
+
+  &__empty-guide {
+    position: absolute;
+    top: 802px;
+    left: 50%;
+
+    width: 353px;
+    margin: 0;
+
+    transform: translateX(-50%);
+
+    color: #9ea4aa;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+  }
+
   &__overlay {
     position: fixed;
     inset: 0;
     z-index: 200;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     background: rgba(86, 86, 86, 0.56);
     backdrop-filter: blur(5px);
   }
 
   &__dialog {
-    width: 315px;
+    width: 310px;
     overflow: hidden;
+
     border-radius: 24px;
     background: #fefefe;
     box-shadow: 0 16px 32px rgba(22, 22, 21, 0.18);
@@ -284,6 +399,7 @@
     p {
       margin: 0;
       padding: 30px 24px 24px;
+
       color: #161615;
       font-size: 15px;
       line-height: 22px;
@@ -296,17 +412,21 @@
   &__dialog-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+
     border-top: 1px solid #e6e6e4;
 
     button {
       min-height: 52px;
+
       border: 0;
       background: transparent;
+
       color: #31312e;
       font-size: 14px;
       font-weight: 600;
       line-height: 20px;
       letter-spacing: -0.35px;
+
       cursor: pointer;
 
       + button {
