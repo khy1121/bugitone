@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import './AnalyzePage.scss'
@@ -32,7 +32,10 @@ const formatToday = () => {
 
 export default function AnalyzePage() {
   const navigate = useNavigate()
+  const pageRef = useRef(null)
   const textareaRef = useRef(null)
+  const actionsRef = useRef(null)
+  const keyboardScrollTimersRef = useRef([])
 
   const today = useMemo(() => formatToday(), [])
 
@@ -53,6 +56,51 @@ export default function AnalyzePage() {
   const diaryCounterText = diary.length >= 300
     ? `(${diary.length} / 300)`
     : `(${diary.length}/300)`
+
+  const clearKeyboardScrollTimers = () => {
+    keyboardScrollTimersRef.current.forEach(timer => window.clearTimeout(timer))
+    keyboardScrollTimersRef.current = []
+  }
+
+  const getScrollFrame = () => pageRef.current?.closest('.app-frame')
+
+  const alignActionsAboveKeyboard = () => {
+    const frame = getScrollFrame()
+    const actions = actionsRef.current
+
+    if (!frame || !actions) return
+
+    const actionBottom = actions.offsetTop + actions.offsetHeight
+    const targetTop = Math.max(0, actionBottom - frame.clientHeight + 24)
+
+    frame.scrollTo({
+      top: targetTop,
+      behavior: 'smooth',
+    })
+  }
+
+  const scheduleKeyboardScroll = () => {
+    clearKeyboardScrollTimers()
+
+    keyboardScrollTimersRef.current = [80, 180, 320, 520].map(delay =>
+      window.setTimeout(alignActionsAboveKeyboard, delay),
+    )
+  }
+
+  const resetKeyboardScroll = () => {
+    clearKeyboardScrollTimers()
+
+    const timer = window.setTimeout(() => {
+      getScrollFrame()?.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    }, 220)
+
+    keyboardScrollTimersRef.current = [timer]
+  }
+
+  useEffect(() => () => clearKeyboardScrollTimers(), [])
 
   useLayoutEffect(() => {
     const textarea = textareaRef.current
@@ -111,10 +159,12 @@ export default function AnalyzePage() {
 
   const handleDiaryFocus = () => {
     setIsDiaryFocused(true)
+    scheduleKeyboardScroll()
   }
 
   const handleDiaryBlur = () => {
     setIsDiaryFocused(false)
+    resetKeyboardScroll()
   }
 
   const toggleEmotion = (emotion) => {
@@ -130,12 +180,7 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div
-      className={[
-        'analyze',
-        isDiaryFocused && 'analyze--keyboard',
-      ].filter(Boolean).join(' ')}
-    >
+    <div ref={pageRef} className="analyze">
       <button
         className="analyze__back"
         type="button"
@@ -232,6 +277,7 @@ export default function AnalyzePage() {
       </main>
 
       <div
+        ref={actionsRef}
         className={[
           'analyze__actions',
           step === 1 && 'analyze__actions--single',

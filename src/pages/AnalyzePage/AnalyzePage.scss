@@ -436,14 +436,3 @@
     }
   }
 }
-
-.analyze--keyboard {
-  height: var(--visual-frame-height);
-  min-height: 0;
-  overflow: hidden;
-
-  .analyze__actions--keyboard {
-    top: auto;
-    bottom: 24px;
-  }
-}
