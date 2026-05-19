@@ -47,6 +47,13 @@ body {
   overflow: hidden;
 }
 
+.keyboard-open {
+  #root {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .app-frame {
   width: var(--design-width);
   min-width: var(--design-width);

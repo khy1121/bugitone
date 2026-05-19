@@ -16,6 +16,7 @@ function setVh() {
     const scaleHeight = isKeyboardOpen ? stableViewportHeight : viewportHeight
     const scale = Math.min(viewportWidth / 393, scaleHeight / 852, 1)
 
+    document.documentElement.classList.toggle('keyboard-open', isKeyboardOpen)
     document.documentElement.style.setProperty('--vh', `${vh}px`)
     document.documentElement.style.setProperty('--app-scale', String(scale))
   }
