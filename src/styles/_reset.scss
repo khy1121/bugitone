@@ -15,79 +15,126 @@ body,
 html,
 body {
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 :root {
   --design-width: 393px;
   --design-height: 852px;
+
+  /* setVh.js에서 갱신 */
+  --vh: 1vh;
+  --visual-vh: 1vh;
   --app-height: calc(var(--vh, 1vh) * 100);
-  --app-frame-height: var(--design-height);
+  --visual-height: calc(var(--visual-vh, 1vh) * 100);
+  --keyboard-height: 0px;
   --app-scale: 1;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
+  --page-inline-padding: 20px;
   --bottom-nav-height: 84px;
-  --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--safe-bottom));
+  --bottom-nav-gap: 20px;
+  --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--bottom-nav-gap) + var(--safe-bottom));
 }
 
 body {
+  width: 100%;
   height: var(--app-height);
   font-family: $font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: #d9d9d9;
+  background: $color-surface;
   color: $color-text;
+  touch-action: manipulation;
 }
 
 #root {
   width: 100%;
   height: var(--app-height);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   overflow: hidden;
 }
 
 .keyboard-open {
-  #root {
-    overflow: hidden;
-  }
-
+  #root,
   .app-frame {
-    height: calc(var(--app-height) / var(--app-scale));
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    height: var(--visual-height);
+    min-height: var(--visual-height);
+    overflow: hidden;
   }
 }
 
+
+
 .app-frame {
-  width: var(--design-width);
-  min-width: var(--design-width);
-  max-width: none;
-  height: var(--design-height);
-  min-height: var(--design-height);
-  margin: 0 auto;
   position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: var(--app-height);
+  min-height: var(--app-height);
+  margin: 0;
   overflow: hidden;
   background: $color-surface;
-  transform: scale(var(--app-scale));
-  transform-origin: top center;
+  transform: none;
+  transform-origin: initial;
 }
 
 .mobile-page {
-  width: 100%;
-  height: var(--app-frame-height);
   position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
   background: $color-surface;
 }
 
-/* 스크롤 필요한 페이지 */
+.mobile-page__inner {
+  position: relative;
+  width: 100%;
+  max-width: var(--design-width);
+  height: 100%;
+  min-height: 100%;
+  margin: 0 auto;
+}
+
 .mobile-page--scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* 하단 네비가 있는 페이지 */
 .mobile-page--with-bottom-nav {
   padding-bottom: var(--bottom-nav-offset);
+}
+
+
+@media (min-width: 768px) {
+  body {
+    background: #d9d9d9;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    overflow: auto;
+    background: #d9d9d9;
+  }
+
+  .app-frame {
+    width: var(--design-width);
+    min-width: var(--design-width);
+    max-width: var(--design-width);
+
+    height: var(--design-height);
+    min-height: var(--design-height);
+
+    margin: 24px auto;
+
+    overflow: hidden;
+    background: $color-surface;
+  }
 }
