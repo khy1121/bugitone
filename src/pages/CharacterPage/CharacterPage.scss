@@ -2,161 +2,205 @@
 
 .char-landing {
   position: relative;
+
   width: 100%;
-  max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
+  max-width: 393px;
+  height: 852px;
+
   overflow: hidden;
 
-  background-color: v.$main-10;
-  background-image: url('/assets/character/noneCharacter.svg'); /* 캐릭터/원 없는 배경만 */
+  background-image: url('/assets/character/bg.svg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-/* 텍스트 */
+/* Text */
 .char-landing__text {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   top: calc(env(safe-area-inset-top, 0px) + 104px);
   left: 0;
+
   width: 100%;
+
   text-align: center;
 }
 
 .char-landing__title {
   margin: 0;
+
   color: v.$gray-900;
-  font-size: v.$font-size-h1;
-  font-weight: v.$font-weight-h1;
-  line-height: 40px;
+
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-display;
+  font-weight: v.$font-weight-display;
+  line-height: v.$line-height-display;
+  letter-spacing: v.$letter-spacing-base;
+  text-align: center;
 }
 
 .char-landing__subtitle {
-  width: 196px;
-  margin: 14px auto 0;
-  color: v.$gray-600;
-  font-size: v.$font-size-body2;
-  line-height: 26px;
+  margin: 18px auto 0;
+
+  color: v.$gray-800;
+
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-body1;
+  font-weight: v.$font-weight-body1;
+  line-height: 1.6;
+  letter-spacing: v.$letter-spacing-base;
+  text-align: center;
 }
 
-/* ───── 캐릭터 + 파동 무대 ─────
-   grid + place-items: center 로 자식들을 한 칸에 겹쳐 가운데 정렬.
-   자식 transform 은 오롯이 애니메이션 전용이 됨. */
+/* Character stage */
 .char-landing__stage {
   position: absolute;
   z-index: 2;
-  top: 45%;                  /* 화면 살짝 위쪽 */
-  left: 50%;
-  margin-left: -160px;       /* 320px / 2 */
-  margin-top: -160px;
 
-  width: 320px;              /* 가장 큰 원(280) 가 scale 1.1 까지 커지므로 여유 */
-  height: 320px;
+  left: 17px;
+  top: 244px;
+
+  width: 361px;
+  height: 361px;
 
   display: grid;
-  place-items: center;       /* 모든 자식 가운데 정렬 */
+  place-items: center;
+
   pointer-events: none;
 }
 
-/* 파동 원 + 캐릭터를 모두 같은 그리드 셀에 겹치기 */
 .char-landing__stage > * {
   grid-area: 1 / 1;
 }
 
-/* 파동 원 — 공통: 링 + 속 글로우로 가장자리 뚜렷하게 */
 .char-landing__ripple {
   border-radius: 50%;
-  border: 3.5px solid rgba(255, 255, 255, 0.95);
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.18) 55%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
-  transform: scale(0.25);
-  opacity: 0;
-  animation: rippleWave 3s ease-out infinite both;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+
+  animation: char-ripple 3s ease-out infinite;
   will-change: transform, opacity;
 }
 
-/* 더 큰 사이즈로 키워서 화면을 시원하게 채우기 */
-.char-landing__ripple--1 {
-  width: 200px;
-  height: 200px;
+.char-landing__ripple--outer {
+  width: 361px;
+  height: 361px;
+  opacity: 0.34;
   animation-delay: 0s;
 }
-.char-landing__ripple--2 {
-  width: 260px;
-  height: 260px;
-  animation-delay: 0.4s;
-}
-.char-landing__ripple--3 {
-  width: 320px;
-  height: 320px;
-  animation-delay: 0.8s;
+
+.char-landing__ripple--middle {
+  width: 273px;
+  height: 273px;
+  opacity: 0.42;
+  animation-delay: 0.35s;
 }
 
-/* 캐릭터 — 둥둥 */
+.char-landing__ripple--inner {
+  width: 183px;
+  height: 183px;
+  opacity: 0.5;
+  animation-delay: 0.7s;
+}
+
+.char-landing__glow {
+  width: 161px;
+  height: 166px;
+
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 244, 198, 0.88) 0%,
+    rgba(255, 230, 130, 0.42) 45%,
+    rgba(255, 230, 130, 0) 72%
+  );
+
+  filter: blur(1px);
+}
+
 .char-landing__character {
+  position: relative;
+  z-index: 2;
+
   width: 90px;
-  height: auto;
-  animation: floatY 2.6s ease-in-out infinite;
+  height: 98px;
+
   filter: drop-shadow(0 6px 10px rgba(180, 130, 0, 0.18));
+  animation: char-float 2.6s ease-in-out infinite;
+
   will-change: transform;
-  z-index: 1;                /* 캐릭터가 원보다 위 */
 }
-
-/* ───── Keyframes ───── */
-@keyframes rippleWave {
-  0%   { transform: scale(0.5); opacity: 0;    }
-  15%  {                          opacity: 0.75; }
-  100% { transform: scale(1.1);  opacity: 0;    }
-}
-
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-14px); }
-}
-
-/* 모션 줄이기 환경설정 — 일단 비활성화 (OS의 reduce-motion 설정과 무관하게 항상 동작)
-@media (prefers-reduced-motion: reduce) {
-  .char-landing__ripple,
-  .char-landing__character {
-    animation: none;
-  }
-}
-*/
 
 /* CTA */
 .char-landing__cta {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
+
   left: 40px;
-  bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+  top: 657px;
+
   width: 313px;
   height: 65px;
+
+  padding: 16px 80px;
+
   border: 0;
   border-radius: 31px;
-  background: v.$main-300;
+
+  background: rgba(255, 247, 247, 0.29);
+  box-shadow: 0 4px 9.5px rgba(125, 88, 18, 0.11);
+
   color: v.$gray-900;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(99, 75, 4, 0.15);
-  padding-left: 80px;
-  padding-right: 80px;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  font-style: Pretendard;
+
+  font-family: v.$font-family-base;
   font-size: 20px;
   font-weight: 600;
-  background-color: #FFF7F74A;
+  line-height: 30px;
+  letter-spacing: v.$letter-spacing-base;
+  text-align: center;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 247, 247, 0.4);
+  }
 
   &:active {
     transform: translateY(1px);
-    background: v.$main-400;
+    background: rgba(255, 247, 247, 0.5);
   }
-  &:hover {
-    background: rgba(#FFF7F74A, 0.4);
+}
+
+@keyframes char-ripple {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.28;
+  }
+
+  50% {
+    transform: scale(1.02);
+    opacity: 0.48;
+  }
+
+  100% {
+    transform: scale(0.96);
+    opacity: 0.28;
+  }
+} 
+
+@keyframes char-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-14px);
   }
 }

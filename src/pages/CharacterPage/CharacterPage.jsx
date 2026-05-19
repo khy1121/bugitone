@@ -9,20 +9,19 @@ export default function CharacterPage() {
 
   return (
     <main className="char-landing">
-      {/* 텍스트 */}
       <section className="char-landing__text">
         <h1 className="char-landing__title">오늘 하루는 어떤가요?</h1>
         <p className="char-landing__subtitle">
           오늘 감정을 들려주면<br />
-          어울리는 캐릭터를 찾아드릴게요
+          어울리는 캐릭터를 찾아드릴게요.
         </p>
       </section>
 
-      {/* 캐릭터 + 파동 원형 (한 묶음으로) */}
       <div className="char-landing__stage" aria-hidden="true">
-        <span className="char-landing__ripple char-landing__ripple--1" />
-        <span className="char-landing__ripple char-landing__ripple--2" />
-        <span className="char-landing__ripple char-landing__ripple--3" />
+        <span className="char-landing__ripple char-landing__ripple--outer" />
+        <span className="char-landing__ripple char-landing__ripple--middle" />
+        <span className="char-landing__ripple char-landing__ripple--inner" />
+        <span className="char-landing__glow" />
 
         <img
           className="char-landing__character"
@@ -31,10 +30,10 @@ export default function CharacterPage() {
         />
       </div>
 
-      {/* CTA */}
       <button
         className="char-landing__cta"
         type="button"
+        variant="glass"
         onClick={() => navigate(ROUTES.ANALYZE)}
       >
         캐릭터 찾기
