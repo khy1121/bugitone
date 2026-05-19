@@ -23,6 +23,8 @@ body {
   --app-height: calc(var(--vh, 1vh) * 100);
   --app-frame-height: var(--design-height);
   --app-scale: 1;
+  --visual-vh: var(--app-height);
+  --visual-frame-height: var(--design-height);
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -53,10 +55,15 @@ body {
   }
 
   .app-frame {
-    height: calc(var(--app-height) / var(--app-scale));
+    position: fixed;
+    top: 0;
+    left: 50%;
+
+    height: var(--visual-frame-height);
     min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
+
+    transform: translateX(-50%) scale(var(--app-scale));
   }
 }
 

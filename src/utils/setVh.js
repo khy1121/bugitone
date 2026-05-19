@@ -4,20 +4,25 @@ function setVh() {
   let stableViewportHeight = window.innerHeight
 
   const set = () => {
-    const viewportHeight = window.visualViewport?.height || window.innerHeight
-    const viewportWidth = window.visualViewport?.width || window.innerWidth
-    const isKeyboardOpen = viewportHeight < stableViewportHeight * 0.75
+    const visualViewportHeight = window.visualViewport?.height || window.innerHeight
+    const visualViewportWidth = window.visualViewport?.width || window.innerWidth
+    const isKeyboardOpen = visualViewportHeight < stableViewportHeight * 0.75
 
     if (!isKeyboardOpen) {
-      stableViewportHeight = Math.max(stableViewportHeight, viewportHeight)
+      stableViewportHeight = Math.max(stableViewportHeight, visualViewportHeight)
     }
 
-    const vh = viewportHeight * 0.01
-    const scaleHeight = isKeyboardOpen ? stableViewportHeight : viewportHeight
-    const scale = Math.min(viewportWidth / 393, scaleHeight / 852, 1)
+    const vh = visualViewportHeight * 0.01
+    const scaleHeight = isKeyboardOpen ? stableViewportHeight : visualViewportHeight
+    const scale = Math.min(visualViewportWidth / 393, scaleHeight / 852, 1)
+    const visualFrameHeight = scale > 0
+      ? visualViewportHeight / scale
+      : visualViewportHeight
 
     document.documentElement.classList.toggle('keyboard-open', isKeyboardOpen)
     document.documentElement.style.setProperty('--vh', `${vh}px`)
+    document.documentElement.style.setProperty('--visual-vh', `${visualViewportHeight}px`)
+    document.documentElement.style.setProperty('--visual-frame-height', `${visualFrameHeight}px`)
     document.documentElement.style.setProperty('--app-scale', String(scale))
   }
 
