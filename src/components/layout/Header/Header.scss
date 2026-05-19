@@ -1,7 +1,1 @@
-﻿/* Header styles */
-@use '../../../styles/variables' as *;
-
-.app-header { background: white; border-bottom:1px solid $color-border }
-.app-header__inner { max-width:1100px; margin:0 auto; padding:0.75rem 1rem; display:flex; align-items:center; justify-content:space-between }
-.app-header__logo { font-weight:700; color:$color-primary }
-.app-header__nav a { margin-left:1rem; color:$color-text }
+﻿
