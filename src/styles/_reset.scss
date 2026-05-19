@@ -49,6 +49,12 @@ body {
 
 .keyboard-open {
   #root {
+    overflow: hidden;
+  }
+
+  .app-frame {
+    height: calc(var(--app-height) / var(--app-scale));
+    min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
