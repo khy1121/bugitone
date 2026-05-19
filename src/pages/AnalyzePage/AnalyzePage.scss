@@ -1,438 +1,575 @@
 .analyze {
   position: relative;
+
+  --analyze-back-y: 60px;
+  --analyze-progress-y: 110px;
+  --analyze-body-y: 157px;
+  --analyze-actions-y: 734px;
+  --analyze-empty-guide-y: 802px;
+
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+
+  overflow: hidden;
+
+  background: #fefefe;
+
+  font-family: 'Pretendard', sans-serif;
+}
+
+.analyze__inner {
+  position: relative;
+
   width: 100%;
   max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
+  height: 100%;
+  min-height: 100%;
+
   margin: 0 auto;
+
   overflow: hidden;
-  background: #fefefe;
+}
+
+.analyze--has-diary .analyze__inner {
+  padding-bottom: 140px;
+}
+
+/* ==============================
+   Header
+============================== */
+
+.analyze__back {
+  position: absolute;
+  top: var(--analyze-back-y);
+  left: 20px;
+  z-index: 10;
+
+  width: 81px;
+  height: 39px;
+  padding: 10px 0;
+
+  border: 0;
+  background: transparent;
+
+  color: #42403a;
+
   font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
 
-  &__back {
+  cursor: pointer;
+}
+
+.analyze__progress {
+  position: absolute;
+  top: var(--analyze-progress-y);
+  left: 20px;
+
+  width: 353px;
+  height: 6px;
+
+  overflow: hidden;
+
+  border-radius: 3px;
+  background: #e6e6e4;
+}
+
+.analyze__progress-fill {
+  display: block;
+
+  height: 6px;
+
+  border-radius: 3px;
+  background: #f8bc0a;
+}
+
+.analyze__progress-fill--step-1 {
+  width: 117.67px;
+}
+
+.analyze__progress-fill--step-2 {
+  width: 235.34px;
+}
+
+.analyze__progress-fill--step-3 {
+  width: 353px;
+}
+
+/* ==============================
+   Body
+============================== */
+
+.analyze__body {
+  position: absolute;
+  top: var(--analyze-body-y);
+  left: 20px;
+
+  width: 353px;
+
+  transition: none;
+}
+
+.analyze__date {
+  margin: 0 0 6px;
+
+  color: #f8bc0a;
+
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 26px;
+  letter-spacing: -0.4px;
+}
+
+.analyze__question {
+  display: flex;
+  flex-direction: column;
+
+  margin: 0;
+
+  color: #282723;
+
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: -0.7px;
+}
+
+.analyze__hint {
+  margin: 13px 0 42px;
+
+  color: #8e8b7e;
+
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 26px;
+  letter-spacing: -0.4px;
+}
+
+/* ==============================
+   Diary
+============================== */
+
+.analyze__diary-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  width: 353px;
+}
+
+.analyze__diary {
+  --diary-max-height: 316px;
+
+  width: 353px;
+  height: min(var(--diary-height, 56px), var(--diary-max-height));
+  max-height: var(--diary-max-height);
+
+  overflow: hidden;
+
+  border-radius: 12px;
+  background: #f2f1ec;
+
+  transition:
+    height 0.18s ease,
+    background 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.analyze__diary--focused {
+  background: #fefefe;
+  box-shadow: 0 0 4px #f19d00;
+}
+
+.analyze__diary--filled {
+  background: #f2f1ec;
+  box-shadow: none;
+}
+
+.analyze__diary--focused.analyze__diary--filled {
+  background: #fefefe;
+  box-shadow: 0 0 4px #f19d00;
+}
+
+.analyze__diary textarea {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  padding: 15px 20px;
+
+  border: 0;
+  outline: 0;
+  resize: none;
+  overflow-y: auto;
+
+  background: transparent;
+
+  color: #42403a;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 25.6px;
+  letter-spacing: -0.4px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  box-sizing: border-box;
+
+  scrollbar-width: thin;
+  scrollbar-color: #d2d1cb transparent;
+
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.analyze__diary textarea::placeholder {
+  color: #8e8b7e;
+  font-weight: 400;
+}
+
+.analyze__diary textarea::-webkit-scrollbar {
+  width: 5px;
+}
+
+.analyze__diary textarea::-webkit-scrollbar-thumb {
+  border-radius: 16px;
+  background: #d2d1cb;
+}
+
+.analyze__diary textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.analyze__counter {
+  position: relative;
+  z-index: 3;
+
+  width: 353px;
+  height: 18px;
+  margin: 4px 0 0;
+
+  color: #8e8b7e;
+
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.3px;
+  text-align: right;
+}
+
+/* ==============================
+   Step 2
+============================== */
+
+.analyze__emotions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.analyze__emotion-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analyze__chip {
+  min-width: 75px;
+  height: 44px;
+  padding: 0 18px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  background: #f2f1ec;
+
+  color: #42403a;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.4px;
+
+  cursor: pointer;
+}
+
+.analyze__chip--active {
+  border-color: rgba(248, 188, 10, 0.42);
+  background: #fef8e7;
+  color: #42403a;
+  font-weight: 600;
+  box-shadow: 0 0 2px #f19d00;
+}
+
+.analyze__chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ==============================
+   Step 3
+============================== */
+
+.analyze__comforts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin-top: 44px;
+}
+
+.analyze__comfort {
+  width: 100%;
+  min-height: 72px;
+
+  padding: 20px;
+
+  border: 1px solid transparent;
+  border-radius: 16px;
+
+  background: #f2f1ec;
+
+  color: #42403a;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.4px;
+  text-align: left;
+
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.analyze__comfort--active {
+  border-color: rgba(248, 188, 10, 0.42);
+  background: #fef8e7;
+  color: #42403a;
+  font-weight: 600;
+  box-shadow: 0 0 2px #f19d00;
+}
+
+/* ==============================
+   Actions
+============================== */
+
+.analyze__actions {
+  position: fixed;
+  left: 50%;
+  bottom: calc(58px + var(--safe-bottom));
+  z-index: 20;
+
+  display: flex;
+  gap: 17px;
+
+  width: 353px;
+  height: 60px;
+
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%);
+
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s ease,
+    visibility 0.18s ease;
+}
+
+.analyze__actions--keyboard {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, 18px);
+}
+
+.analyze__actions--single .analyze__next {
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+.analyze__prev,
+.analyze__next {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 60px;
+
+  border: 0;
+  border-radius: 15px;
+
+  color: #42403a;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 25.6px;
+  letter-spacing: -0.4px;
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+.analyze__prev {
+  background: #f2f1ec;
+  cursor: pointer;
+}
+
+.analyze__next {
+  background: #f2f1ec;
+  cursor: default;
+}
+
+.analyze__next--active {
+  background: #fbd76c;
+  cursor: pointer;
+}
+
+.analyze__next:disabled {
+  cursor: default;
+}
+
+.analyze__empty-guide {
+  position: absolute;
+  top: var(--analyze-empty-guide-y);
+  left: 20px;
+  right: 20px;
+
+  width: auto;
+  margin: 0;
+
+  color: #9ea4aa;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+
+  transition:
+    opacity 0.18s ease,
+    visibility 0.18s ease;
+}
+
+.analyze--keyboard .analyze__empty-guide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ==============================
+   Keyboard State
+============================== */
+
+.analyze--keyboard {
+  height: var(--visual-height);
+  min-height: var(--visual-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.analyze--keyboard .analyze__inner {
+  height: auto;
+  min-height: var(--design-height, 852px);
+  overflow: visible;
+}
+
+/*
+  Figma 100:8596 기준:
+  textarea y342 h56, counter y402, keyboard y500.
+  따라서 키보드 상태에서는 body를 움직이지 않는다.
+*/
+.analyze--keyboard .analyze__body {
+  transform: none;
+}
+
+.analyze--keyboard .analyze__hint {
+  margin: 13px 0 42px;
+}
+
+/* ==============================
+   Dialog
+============================== */
+
+.analyze__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(86, 86, 86, 0.56);
+  backdrop-filter: blur(5px);
+}
+
+.analyze__dialog {
+  width: 310px;
+  overflow: hidden;
+
+  border-radius: 24px;
+  background: #fefefe;
+  box-shadow: 0 16px 32px rgba(22, 22, 21, 0.18);
+}
+
+.analyze__dialog p {
+  margin: 0;
+  padding: 30px 24px 24px;
+
+  color: #161615;
+
+  font-size: 15px;
+  line-height: 22px;
+  letter-spacing: -0.38px;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.analyze__dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  border-top: 1px solid #e6e6e4;
+}
+
+.analyze__dialog-actions button {
+  min-height: 52px;
+
+  border: 0;
+  background: transparent;
+
+  color: #31312e;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: -0.35px;
+
+  cursor: pointer;
+}
+
+.analyze__dialog-actions button + button {
+  border-left: 1px solid #e6e6e4;
+  color: #f8bc0a;
+}
+
+@media (min-width: 768px) {
+  .analyze__actions {
     position: absolute;
-    top: 60px;
+    top: var(--analyze-actions-y);
+    bottom: auto;
     left: 20px;
-    z-index: 10;
-
-    width: 81px;
-    height: 39px;
-    padding: 10px 0;
-
-    border: 0;
-    background: transparent;
-
-    color: #42403a;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: normal;
-    letter-spacing: 0;
-
-    text-align: left;
-    cursor: pointer;
+    transform: none;
   }
 
-  &__progress {
-    position: absolute;
-    top: 110px;
-    left: 20px;
-
-    width: 353px;
-    height: 6px;
-    overflow: hidden;
-
-    border-radius: 3px;
-    background: #e6e6e4;
-  }
-
-  &__progress-fill {
-    display: block;
-    height: 6px;
-
-    border-radius: 3px;
-    background: #f8bc0a;
-
-    &--step-1 {
-      width: 117.67px;
-    }
-
-    &--step-2 {
-      width: 235.34px;
-    }
-
-    &--step-3 {
-      width: 353px;
-    }
-  }
-
-  &__body {
-    position: absolute;
-    top: 157px;
-    left: 20px;
-
-    width: 353px;
-  }
-
-  &__date {
-    margin: 0 0 6px;
-
-    color: #f8bc0a;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.6;
-    letter-spacing: -0.4px;
-  }
-
-  &__question {
-    display: flex;
-    flex-direction: column;
-
-    margin: 0;
-
-    color: #282723;
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 36px;
-    letter-spacing: -0.7px;
-  }
-
-  &__hint {
-    margin: 12px 0 44px;
-
-    color: #8e8b7e;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
-    letter-spacing: -0.4px;
-  }
-
-  &__diary {
-    width: 353px;
-    height: var(--diary-height, 56px);
-    overflow: hidden;
-
-    border-radius: 12px;
-    background: #f2f1ec;
-
-    transition:
-      height 0.16s ease,
-      background 0.15s ease,
-      box-shadow 0.15s ease;
-
-    /*
-      입력 완료 상태
-      - 212-1494, 1285-2292 기준
-      - 값은 있지만 focus가 빠진 상태
-      - 회색 박스, shadow 없음
-    */
-    &--filled {
-      background: #f2f1ec;
-      box-shadow: none;
-    }
-
-    /*
-      입력중 상태
-      - 212-1465 기준
-      - focus 상태일 때만 흰색 + 노란 shadow
-    */
-    &--focused {
-      background: #fefefe;
-      box-shadow: 0 0 4px #f19d00;
-    }
-
-    textarea {
-      display: block;
-
-      width: 100%;
-      height: 100%;
-      padding: 15px 20px;
-
-      border: 0;
-      outline: 0;
-      resize: none;
-      overflow-y: auto;
-
-      background: transparent;
-      color: #42403a;
-
-      font-family: 'Pretendard', sans-serif;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 26px;
-      letter-spacing: -0.4px;
-
-      box-sizing: border-box;
-      scrollbar-width: thin;
-      scrollbar-color: #d2d1cb transparent;
-    }
-
-    textarea::placeholder {
-      color: #8e8b7e;
-      font-weight: 400;
-    }
-
-    textarea::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    textarea::-webkit-scrollbar-thumb {
-      border-radius: 16px;
-      background: #d2d1cb;
-    }
-
-    textarea::-webkit-scrollbar-track {
-      background: transparent;
-    }
-  }
-
-  &__counter {
-    margin: 4px 0 0;
-
-    color: #8e8b7e;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 18px;
-    letter-spacing: -0.3px;
-    text-align: right;
-  }
-
-  &__emotions {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    margin-top: 47px;
-  }
-
-  &__emotion-row {
-    display: flex;
-    gap: 11px;
-
-    min-height: 44px;
-  }
-
-  &__chip {
-    height: 50px;
-    padding: 12px 20px;
-
-    border: 1px solid transparent;
-    border-radius: 20px;
-    background: #f2f1ec;
-
-    color: #8e8b7e;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
-    letter-spacing: -0.4px;
-    white-space: nowrap;
-
-    box-sizing: border-box;
-    cursor: pointer;
-
-    &:disabled {
-      cursor: default;
-      opacity: 1;
-    }
-
-    &--active {
-      border-color: rgba(248, 188, 10, 0.42);
-      background: #fef8e7;
-      color: #42403a;
-      font-weight: 600;
-      box-shadow: 0 0 3px #f19d00;
-    }
-  }
-
-  &__comforts {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-
-    margin-top: 78px;
-  }
-
-  &__comfort {
-    width: 353px;
-    height: 56px;
-    padding: 14px 20px;
-
-    border: 1px solid transparent;
-    border-radius: 13px;
-    background: #f2f1ec;
-
-    color: #8e8b7e;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
-    letter-spacing: -0.4px;
-    text-align: left;
-
-    box-sizing: border-box;
-    cursor: pointer;
-
-    &--active {
-      border-color: rgba(248, 188, 10, 0.42);
-      background: #fef8e7;
-      color: #42403a;
-      font-weight: 600;
-      box-shadow: 0 0 2px #f19d00;
-    }
-  }
-
-  &__actions {
-    position: absolute;
-    top: 734px;
-    left: 20px;
-    z-index: 5;
-
-    display: flex;
-    gap: 17px;
-
-    width: 353px;
-    height: 60px;
-
-    &--single {
-      .analyze__next {
-        flex: 0 0 353px;
-        width: 353px;
-      }
-    }
-
-    /*
-      212-1465 입력중 화면 기준
-      Figma에서는 버튼이 top 738px로 4px 내려감
-    */
-    &--keyboard {
-      top: 738px;
-    }
-  }
-
-  &__prev,
-  &__next {
-    flex: 0 0 168px;
-    width: 168px;
-    height: 60px;
-
-    border: 0;
-    border-radius: 15px;
-
-    color: #42403a;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.6;
-    letter-spacing: -0.4px;
-    text-align: center;
-
-    box-sizing: border-box;
-  }
-
-  &__prev {
-    background: #f2f1ec;
-    cursor: pointer;
-
-    &:hover {
-      background: #edece7;
-    }
-  }
-
-  &__next {
-    min-width: 0;
-
-    background: #f2f1ec;
-    cursor: default;
-
-    &--active {
-      background: #fbd76c;
-      cursor: pointer;
-
-      &:hover {
-        background: #f8cc3f;
-      }
-    }
-
-    &:disabled {
-      cursor: default;
-    }
-  }
-
-  &__empty-guide {
-    position: absolute;
-    top: 802px;
-    left: 50%;
-
-    width: 353px;
-    margin: 0;
-
-    transform: translateX(-50%);
-
-    color: #9ea4aa;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: normal;
-    text-align: center;
-  }
-
-  &__overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(86, 86, 86, 0.56);
-    backdrop-filter: blur(5px);
-  }
-
-  &__dialog {
-    width: 310px;
-    overflow: hidden;
-
-    border-radius: 24px;
-    background: #fefefe;
-    box-shadow: 0 16px 32px rgba(22, 22, 21, 0.18);
-
-    p {
-      margin: 0;
-      padding: 30px 24px 24px;
-
-      color: #161615;
-      font-size: 15px;
-      line-height: 22px;
-      letter-spacing: -0.38px;
-      text-align: center;
-      white-space: pre-line;
-    }
-  }
-
-  &__dialog-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-
-    border-top: 1px solid #e6e6e4;
-
-    button {
-      min-height: 52px;
-
-      border: 0;
-      background: transparent;
-
-      color: #31312e;
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 20px;
-      letter-spacing: -0.35px;
-
-      cursor: pointer;
-
-      + button {
-        border-left: 1px solid #e6e6e4;
-        color: #f8bc0a;
-      }
-    }
+  .analyze__actions--keyboard {
+    transform: translateY(18px);
   }
 }
