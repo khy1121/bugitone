@@ -10,6 +10,7 @@ export default function CharacterPage() {
   return (
     <main className="char-landing">
       <div className="char-landing__inner">
+
         <section className="char-landing__text">
           <h1 className="char-landing__title">오늘 하루는 어떤가요?</h1>
           <p className="char-landing__subtitle">
@@ -23,7 +24,6 @@ export default function CharacterPage() {
           <span className="char-landing__ripple char-landing__ripple--middle" />
           <span className="char-landing__ripple char-landing__ripple--inner" />
           <span className="char-landing__glow" />
-
           <img
             className="char-landing__character"
             src="/assets/character/character.svg"
@@ -31,13 +31,15 @@ export default function CharacterPage() {
           />
         </div>
 
-        <button
-          className="char-landing__cta"
-          type="button"
-          onClick={() => navigate(ROUTES.ANALYZE)}
-        >
-          캐릭터 찾기
-        </button>
+        <div className="char-landing__cta-wrap">
+          <button
+            className="char-landing__cta"
+            type="button"
+            onClick={() => navigate(ROUTES.ANALYZE)}
+          >
+            캐릭터 찾기
+          </button>
+        </div>
 
         <BottomNav active="character" className="bottom-nav--character-landing" />
       </div>

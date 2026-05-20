@@ -60,9 +60,7 @@ export default function BottomNav({ active = "library", className = "" }) {
           isCharacterLanding && item.key === "character" && isActive;
 
         const Icon = item.Icon;
-
         const iconColor = "#282723";
-
         const activeFillColor = isCharacterLandingActive
           ? "#FEFEFE"
           : isActive
@@ -105,5 +103,5 @@ export default function BottomNav({ active = "library", className = "" }) {
         );
       })}
     </nav>
-  ); 
+  );
 }
