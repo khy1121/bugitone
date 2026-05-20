@@ -31,7 +31,7 @@ const DIARY_VIEWPORT_MARGIN = 16;
 const ACTION_HEIGHT = 60;
 const ACTION_BOTTOM_OFFSET = 58;
 
-const KEYBOARD_BLUR_DELAY = 520;
+const KEYBOARD_BLUR_DELAY = 420;
 
 const formatToday = () => {
   const today = new Date();
@@ -221,6 +221,11 @@ export default function AnalyzePage() {
   };
 
   const getAvailableDiaryHeight = () => {
+    // blur 직후 visual viewport가 아직 키보드 높이를 반환하는 race condition 방지.
+    // unfocused 상태에서는 디자인 최대값(316px) 그대로 반환 —
+    // Figma 기준 textarea max bottom(342+316=658) < button top(734) 이므로 겹치지 않음.
+    if (!isDiaryFocused) return DIARY_MAX_HEIGHT;
+
     const textarea = textareaRef.current;
     if (!textarea) return DIARY_MAX_HEIGHT;
 
@@ -229,11 +234,8 @@ export default function AnalyzePage() {
     const viewportBottom = visualViewport
       ? visualViewport.offsetTop + visualViewport.height
       : window.innerHeight;
-    const contentBottom = isDiaryFocused
-      ? viewportBottom
-      : viewportBottom - ACTION_BOTTOM_OFFSET - ACTION_HEIGHT;
     const availableHeight =
-      contentBottom - diaryTop - DIARY_COUNTER_SPACE - DIARY_VIEWPORT_MARGIN;
+      viewportBottom - diaryTop - DIARY_COUNTER_SPACE - DIARY_VIEWPORT_MARGIN;
 
     return Math.min(
       DIARY_MAX_HEIGHT,

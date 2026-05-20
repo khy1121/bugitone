@@ -1,17 +1,31 @@
 .analyze {
   position: relative;
 
-  --analyze-back-y: 60px;
-  --analyze-progress-y: 110px;
-  --analyze-body-y: 157px;
+  --analyze-inline-padding: var(--page-inline-padding, 20px);
+  --analyze-content-width: calc(100% - (var(--analyze-inline-padding) * 2));
+  --analyze-design-content-width: calc(
+    var(--design-width, 393px) - (var(--analyze-inline-padding) * 2)
+  );
+
+  // Figma: 상태바 60px, 뒤로가기 y=60 → 상태바 바로 아래
+  --analyze-back-y: var(--safe-top, 0px);
+  // Figma: 프로그레스바 y=105 = 60(상태바) + 45px
+  --analyze-progress-y: calc(var(--safe-top, 0px) + 45px);
+  // Figma: date y=157 = 60(상태바) + 97px
+  --analyze-body-y: calc(var(--safe-top, 0px) + 97px);
+  // 데스크탑 절대 위치용 (768px+ media query에서만 사용)
   --analyze-actions-y: 734px;
-  --analyze-empty-guide-y: 802px;
 
   width: 100%;
   height: 100%;
   min-height: 100%;
 
-  overflow: hidden;
+  // overflow: hidden 대신 항상 스크롤 가능하게 유지
+  // → 키보드 오픈 시 브라우저가 자체 레이아웃 조정으로 튕기는 현상 방지
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 
   background: #fefefe;
 
@@ -28,7 +42,8 @@
 
   margin: 0 auto;
 
-  overflow: hidden;
+  // 절대 위치 자식 클리핑용 — 스크롤은 부모(.analyze)가 담당
+  overflow: clip;
 }
 
 .analyze--has-diary .analyze__inner {
@@ -42,10 +57,11 @@
 .analyze__back {
   position: absolute;
   top: var(--analyze-back-y);
-  left: 20px;
+  left: var(--analyze-inline-padding);
   z-index: 10;
 
-  width: 81px;
+  width: fit-content;
+  // Figma: Frame 24 h=39 (padding T10 B10 + text 19px)
   height: 39px;
   padding: 10px 0;
 
@@ -57,7 +73,7 @@
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: normal;
+  line-height: 24px;
   text-align: left;
 
   cursor: pointer;
@@ -66,9 +82,10 @@
 .analyze__progress {
   position: absolute;
   top: var(--analyze-progress-y);
-  left: 20px;
+  left: var(--analyze-inline-padding);
+  right: var(--analyze-inline-padding);
 
-  width: 353px;
+  width: auto;
   height: 6px;
 
   overflow: hidden;
@@ -87,15 +104,15 @@
 }
 
 .analyze__progress-fill--step-1 {
-  width: 117.67px;
+  width: 33.3333%;
 }
 
 .analyze__progress-fill--step-2 {
-  width: 235.34px;
+  width: 66.6666%;
 }
 
 .analyze__progress-fill--step-3 {
-  width: 353px;
+  width: 100%;
 }
 
 /* ==============================
@@ -105,9 +122,10 @@
 .analyze__body {
   position: absolute;
   top: var(--analyze-body-y);
-  left: 20px;
+  left: var(--analyze-inline-padding);
+  right: var(--analyze-inline-padding);
 
-  width: 353px;
+  width: auto;
 
   transition: none;
 }
@@ -157,13 +175,13 @@
   flex-direction: column;
   gap: 4px;
 
-  width: 353px;
+  width: 100%;
 }
 
 .analyze__diary {
   --diary-max-height: 316px;
 
-  width: 353px;
+  width: 100%;
   height: min(var(--diary-height, 56px), var(--diary-max-height));
   max-height: var(--diary-max-height);
 
@@ -250,7 +268,7 @@
   position: relative;
   z-index: 3;
 
-  width: 353px;
+  width: 100%;
   height: 18px;
   margin: 4px 0 0;
 
@@ -364,13 +382,15 @@
 .analyze__actions {
   position: fixed;
   left: 50%;
-  bottom: calc(58px + var(--safe-bottom));
+  // Figma: 버튼 y=734 h=60 → from bottom: 852-794=58px
+  bottom: calc(58px + var(--safe-bottom, 0px));
   z-index: 20;
 
   display: flex;
   gap: 17px;
 
-  width: 353px;
+  width: var(--analyze-content-width);
+  max-width: var(--analyze-design-content-width);
   height: 60px;
 
   opacity: 1;
@@ -437,9 +457,10 @@
 
 .analyze__empty-guide {
   position: absolute;
-  top: var(--analyze-empty-guide-y);
-  left: 20px;
-  right: 20px;
+  // Figma: y=802 h=17 → from bottom: 852-802-17=33px (hybrid: safe-bottom 상대)
+  bottom: calc(var(--safe-bottom, 0px) + 33px);
+  left: var(--analyze-inline-padding);
+  right: var(--analyze-inline-padding);
 
   width: auto;
   margin: 0;
@@ -466,17 +487,16 @@
 ============================== */
 
 .analyze--keyboard {
-  height: var(--visual-height);
-  min-height: var(--visual-height);
-  overflow-x: hidden;
-  overflow-y: auto;
+  // 키보드 오픈 시 시각적 뷰포트 높이로 제한
+  height: var(--visual-height, 100%);
+  min-height: unset;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 .analyze--keyboard .analyze__inner {
   height: auto;
-  min-height: var(--design-height, 852px);
+  // 짧은 화면에서도 모든 콘텐츠(textarea y342 + 여유공간)에 접근 가능하도록
+  min-height: max(var(--design-height, 852px), var(--app-height, 100%));
   overflow: visible;
 }
 
@@ -565,7 +585,11 @@
     position: absolute;
     top: var(--analyze-actions-y);
     bottom: auto;
-    left: 20px;
+    left: var(--analyze-inline-padding);
+    right: var(--analyze-inline-padding);
+
+    width: auto;
+    max-width: none;
     transform: none;
   }
 
