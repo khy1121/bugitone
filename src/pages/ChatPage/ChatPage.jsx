@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '../../components/common/BottomNav/BottomNav'
 import Loading from '../../components/common/LoadingSpinner/LoadingSpinner'
 import { ArrowUpIcon } from '../../assets/icons'
@@ -11,12 +11,18 @@ import {
   sendMessage,
   deleteRoom,
 } from '../../api/chatApi'
+import { ROUTES } from '../../constants/routes'
 import './ChatPage.scss'
 
 const CHAR_IMG = '/assets/character/character.svg'
 const MAX_INPUT_HEIGHT = 380
 
-const getUserId = () => Number(localStorage.getItem('userId')) || 1
+// 로그인 안 된 경우 null 반환 (1 폴백 제거 — 존재하지 않는 userId로 API 호출 방지)
+const getUserId = () => {
+  const stored = localStorage.getItem('userId')
+  const id = Number(stored)
+  return stored && id > 0 ? id : null
+}
 
 const toMsg = (m) => ({
   id: m.messageId,
@@ -100,9 +106,9 @@ function ChatList({ open, onClose, onSelectChat }) {
   const userId = getUserId()
   const normalizedQuery = searchQuery.trim()
 
-  // 드로어가 열릴 때 목록 로드
+  // 드로어가 열릴 때 목록 로드 (userId 없으면 빈 목록)
   useEffect(() => {
-    if (!open) return
+    if (!open || !userId) return
 
     setListLoading(true)
     getRoomList(userId)
@@ -113,7 +119,7 @@ function ChatList({ open, onClose, onSelectChat }) {
 
   // 검색어 디바운스 처리
   useEffect(() => {
-    if (!open) return
+    if (!open || !userId) return
 
     if (!normalizedQuery) {
       setListLoading(true)
@@ -250,6 +256,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(false)
+  const [sendError, setSendError] = useState('')
 
   const inputRef = useRef(null)
   const messagesEndRef = useRef(null)
@@ -296,6 +303,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 
   const handleSend = async () => {
     if (!canSend || loading) return
+    setSendError('')
 
     const text = input.trim()
     setInput('')
@@ -311,7 +319,14 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 
       // 첫 메시지: 채팅방 먼저 생성
       if (!roomId) {
-        const room = await createRoom({ userId, bookId: bookId ?? 1, topic: text })
+        if (!bookId) {
+          // bookId 없이는 채팅방 생성 불가 — 사용자에게 안내
+          setMessages((prev) => prev.filter((m) => m.id !== tempId))
+          setSendError('책 상세 페이지에서 가독이챗을 시작해주세요.')
+          setLoading(false)
+          return
+        }
+        const room = await createRoom({ userId, bookId, topic: text })
         roomId = room.roomId
         setActiveRoomId(roomId)
       }
@@ -323,8 +338,9 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
         toMsg(userMessage),
         toMsg(aiMessage),
       ])
-    } catch {
+    } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId))
+      setSendError(err?.message ?? '메시지 전송에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -417,6 +433,10 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
           </div>
         )}
 
+        {sendError && (
+          <p className="chat-room__send-error">{sendError}</p>
+        )}
+
         <div className={`chat-room__input-wrap${isTyping ? ' chat-room__input-wrap--typing' : ''}`}>
           <textarea
             ref={inputRef}
@@ -452,7 +472,19 @@ export default function ChatPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeChat, setActiveChat] = useState(null)
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const userId = getUserId()
   const bookId = location.state?.bookId ?? null
+
+  // 로그인 안 된 경우 로그인 페이지로 이동
+  useEffect(() => {
+    if (!userId) {
+      navigate(ROUTES.LOGIN, { replace: true })
+    }
+  }, [userId, navigate])
+
+  if (!userId) return null
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>

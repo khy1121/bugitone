@@ -603,6 +603,31 @@
     justify-content: center;
   }
 
+  &__send-error {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: calc(200px + var(--safe-bottom, 0px));
+
+    margin: 0;
+    padding: 10px 16px;
+
+    border-radius: 10px;
+    background: rgba(255, 80, 80, 0.1);
+
+    color: #c0392b;
+
+    font-family: $font-family-base;
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    line-height: $line-height-body2;
+    text-align: center;
+  }
+
+  &--conversation &__send-error {
+    bottom: calc(120px + var(--safe-bottom, 0px));
+  }
+
   // Messages — same top as landing
   &__messages {
     position: absolute;
