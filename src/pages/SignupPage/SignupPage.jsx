@@ -85,7 +85,7 @@ export default function SignupPage() {
         <button
           className={`auth-btn auth-btn--pill${canSubmit ? ' auth-btn--active' : ''}`}
           disabled={!canSubmit}
-          onClick={() => navigate(ROUTES.NICKNAME)}
+          onClick={() => navigate(ROUTES.NICKNAME, { state: { email, password } })}
         >
           이메일로 회원가입
         </button>
