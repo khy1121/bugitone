@@ -4,14 +4,9 @@ import BottomNav from '../../components/common/BottomNav/BottomNav'
 import Chip from '../../components/common/Chip/Chip'
 import { mockBooks } from '../../data/mockBooks'
 import { ChevronRightIcon, ChevronLeftIcon } from '../../assets/icons'
+import { ROUTES } from '../../constants/routes'
+import { deleteAccount, updateUser } from '../../api/userApi'
 import './MyPage.scss'
-
-const MOCK_USER = {
-  name: '유저 이름',
-  id: '유저 아이디',
-  birthday: '20XX/XX/XX',
-  gender: '여성',
-}
 
 const CURRENT_MONTH = new Date().getMonth() + 1
 const EMOTIONS = ['#뿌듯함', '#지침', '#설렘']
@@ -89,6 +84,8 @@ function ProgressBar({ currentPage, totalPages }) {
 function MainView({ onReport, onAccount, onLibrary }) {
   const books = getBooksWithInfo()
   const countByStatus = (status) => books.filter(b => b.status === status).length
+  const nickname = localStorage.getItem('nickname') ?? ''
+  const userId = localStorage.getItem('userId') ?? ''
 
   return (
     <div className="mypage mypage--main">
@@ -100,8 +97,8 @@ function MainView({ onReport, onAccount, onLibrary }) {
         <button type="button" className="mypage__card mypage__card--account" onClick={onAccount}>
           <div className="mypage__avatar mypage__avatar--sm" />
           <div className="mypage__card-info">
-            <span className="mypage__user-name">{MOCK_USER.name}</span>
-            <span className="mypage__user-id">{MOCK_USER.id}</span>
+            <span className="mypage__user-name">{nickname}</span>
+            <span className="mypage__user-id">{userId}</span>
           </div>
           <span className="mypage__arrow"><ArrowRight /></span>
         </button>
@@ -169,7 +166,44 @@ function ReportView({ onBack }) {
   )
 }
 
-function AccountView({ onBack }) {
+function AccountView({ onBack, onEdit }) {
+  const navigate = useNavigate()
+  const nickname = localStorage.getItem('nickname') ?? ''
+  const userId = localStorage.getItem('userId') ?? ''
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [apiError, setApiError] = useState('')
+
+  const handleLogout = () => {
+    localStorage.removeItem('userId')
+    localStorage.removeItem('nickname')
+    navigate(ROUTES.LOGIN, { replace: true })
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true)
+      return
+    }
+    setDeleting(true)
+    setApiError('')
+    try {
+      await deleteAccount(Number(userId))
+      localStorage.removeItem('userId')
+      localStorage.removeItem('nickname')
+      navigate(ROUTES.LOGIN, { replace: true })
+    } catch {
+      setApiError('회원탈퇴에 실패했습니다.')
+      setDeleteConfirm(false)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const handleCopyId = () => {
+    navigator.clipboard?.writeText(userId).catch(() => {})
+  }
+
   return (
     <div className="mypage mypage--account">
       <div className="mypage__header-line" />
@@ -177,30 +211,138 @@ function AccountView({ onBack }) {
       <h1 className="mypage__title mypage__title--account">계정</h1>
 
       <div className="mypage__avatar mypage__avatar--lg" />
-      <p className="mypage__account-name">{MOCK_USER.name}</p>
+      <p className="mypage__account-name">{nickname}</p>
 
       <div className="mypage__info-list">
         <div className="mypage__info-row">
           <div className="mypage__info-icon" />
           <span className="mypage__info-label">유저 아이디</span>
-          <span className="mypage__info-value">{MOCK_USER.id}</span>
-          <button type="button" className="mypage__copy-btn">복사</button>
+          <span className="mypage__info-value">{userId}</span>
+          <button type="button" className="mypage__copy-btn" onClick={handleCopyId}>복사</button>
         </div>
-        <div className="mypage__info-row">
+        <button type="button" className="mypage__info-row" onClick={onEdit}>
           <div className="mypage__info-icon" />
-          <span className="mypage__info-label">생일</span>
-          <span className="mypage__info-value">{MOCK_USER.birthday}</span>
+          <span className="mypage__info-label">정보 수정</span>
           <span className="mypage__arrow"><ArrowRight /></span>
-        </div>
-        <div className="mypage__info-row">
-          <div className="mypage__info-icon" />
-          <span className="mypage__info-label">성별</span>
-          <span className="mypage__info-value">{MOCK_USER.gender}</span>
-          <span className="mypage__arrow"><ArrowRight /></span>
-        </div>
+        </button>
       </div>
 
-      <button type="button" className="mypage__logout">로그아웃</button>
+      <button type="button" className="mypage__logout" onClick={handleLogout}>로그아웃</button>
+
+      {deleteConfirm ? (
+        <div className="mypage__delete-confirm">
+          <p className="mypage__delete-confirm__text">정말 탈퇴하시겠어요?</p>
+          <div className="mypage__delete-confirm__btns">
+            <button type="button" className="mypage__delete-confirm__yes" onClick={handleDeleteAccount} disabled={deleting}>
+              {deleting ? '탈퇴 중...' : '확인'}
+            </button>
+            <button type="button" className="mypage__delete-confirm__no" onClick={() => setDeleteConfirm(false)}>취소</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="mypage__withdraw" onClick={() => setDeleteConfirm(true)}>회원탈퇴</button>
+      )}
+
+      {apiError && <p className="mypage__api-error">{apiError}</p>}
+    </div>
+  )
+}
+
+function EditView({ onBack }) {
+  const userId = Number(localStorage.getItem('userId'))
+  const [nickname, setNickname] = useState(localStorage.getItem('nickname') ?? '')
+  const [password, setPassword] = useState('')
+  const [gender, setGender] = useState('')
+  const [birthday, setBirthday] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [apiError, setApiError] = useState('')
+
+  const handleSubmit = async () => {
+    const body = {}
+    if (nickname) body.nickname = nickname
+    if (password) body.password = password
+    if (gender) body.gender = gender
+    if (birthday) body.birthday = birthday
+    if (Object.keys(body).length === 0) return
+
+    setSubmitting(true)
+    setApiError('')
+    setSuccess(false)
+    try {
+      const profile = await updateUser(userId, body)
+      if (body.nickname) localStorage.setItem('nickname', profile?.nickname ?? nickname)
+      setSuccess(true)
+    } catch {
+      setApiError('수정에 실패했습니다.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="mypage mypage--edit">
+      <div className="mypage__header-line" />
+      <BackButton onClick={onBack} />
+      <h1 className="mypage__title mypage__title--account">정보 수정</h1>
+
+      <div className="mypage__edit-form">
+        <div className="mypage__edit-field">
+          <label className="mypage__edit-label">닉네임</label>
+          <input
+            className="mypage__edit-input"
+            type="text"
+            value={nickname}
+            onChange={e => setNickname(e.target.value)}
+            maxLength={10}
+            placeholder="닉네임"
+          />
+        </div>
+        <div className="mypage__edit-field">
+          <label className="mypage__edit-label">비밀번호</label>
+          <input
+            className="mypage__edit-input"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="새 비밀번호 (6~8자)"
+            maxLength={8}
+          />
+        </div>
+        <div className="mypage__edit-field">
+          <label className="mypage__edit-label">성별</label>
+          <select
+            className="mypage__edit-input"
+            value={gender}
+            onChange={e => setGender(e.target.value)}
+          >
+            <option value="">선택 안 함</option>
+            <option value="MALE">남성</option>
+            <option value="FEMALE">여성</option>
+          </select>
+        </div>
+        <div className="mypage__edit-field">
+          <label className="mypage__edit-label">생일</label>
+          <input
+            className="mypage__edit-input"
+            type="date"
+            value={birthday}
+            onChange={e => setBirthday(e.target.value)}
+          />
+        </div>
+
+        {success && <p className="mypage__edit-success">수정되었습니다.</p>}
+        {apiError && <p className="mypage__api-error">{apiError}</p>}
+
+        <button
+          type="button"
+          className="mypage__edit-submit"
+          onClick={handleSubmit}
+          disabled={submitting}
+        >
+          {submitting ? '저장 중...' : '저장'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -286,7 +428,8 @@ export default function MyPage() {
   const [selectedCategory, setSelectedCategory] = useState(null)
 
   if (view === 'report') return <ReportView onBack={() => setView('main')} />
-  if (view === 'account') return <AccountView onBack={() => setView('main')} />
+  if (view === 'account') return <AccountView onBack={() => setView('main')} onEdit={() => setView('edit')} />
+  if (view === 'edit') return <EditView onBack={() => setView('account')} />
   if (view === 'library') return (
     <LibraryCategoryView
       initialCategory={selectedCategory}
