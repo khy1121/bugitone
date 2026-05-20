@@ -265,7 +265,12 @@ export default function BookDetailPage() {
 
         {activeTab === 'chat' && (
           <div className="book-chat">
-            <button className="book-chat__btn">가독이챗 하러 가기</button>
+            <button
+              className="book-chat__btn"
+              onClick={() => navigate(ROUTES.CHAT, { state: { bookId: book.id } })}
+            >
+              가독이챗 하러 가기
+            </button>
           </div>
         )}
 

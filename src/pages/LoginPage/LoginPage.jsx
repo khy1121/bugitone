@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { ChevronLeftIcon } from '../../assets/icons'
+import { login } from '../../api/userApi'
 import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -10,6 +11,8 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   const emailTouched = email.length > 0
   const emailValid = emailRegex.test(email)
@@ -19,10 +22,22 @@ export default function LoginPage() {
   const passwordTouched = password.length > 0
   const passwordValid = password.length >= 6 && password.length <= 8
 
-  const canSubmit = emailValid && passwordValid
+  const canSubmit = emailValid && passwordValid && !submitting
 
-  const handleLogin = () => {
-    navigate(ROUTES.HOME)
+  const handleLogin = async () => {
+    if (!canSubmit) return
+    setSubmitting(true)
+    setApiError('')
+    try {
+      const profile = await login({ email, password })
+      localStorage.setItem('userId', String(profile.userId))
+      localStorage.setItem('nickname', profile.nickname ?? '')
+      navigate(ROUTES.HOME)
+    } catch (err) {
+      setApiError(err?.message ?? '로그인에 실패했습니다.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -66,11 +81,14 @@ export default function LoginPage() {
           )}
         </div>
 
+        {apiError && <p className="auth-field__msg auth-field__msg--error">{apiError}</p>}
+
         <button
           className="auth-btn auth-btn--pill auth-btn--active"
           onClick={handleLogin}
+          disabled={!canSubmit}
         >
-          이메일로 로그인하기
+          {submitting ? '로그인 중...' : '이메일로 로그인하기'}
         </button>
 
         <div className="auth-divider" />

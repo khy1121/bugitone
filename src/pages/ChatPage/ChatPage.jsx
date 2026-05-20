@@ -1,45 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import BottomNav from '../../components/common/BottomNav/BottomNav'
 import Loading from '../../components/common/LoadingSpinner/LoadingSpinner'
 import { ArrowUpIcon } from '../../assets/icons'
+import {
+  getRoomList,
+  searchRoomList,
+  createRoom,
+  getMessages,
+  sendMessage,
+  deleteRoom,
+} from '../../api/chatApi'
 import './ChatPage.scss'
 
 const CHAR_IMG = '/assets/character/character.svg'
-
-const MOCK_CHATS = [
-  {
-    id: 1,
-    preview: '모순에 나오는 주인공은 어떤 사람 같아?',
-    messages: [
-      { id: 1, role: 'user', text: '모순에 나오는 주인공은 어떤 사람 같아?' },
-      {
-        id: 2,
-        role: 'ai',
-        text: '주인공은 자기 안의 모순을 계속 마주하면서도 쉽게 단정하지 않는 인물로 보여.',
-        actions: ['이유가 궁금해!', '이어서 대화하기'],
-      },
-    ],
-  },
-  { id: 2, preview: '너는 어떻게 생각해 만약 내가...', messages: [] },
-  { id: 3, preview: '어린왕자에서 보면 어린 왕자는...', messages: [] },
-  { id: 4, preview: '반대입장이 되어보기로 했어...', messages: [] },
-  { id: 5, preview: '한강 소설 소년이 온다 읽어봤어?', messages: [] },
-  { id: 6, preview: '과제에서는 내 입장이 중요한데...', messages: [] },
-  { id: 7, preview: '왜 그렇게 생각하는데 더 자세히...', messages: [] },
-  { id: 8, preview: '찬성입장도 생각을 해봤는데...', messages: [] },
-  { id: 9, preview: '두 입장 중 뭐가 더 설득력 있어?', messages: [] },
-  { id: 10, preview: '모순에서의 장면중 인상적인 건...', messages: [] },
-]
-
-const SEARCH_CHATS = [
-  { id: 101, preview: '반대 입장에서 생각해 보면...', messages: [] },
-  { id: 102, preview: '반대 입장으로 토론하기...', messages: [] },
-  { id: 103, preview: '찬성과 반대 입장 정리...', messages: [] },
-]
-
-const QUICK_ACTIONS = ['가독이와 토론하기', '분위기만으로 책 추천하기', '가독이와 함께 감상문 쓰기']
-
 const MAX_INPUT_HEIGHT = 380
+
+const getUserId = () => Number(localStorage.getItem('userId')) || 1
+
+const toMsg = (m) => ({
+  id: m.messageId,
+  role: m.role.toLowerCase(),
+  text: m.content,
+})
+
+/* ==============================
+   Icons
+============================== */
 
 function MenuIcon() {
   return (
@@ -71,7 +58,6 @@ function StopIcon() {
 
 function ChatIcon({ active = false }) {
   const stroke = active ? '#141B34' : '#42403A'
-
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       {active && (
@@ -88,9 +74,7 @@ function ChatIcon({ active = false }) {
 
 function HighlightedText({ text, query }) {
   if (!query || !text.includes(query)) return text
-
   const parts = text.split(query)
-
   return (
     <>
       {parts.map((part, index) => (
@@ -103,22 +87,69 @@ function HighlightedText({ text, query }) {
   )
 }
 
+/* ==============================
+   Chat List (Drawer)
+============================== */
+
 function ChatList({ open, onClose, onSelectChat }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [rooms, setRooms] = useState([])
+  const [listLoading, setListLoading] = useState(false)
   const [activeChatId, setActiveChatId] = useState(null)
 
+  const userId = getUserId()
   const normalizedQuery = searchQuery.trim()
-  const isSearching = normalizedQuery.length > 0
 
-  const chats = isSearching
-    ? SEARCH_CHATS.filter((chat) => chat.preview.includes(normalizedQuery))
-    : MOCK_CHATS
+  // 드로어가 열릴 때 목록 로드
+  useEffect(() => {
+    if (!open) return
 
-  const handleChatClick = (chat) => {
-    setActiveChatId(chat.id)
+    setListLoading(true)
+    getRoomList(userId)
+      .then(setRooms)
+      .catch(() => setRooms([]))
+      .finally(() => setListLoading(false))
+  }, [open, userId])
+
+  // 검색어 디바운스 처리
+  useEffect(() => {
+    if (!open) return
+
+    if (!normalizedQuery) {
+      setListLoading(true)
+      getRoomList(userId)
+        .then(setRooms)
+        .catch(() => setRooms([]))
+        .finally(() => setListLoading(false))
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      setListLoading(true)
+      searchRoomList(userId, normalizedQuery)
+        .then(setRooms)
+        .catch(() => setRooms([]))
+        .finally(() => setListLoading(false))
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [normalizedQuery, open, userId])
+
+  const handleChatClick = (room) => {
+    setActiveChatId(room.roomId)
     window.setTimeout(() => {
-      onSelectChat(chat)
+      onSelectChat({ id: room.roomId, preview: room.topic, bookId: room.bookId })
     }, 100)
+  }
+
+  const handleDelete = async (e, roomId) => {
+    e.stopPropagation()
+    try {
+      await deleteRoom(roomId, userId)
+      setRooms((prev) => prev.filter((r) => r.roomId !== roomId))
+    } catch {
+      // 삭제 실패 시 무시
+    }
   }
 
   return (
@@ -150,42 +181,55 @@ function ChatList({ open, onClose, onSelectChat }) {
             </button>
           </header>
 
-          <label className={`chat-list__search${isSearching ? ' chat-list__search--active' : ''}`}>
+          <label className={`chat-list__search${normalizedQuery ? ' chat-list__search--active' : ''}`}>
             <span className="sr-only">채팅 검색</span>
-
             <input
               type="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="채팅 검색"
             />
-
             <SearchIcon />
           </label>
 
-          <div
-            className={`chat-list__body${isSearching ? ' chat-list__body--search' : ''}`}
-            aria-label="최근 대화"
-          >
-            {chats.map((chat) => {
-              const active = chat.id === activeChatId
+          <div className="chat-list__body" aria-label="최근 대화">
+            {listLoading && (
+              <div className="chat-list__loading">
+                <Loading size={32} />
+              </div>
+            )}
 
+            {!listLoading && rooms.length === 0 && (
+              <p className="chat-list__empty">
+                {normalizedQuery ? '검색 결과가 없어요.' : '대화 내역이 없어요.'}
+              </p>
+            )}
+
+            {!listLoading && rooms.map((room) => {
+              const active = room.roomId === activeChatId
               return (
                 <button
-                  key={chat.id}
+                  key={room.roomId}
                   type="button"
                   className={`chat-list__item${active ? ' chat-list__item--active' : ''}`}
-                  onClick={() => handleChatClick(chat)}
+                  onClick={() => handleChatClick(room)}
                 >
                   <span className="chat-list__item-icon">
                     <ChatIcon active={active} />
                   </span>
 
                   <span className="chat-list__item-preview">
-                    <HighlightedText text={chat.preview} query={normalizedQuery} />
+                    <HighlightedText text={room.topic ?? '(제목 없음)'} query={normalizedQuery} />
                   </span>
 
-                  <span className="chat-list__item-arrow" aria-hidden="true" />
+                  <button
+                    className="chat-list__item-delete"
+                    type="button"
+                    aria-label="채팅방 삭제"
+                    onClick={(e) => handleDelete(e, room.roomId)}
+                  >
+                    ×
+                  </button>
                 </button>
               )
             })}
@@ -196,21 +240,42 @@ function ChatList({ open, onClose, onSelectChat }) {
   )
 }
 
-function ChatRoom({ initialChat, onOpenDrawer }) {
+/* ==============================
+   Chat Room
+============================== */
+
+function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
+  const [activeRoomId, setActiveRoomId] = useState(initialChat?.id ?? null)
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState(() => initialChat?.messages ?? [])
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(false)
 
   const inputRef = useRef(null)
   const messagesEndRef = useRef(null)
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+  const userId = getUserId()
+  const bookId = propBookId ?? initialChat?.bookId ?? null
 
   const isTyping = input.length > 0
   const canSend = input.trim().length > 0
-  const isLanding = messages.length === 0 && !loading
+  const isLanding = !activeRoomId && messages.length === 0 && !loading
+
+  // 기존 채팅방 선택 시 메시지 내역 로드
+  useEffect(() => {
+    if (!initialChat?.id) return
+
+    setActiveRoomId(initialChat.id)
+    setPageLoading(true)
+    getMessages(initialChat.id, userId)
+      .then((msgs) => setMessages(msgs.map(toMsg)))
+      .catch(() => setMessages([]))
+      .finally(() => setPageLoading(false))
+  }, [initialChat?.id, userId])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, loading])
 
   const resetInputHeight = () => {
     if (!inputRef.current) return
@@ -224,12 +289,12 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
     textarea.style.height = `${Math.min(textarea.scrollHeight, MAX_INPUT_HEIGHT)}px`
   }
 
-  const handleInputChange = (event) => {
-    setInput(event.target.value)
+  const handleInputChange = (e) => {
+    setInput(e.target.value)
     requestAnimationFrame(resizeInput)
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!canSend || loading) return
 
     const text = input.trim()
@@ -237,36 +302,39 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
     resetInputHeight()
     inputRef.current?.blur()
 
-    setMessages((prev) => [...prev, { id: Date.now(), role: 'user', text }])
+    const tempId = `temp-${Date.now()}`
+    setMessages((prev) => [...prev, { id: tempId, role: 'user', text }])
     setLoading(true)
 
-    window.setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: 'ai',
-          text: '나는 꼭 "끝까지 책임져야만" 진짜 사랑이라고는 생각하지 않아.\n\n근데 사랑에는 분명 책임이 따라온다고는 생각해.',
-          actions: ['이유가 궁금해!', '이어서 대화하기'],
-        },
-      ])
-      setLoading(false)
-    }, 1400)
-  }
+    try {
+      let roomId = activeRoomId
 
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      handleSend()
+      // 첫 메시지: 채팅방 먼저 생성
+      if (!roomId) {
+        const room = await createRoom({ userId, bookId: bookId ?? 1, topic: text })
+        roomId = room.roomId
+        setActiveRoomId(roomId)
+      }
+
+      const { userMessage, aiMessage } = await sendMessage(roomId, { userId, content: text })
+
+      setMessages((prev) => [
+        ...prev.filter((m) => m.id !== tempId),
+        toMsg(userMessage),
+        toMsg(aiMessage),
+      ])
+    } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId))
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleQuickAction = (text) => {
-    setInput(text)
-    requestAnimationFrame(() => {
-      inputRef.current?.focus()
-      resizeInput()
-    })
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
   }
 
   const handleAreaTap = () => {
@@ -286,7 +354,6 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
 
         <header className="chat-room__header">
           <h1 className="chat-room__title">가독이 chat</h1>
-
           <button
             className="chat-room__menu-btn"
             type="button"
@@ -300,13 +367,10 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
         {isLanding && (
           <div className="chat-room__landing" onClick={handleAreaTap}>
             <div className="chat-room__char-glow" aria-hidden="true" />
-
             <img className="chat-room__char-img" src={CHAR_IMG} alt="" aria-hidden="true" />
-
             <p className="chat-room__welcome">
               안녕, 난 가독이야 👋{'\n'}오늘은 무슨 이야기를 나눠볼까?
             </p>
-
             <p className="chat-room__desc">
               토론하고 싶은 책의 장면 혹은 주제를 입력하면{'\n'}AI 챗봇 '가독이'가 책 내용을
               분석하여 토론을 이끌어 나가요!
@@ -314,33 +378,26 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
           </div>
         )}
 
-        {!isLanding && (
+        {pageLoading && (
+          <div className="chat-room__page-loading">
+            <Loading size={40} />
+          </div>
+        )}
+
+        {!isLanding && !pageLoading && (
           <div className="chat-room__messages" onClick={handleAreaTap}>
             {messages.map((message) => (
-              <div key={message.id} className={`chat-room__message chat-room__message--${message.role}`}>
+              <div
+                key={message.id}
+                className={`chat-room__message chat-room__message--${message.role}`}
+              >
                 {message.role === 'ai' && (
                   <span className="chat-room__avatar" aria-hidden="true">
                     <img src={CHAR_IMG} alt="" />
                   </span>
                 )}
-
                 <div className={`chat-room__bubble chat-room__bubble--${message.role}`}>
                   <span>{message.text}</span>
-
-                  {message.actions && (
-                    <div className="chat-room__reply-actions">
-                      {message.actions.map((action, index) => (
-                        <button
-                          key={action}
-                          type="button"
-                          className={index === message.actions.length - 1 ? 'chat-room__reply-action--primary' : ''}
-                          onClick={() => handleQuickAction(action)}
-                        >
-                          {action}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -360,21 +417,6 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
           </div>
         )}
 
-        {isLanding && isTyping && (
-          <div className="chat-room__quick-actions">
-            {QUICK_ACTIONS.slice(1).map((action) => (
-              <button
-                key={action}
-                type="button"
-                className="chat-room__quick-btn"
-                onClick={() => handleQuickAction(action)}
-              >
-                {action}
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className={`chat-room__input-wrap${isTyping ? ' chat-room__input-wrap--typing' : ''}`}>
           <textarea
             ref={inputRef}
@@ -385,12 +427,11 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
             placeholder="가독이와 대화하기"
             rows={1}
           />
-
           <button
             className={`chat-room__send${canSend ? ' chat-room__send--active' : ''}`}
             type="button"
             onClick={handleSend}
-            aria-label={loading ? '응답 중지' : '전송'}
+            aria-label="전송"
             disabled={!canSend || loading}
           >
             {loading ? <StopIcon /> : <ArrowUpIcon size={20} />}
@@ -403,15 +444,22 @@ function ChatRoom({ initialChat, onOpenDrawer }) {
   )
 }
 
+/* ==============================
+   ChatPage (root)
+============================== */
+
 export default function ChatPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeChat, setActiveChat] = useState(null)
+  const location = useLocation()
+  const bookId = location.state?.bookId ?? null
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <ChatRoom
         key={activeChat?.id ?? 'landing'}
         initialChat={activeChat}
+        bookId={bookId}
         onOpenDrawer={() => setDrawerOpen(true)}
       />
       <ChatList
