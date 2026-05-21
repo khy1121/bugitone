@@ -1,4 +1,6 @@
-﻿@use '../../styles/variables' as *;
+@use '../../styles/variables' as *;
+
+// auth-page, auth-header, auth-field, auth-btn은 LoginPage.scss에서 정의된 동일 클래스를 재사용
 
 .auth-page {
   width: 100%;
@@ -8,20 +10,24 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .auth-header {
   position: relative;
-  height: 77px;
+  padding-top: var(--safe-top, 0px);
+  min-height: calc(var(--safe-top, 0px) + 77px);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  padding-bottom: 16px;
   border-bottom: 1px solid #000;
   flex-shrink: 0;
 
   &__back {
     position: absolute;
     left: 19px;
+    bottom: 12px;
     background: none;
     border: none;
     cursor: pointer;
@@ -43,19 +49,34 @@
     font-family: 'Pretendard', sans-serif;
     color: #000;
     outline: none;
+    box-sizing: border-box;
+    appearance: none;
 
     &::placeholder {
-      color: $color-label;
+      color: $gray-600;
+    }
+
+    &:focus {
+      background: $gray-100;
     }
   }
 
   &__msg {
-    font-size: 16px;
+    font-size: 14px;
     font-family: 'Pretendard', sans-serif;
     font-weight: 400;
-    color: #000;
-    padding-left: 4px;
+    color: $gray-700;
+    padding-left: 6px;
     margin: 8px 0 0;
+    line-height: 1.4;
+
+    &--error {
+      color: $color-danger;
+    }
+
+    &--success {
+      color: $color-success;
+    }
   }
 }
 
@@ -81,14 +102,18 @@
 
   &:disabled {
     cursor: not-allowed;
+    opacity: 0.6;
   }
 }
+
+// ── 닉네임 페이지 전용 ──
 
 .nickname-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 56px 29px 56px;
+  padding: 40px 29px 48px;
+  overflow-y: auto;
 }
 
 .nickname-label {
@@ -96,7 +121,39 @@
   font-family: 'Pretendard', sans-serif;
   font-weight: 400;
   color: #000;
-  margin-bottom: 12px;
+  margin: 0 0 14px;
+}
+
+.nickname-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+
+  .auth-field__input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.nickname-check-btn {
+  flex-shrink: 0;
+  height: 55px;
+  padding: 0 14px;
+  background: $color-input-bg;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  color: $gray-500;
+  white-space: nowrap;
+  cursor: not-allowed;
+  transition: background 0.15s, color 0.15s;
+
+  &--active {
+    color: #000;
+    cursor: pointer;
+  }
 }
 
 .nickname-spacer {

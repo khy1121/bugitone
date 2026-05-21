@@ -60,10 +60,7 @@ export default function LoginPage() {
             autoComplete="email"
           />
           {emailError && (
-            <p className="auth-field__msg">이메일 형식이 올바르지 않습니다.</p>
-          )}
-          {emailSuccess && (
-            <p className="auth-field__msg">사용할 수 있는 이메일입니다.</p>
+            <p className="auth-field__msg auth-field__msg--error">이메일 형식이 올바르지 않습니다.</p>
           )}
         </div>
 

@@ -8,20 +8,24 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .auth-header {
   position: relative;
-  height: 77px;
+  padding-top: var(--safe-top, 0px);
+  min-height: calc(var(--safe-top, 0px) + 77px);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  padding-bottom: 16px;
   border-bottom: 1px solid #000;
   flex-shrink: 0;
 
   &__back {
     position: absolute;
     left: 19px;
+    bottom: 12px;
     background: none;
     border: none;
     cursor: pointer;
@@ -35,21 +39,25 @@
     font-family: 'Pretendard', sans-serif;
     font-weight: 700;
     color: #000;
+    line-height: 1;
   }
 }
 
 .auth-body {
-  padding: 20px 29px;
+  flex: 1;
+  padding: 32px 29px 40px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .auth-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 
   &__input {
     width: 100%;
@@ -62,19 +70,34 @@
     font-family: 'Pretendard', sans-serif;
     color: #000;
     outline: none;
+    box-sizing: border-box;
+    appearance: none;
 
     &::placeholder {
-      color: #555;
+      color: $gray-600;
+    }
+
+    &:focus {
+      background: $gray-100;
     }
   }
 
   &__msg {
-    font-size: 16px;
+    font-size: 14px;
     font-family: 'Pretendard', sans-serif;
     font-weight: 400;
-    color: #000;
-    padding-left: 4px;
-    margin: 0;
+    color: $gray-700;
+    padding-left: 6px;
+    margin: 2px 0 0;
+    line-height: 1.4;
+
+    &--error {
+      color: $color-danger;
+    }
+
+    &--success {
+      color: $color-success;
+    }
   }
 }
 
@@ -89,6 +112,7 @@
   color: #000;
   cursor: pointer;
   transition: background 0.15s;
+  margin-bottom: 8px;
 
   &--pill {
     border-radius: 70px;
@@ -100,6 +124,7 @@
 
   &:disabled {
     cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
@@ -107,5 +132,62 @@
   width: 100%;
   height: 1px;
   background: #000;
-  margin: 12px 0;
+  margin: 8px 0 16px;
+}
+
+// ── 닉네임 페이지 전용 ──
+.nickname-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 29px 48px;
+  overflow-y: auto;
+}
+
+.nickname-label {
+  font-size: 26px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  color: #000;
+  margin: 0 0 14px;
+}
+
+.nickname-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+
+  .auth-field__input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.nickname-check-btn {
+  flex-shrink: 0;
+  height: 55px;
+  padding: 0 14px;
+  background: $color-input-bg;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  color: $gray-500;
+  white-space: nowrap;
+  cursor: not-allowed;
+  transition: background 0.15s, color 0.15s;
+
+  &--active {
+    color: #000;
+    cursor: pointer;
+
+    &:active {
+      background: $gray-300;
+    }
+  }
+}
+
+.nickname-spacer {
+  flex: 1;
 }
