@@ -1,36 +1,153 @@
-﻿@use '../../styles/variables' as *;
+@use '../../styles/variables' as *;
 
 .splash {
+  position: relative;
   width: 100%;
-  max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
-  margin: 0 auto;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 56px;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background-image: url('/assets/onBoarding/onboardMain.svg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 
-  &__logo {
-    flex: 1;
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(153, 124, 38, 0.53);
+    z-index: 1;
+  }
+
+  &__inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 393px;
+    height: 100%;
+    min-height: 0;
+    margin: 0 auto;
+  }
+
+  &__logo-group {
+    position: absolute;
+    top: 38.5%;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    font-size: 96px;
-    font-family: 'Pretendard', sans-serif;
+    white-space: nowrap;
+  }
+
+  &__title {
+    margin: 0;
+    color: #fefefe;
+    font-family: 'Tropi Land', fantasy;
+    font-size: 67.2px;
     font-weight: 400;
-    color: #000;
+    line-height: 1;
+    letter-spacing: 2.016px;
+  }
+
+  &__subtitle {
+    margin: 11px 0 0;
+    color: #fef8e7;
+    font-family: 'tvN EnjoystoriesOTF', 'Pretendard', sans-serif;
+    font-size: 26.88px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.672px;
   }
 
   &__btn {
-    width: 341px;
-    height: 68px;
-    background: $color-gold;
-    border: none;
-    font-size: 40px;
-    font-family: 'Pretendard', sans-serif;
-    font-weight: 400;
-    color: #000;
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--safe-bottom, 0px) + 61px);
+    transform: translateX(-50%);
+    width: min(313px, calc(100% - 80px));
+    height: 65px;
+    padding: 16px 80px;
+    border: 0;
+    border-radius: 31px;
+    background: rgba(255, 247, 247, 0.23);
+    box-shadow:
+      0 4px 18px rgba(95, 56, 255, 0.04),
+      inset 0 4px 2px rgba(255, 255, 255, 0.18),
+      inset 0 -2px 4px rgba(241, 241, 241, 0.43);
+    color: #fefefe;
     cursor: pointer;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 30px;
+    letter-spacing: -0.5px;
+    text-align: center;
+    white-space: nowrap;
+
+    &:active {
+      background: rgba(255, 247, 247, 0.35);
+    }
+  }
+
+  &__home-indicator {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--safe-bottom, 0px) + 8px);
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    border-radius: 100px;
+    background: #fefefe;
+  }
+}
+
+body.splash-page-active {
+  height: var(--app-height);
+  min-height: var(--app-height);
+
+  #root,
+  .app-frame {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: var(--app-height);
+    min-height: var(--app-height);
+    margin: 0;
+    overflow: hidden;
+  }
+
+  #root,
+  .app-frame {
+    background: transparent;
+  }
+}
+
+@media (min-width: 768px) {
+  body.splash-page-active {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+
+    #root {
+      width: 100%;
+      height: auto;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: auto;
+      background: #d9d9d9;
+    }
+
+    .app-frame {
+      width: var(--design-width);
+      min-width: var(--design-width);
+      max-width: var(--design-width);
+      height: var(--design-height);
+      min-height: var(--design-height);
+      margin: 24px auto;
+      overflow: hidden;
+    }
   }
 }
