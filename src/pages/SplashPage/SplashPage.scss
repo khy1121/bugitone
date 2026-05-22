@@ -102,52 +102,11 @@
   }
 }
 
+// viewport-wrapper / app-frame 레이아웃은 _reset.scss가 전역 처리
+// 스플래시 배경이 비쳐야 하므로 app-frame 배경만 투명화
 body.splash-page-active {
-  height: var(--app-height);
-  min-height: var(--app-height);
-
-  #root,
-  .app-frame {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    height: var(--app-height);
-    min-height: var(--app-height);
-    margin: 0;
-    overflow: hidden;
-  }
-
-  #root,
-  .app-frame {
+  .app-frame,
+  .viewport-wrapper {
     background: transparent;
-  }
-}
-
-@media (min-width: 768px) {
-  body.splash-page-active {
-    height: auto;
-    min-height: 100vh;
-    overflow: auto;
-
-    #root {
-      width: 100%;
-      height: auto;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      overflow: auto;
-      background: #d9d9d9;
-    }
-
-    .app-frame {
-      width: var(--design-width);
-      min-width: var(--design-width);
-      max-width: var(--design-width);
-      height: var(--design-height);
-      min-height: var(--design-height);
-      margin: 24px auto;
-      overflow: hidden;
-    }
   }
 }

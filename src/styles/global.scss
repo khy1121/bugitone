@@ -2,15 +2,12 @@
 @use 'mixins' as *;
 @use 'reset';
 
-// ── Custom fonts (파일을 /public/fonts/ 에 넣은 뒤 활성화됩니다) ──
 @font-face {
   font-family: 'Tropi Land';
   src: url('/assets/fonts/TropiLand.ttf') format('truetype');
   font-weight: 400;
-
   font-style: normal;
   font-display: swap;
-
 }
 
 @font-face {
@@ -30,6 +27,12 @@ button,
 input,
 textarea {
   font-family: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
 .sr-only {

@@ -1,6 +1,9 @@
 @use 'variables' as *;
 
-* {
+// ── Base ──────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -12,17 +15,23 @@ body,
   margin: 0;
 }
 
+html {
+  // setVh.js 실행 전 순간에도 흰 틈이 보이지 않도록 앱 배경색을 html에도 적용
+  background: $color-surface;
+}
+
 html,
 body {
   overflow: hidden;
   overscroll-behavior: none;
 }
 
+// ── CSS 커스텀 프로퍼티 ────────────────────────────────────────────────
 :root {
-  --design-width: 393px;
-  --design-height: 852px;
+  --design-width: #{$design-width};
+  --design-height: #{$design-height};
 
-  /* setVh.js에서 갱신 */
+  // setVh.js가 window.innerHeight 기준으로 갱신
   --vh: 1vh;
   --visual-vh: 1vh;
   --app-height: calc(var(--vh, 1vh) * 100);
@@ -30,60 +39,72 @@ body {
   --keyboard-height: 0px;
   --app-scale: 1;
 
+  // 물리 safe-area (iPhone 노치 / 홈 인디케이터)
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
+  // 레이아웃 상수
   --page-inline-padding: 20px;
   --bottom-nav-height: 84px;
-  --bottom-nav-gap: 20px;
+  --bottom-nav-gap: 18px;
   --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--bottom-nav-gap) + var(--safe-bottom));
 }
 
+// ── Body / Root ────────────────────────────────────────────────────────
 body {
-  width: 100%;
-  height: var(--app-height);
-  font-family: $font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  height: calc(var(--app-height) + var(--safe-bottom));
+  font-family: $font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial;
   background: $color-surface;
   color: $color-text;
   touch-action: manipulation;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
-  width: 100%;
-  height: var(--app-height);
+  height: calc(var(--app-height) + var(--safe-bottom));
   overflow: hidden;
 }
 
+// ── 키보드 오픈 상태 ──────────────────────────────────────────────────
+// setVh.js가 visualViewport 기반으로 html.keyboard-open 클래스 토글
 .keyboard-open {
   #root,
   .app-frame {
     height: var(--visual-height);
     min-height: var(--visual-height);
-    overflow: hidden;
   }
 }
 
+// ── Viewport Wrapper ──────────────────────────────────────────────────
+// 모바일: 투명 패스스루, app-frame이 전체 높이를 채움
+// 데스크탑: 회색 배경 + 앱 프레임 중앙 정렬
+.viewport-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: calc(var(--app-height) + var(--safe-bottom));
+  display: flex;
+  align-items: stretch;
+}
 
-
+// ── App Frame ─────────────────────────────────────────────────────────
+// setVh.js가 window.innerHeight(iOS standalone 포함 전체 화면)를 기준으로
+// --app-height를 계산. 100dvh는 iOS standalone에서 safe-area-inset-bottom을
+// 제외한 높이를 반환해 하단 흰 여백이 생기므로 사용하지 않음.
 .app-frame {
   position: relative;
   width: 100%;
-  min-width: 0;
-  max-width: none;
-  height: var(--app-height);
-  min-height: var(--app-height);
-  margin: 0;
   overflow: hidden;
   background: $color-surface;
-  transform: none;
-  transform-origin: initial;
+  height: calc(var(--app-height) + var(--safe-bottom));
+  min-height: calc(100dvh + var(--safe-bottom));
 }
 
+// ── 페이지 컨테이너 헬퍼 ─────────────────────────────────────────────
 .mobile-page {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 100%;
   overflow: hidden;
   background: $color-surface;
 }
@@ -93,48 +114,58 @@ body {
   width: 100%;
   max-width: var(--design-width);
   height: 100%;
-  min-height: 100%;
   margin: 0 auto;
 }
 
 .mobile-page--scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 .mobile-page--with-bottom-nav {
   padding-bottom: var(--bottom-nav-offset);
 }
 
-
-@media (min-width: 768px) {
-  body {
-    background: #d9d9d9;
+// ── 데스크탑 레이아웃 (≥768px) ──────────────────────────────────────
+// 앱 컨테이너를 393×852 고정 프레임으로 중앙에 띄움
+@media (min-width: $breakpoint-mobile) {
+  html {
+    overflow: auto; // 데스크탑에서 페이지 스크롤 허용 (프레임 높이 > 화면 높이인 경우)
   }
 
-  #root {
-    width: 100%;
+  body {
+    height: auto;
     min-height: 100vh;
-
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-
     overflow: auto;
     background: #d9d9d9;
   }
 
+  #root {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .viewport-wrapper {
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: #d9d9d9;
+    overflow: auto;
+    padding: 24px 0;
+  }
+
   .app-frame {
-    width: var(--design-width);
-    min-width: var(--design-width);
-    max-width: var(--design-width);
-
-    height: var(--design-height);
-    min-height: var(--design-height);
-
-    margin: 24px auto;
-
+    width: $design-width;
+    height: $design-height;
+    min-height: $design-height;
+    flex-shrink: 0;
+    border-radius: 40px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
     overflow: hidden;
-    background: $color-surface;
+
+    // position: fixed 자식(BottomNav 등)이 뷰포트 대신 이 프레임을 기준으로 배치됨
+    transform: translateZ(0);
   }
 }
