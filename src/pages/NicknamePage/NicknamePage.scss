@@ -1,161 +1,299 @@
 @use '../../styles/variables' as *;
 
-// auth-page, auth-header, auth-field, auth-btn은 LoginPage.scss에서 정의된 동일 클래스를 재사용
-
-.auth-page {
+.nickname-onboard {
   width: 100%;
-  max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
-  margin: 0 auto;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+  height: 100%;
+  overflow: hidden;
+  background: #fefefe;
 
-.auth-header {
-  position: relative;
-  padding-top: var(--safe-top, 0px);
-  min-height: calc(var(--safe-top, 0px) + 77px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #000;
-  flex-shrink: 0;
+  &__inner {
+    position: relative;
+    width: 100%;
+    max-width: var(--design-width, 393px);
+    height: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  &__header {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+  }
 
   &__back {
     position: absolute;
-    left: 19px;
-    bottom: 12px;
+    top: 11px;
+    left: 20px;
+    height: 39px;
+    padding: 10px 0;
+    border: 0;
     background: none;
-    border: none;
+    color: $gray-800;
     cursor: pointer;
-    padding: 8px;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: 1;
+  }
+
+  &__header-title {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    color: $gray-800;
+    font-family: $font-family-base;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 30px;
+    letter-spacing: -0.55px;
+    white-space: nowrap;
+  }
+
+  &__title {
+    position: absolute;
+    top: 160px;
+    left: 20px;
+    margin: 0;
+    color: $gray-900;
+    font-family: $font-family-base;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 36px;
+    letter-spacing: -0.7px;
+    white-space: nowrap;
+
+    span {
+      display: block;
+    }
+  }
+
+  &__input-wrap {
+    position: absolute;
+    top: 273px;
+    left: 20px;
+    width: 353px;
+    height: 60px;
     display: flex;
     align-items: center;
-  }
-}
-
-.auth-field {
-  &__input {
-    width: 100%;
-    height: 55px;
-    background: $color-input-bg;
-    border: none;
-    border-radius: 12px;
-    padding: 0 16px;
-    font-size: 20px;
-    font-family: 'Pretendard', sans-serif;
-    color: #000;
-    outline: none;
+    gap: 8px;
+    padding: 15px 20px;
+    border: 1px solid transparent;
+    border-radius: 15px;
+    background: $gray-50;
     box-sizing: border-box;
-    appearance: none;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      border-radius 0.15s ease,
+      box-shadow 0.15s ease;
 
-    &::placeholder {
-      color: $gray-600;
+    &:focus-within {
+      border-color: transparent;
+      border-radius: 12px;
+      background: #fefefe;
+      box-shadow: 0 0 4px #f19d00;
     }
-
-    &:focus {
-      background: $gray-100;
-    }
-  }
-
-  &__msg {
-    font-size: 14px;
-    font-family: 'Pretendard', sans-serif;
-    font-weight: 400;
-    color: $gray-700;
-    padding-left: 6px;
-    margin: 8px 0 0;
-    line-height: 1.4;
 
     &--error {
-      color: $color-danger;
+      border: 1.6px solid #f66949;
+      border-radius: 12px;
+      background: rgba(246, 105, 73, 0.07);
+      box-shadow: none;
+
+      &:focus-within {
+        border-color: #f66949;
+        background: rgba(246, 105, 73, 0.07);
+        box-shadow: none;
+      }
     }
-
-    &--success {
-      color: $color-success;
-    }
-  }
-}
-
-.auth-btn {
-  width: 100%;
-  height: 55px;
-  background: $color-input-bg;
-  border: none;
-  font-size: 20px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
-  color: #000;
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &--pill {
-    border-radius: 70px;
   }
 
-  &--active {
-    background: $color-gold;
+  &__check {
+    position: relative;
+    right: 0;
   }
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-// ── 닉네임 페이지 전용 ──
-
-.nickname-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 40px 29px 48px;
-  overflow-y: auto;
-}
-
-.nickname-label {
-  font-size: 26px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
-  color: #000;
-  margin: 0 0 14px;
-}
-
-.nickname-row {
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
-
-  .auth-field__input {
+  &__input {
     flex: 1;
     min-width: 0;
+    height: 30px;
+    padding: 0;
+    appearance: none;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: $gray-900;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: 1.6;
+    letter-spacing: $letter-spacing-base;
+
+    &::placeholder {
+      color: $gray-500;
+      opacity: 1;
+    }
   }
-}
 
-.nickname-check-btn {
-  flex-shrink: 0;
-  height: 55px;
-  padding: 0 14px;
-  background: $color-input-bg;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
-  color: $gray-500;
-  white-space: nowrap;
-  cursor: not-allowed;
-  transition: background 0.15s, color 0.15s;
-
-  &--active {
-    color: #000;
-    cursor: pointer;
+  &__input-wrap--error &__input {
+    color: #f66949;
   }
-}
 
-.nickname-spacer {
-  flex: 1;
+  &__check {
+    flex: 0 0 auto;
+    height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: #e6e5df;
+    color: $gray-600;
+    cursor: not-allowed;
+    font-family: $font-family-base;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+
+    &--active {
+      background: $main-300;
+      color: $gray-800;
+      cursor: pointer;
+    }
+  }
+
+  &__guide {
+    position: absolute;
+    top: 341px;
+    left: 20px;
+    margin: 0;
+    color: $gray-500;
+    font-family: $font-family-base;
+    font-size: 14px;
+    font-weight: $font-weight-body2;
+    line-height: 23px;
+    letter-spacing: -0.35px;
+    white-space: nowrap;
+
+    &--error {
+      color: #f66949;
+    }
+  }
+
+  &__btn {
+    position: absolute;
+    top: 412px;
+    left: 20px;
+    width: 353px;
+    height: 60px;
+    min-height: 60px;
+    border: 0;
+    border-radius: 15px;
+    background: $gray-50;
+    color: $gray-800;
+    cursor: not-allowed;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-button;
+    line-height: 1.6;
+    letter-spacing: $letter-spacing-base;
+    text-align: center;
+
+    &--active {
+      background: $main-300;
+      cursor: pointer;
+    }
+  }
+
+  &__hint {
+    position: absolute;
+    top: 480px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    color: #9ea4aa;
+    font-family: $font-family-base;
+    font-size: 14px;
+    font-weight: $font-weight-body2;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  &__home-indicator {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--safe-bottom, 0px) + 8px);
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    border-radius: 100px;
+    background: #000;
+  }
+
+  &--error {
+    .nickname-onboard__input-wrap {
+      top: 273px;
+      padding: 15px 20px;
+    }
+
+    .nickname-onboard__input {
+      height: 30px;
+    }
+
+    .nickname-onboard__guide {
+      top: 341px;
+      font-size: 14px;
+      line-height: 23px;
+      letter-spacing: -0.35px;
+    }
+
+    .nickname-onboard__btn {
+      top: 412px;
+    }
+
+    .nickname-onboard__hint {
+      top: 480px;
+    }
+  }
+
+  &--available {
+    .nickname-onboard__input-wrap {
+      top: 273px;
+      padding: 15px 20px;
+    }
+
+    .nickname-onboard__input {
+      height: 30px;
+    }
+
+    .nickname-onboard__guide {
+      top: 341px;
+      font-size: 14px;
+      line-height: 23px;
+      letter-spacing: -0.35px;
+    }
+
+    .nickname-onboard__btn {
+      top: 412px;
+    }
+
+    .nickname-onboard__hint {
+      top: 480px;
+    }
+
+    .nickname-onboard__check {
+      height: 32px;
+      width: 73px;
+      padding: 0 13px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: $font-weight-body1;
+      letter-spacing: -0.3px;
+    }
+  }
 }

@@ -43,19 +43,22 @@ export default function LoginPage() {
     }
   }
 
-  // 비밀번호 필드 아래 메시지 — Figma: 이메일 에러 우선, 그 다음 비밀번호 힌트
+  // 메시지 우선순위: 이메일 에러 > 비밀번호 에러 > 비밀번호 입력 힌트 > API 에러
   const msgText = emailError
     ? '이메일 형식이 올바르지 않습니다.'
-    : passwordTouched
+    : passwordError
+    ? '비밀번호가 올바르지 않습니다.'
+    : passwordTouched && !passwordBlurred
     ? '6~8자 이내로 입력해주세요.'
     : apiError || ''
 
-  const msgType = emailError ? 'error' : apiError ? 'error' : 'hint'
+  const msgIsError = emailError || passwordError || !!apiError
+  const msgType = msgIsError ? 'error' : 'hint'
 
   return (
     <div className="onboard-login">
       <div className="onboard-login__inner">
-        <h1 className="onboard-login__logo">NADOK</h1>
+        <h1 className="onboard-login__logo">DOK</h1>
 
         <div className="onboard-login__form">
           <Input

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
-import { ChevronLeftIcon } from '../../assets/icons'
 import { signup, checkNickname } from '../../api/userApi'
 import './NicknamePage.scss'
 
@@ -13,24 +12,33 @@ export default function NicknamePage() {
   const { email, password } = location.state ?? {}
 
   const [nickname, setNickname] = useState('')
-  const [nicknameStatus, setNicknameStatus] = useState('idle') // idle | checking | available | taken
+  const [nicknameStatus, setNicknameStatus] = useState('idle')
   const [submitting, setSubmitting] = useState(false)
   const [apiError, setApiError] = useState('')
 
   const touched = nickname.length > 0
   const isValid = nicknameRegex.test(nickname)
-  const canCheck = isValid && nicknameStatus !== 'checking'
-  const canSubmit = isValid && nicknameStatus === 'available' && !submitting
+  const isChecking = nicknameStatus === 'checking'
+  const isDuplicate = nicknameStatus === 'taken'
+  const isAvailable = nicknameStatus === 'available'
+  const canCheck = touched && isValid && !isChecking
+  const canSubmit = isAvailable && !submitting
 
-  // 이메일/비밀번호 없이 직접 접근 차단
   useEffect(() => {
     if (!email || !password) {
       navigate(ROUTES.SIGNUP, { replace: true })
     }
   }, [email, password, navigate])
 
-  const handleCheck = async () => {
+  const handleNicknameChange = (e) => {
+    setNickname(e.target.value)
+    setNicknameStatus('idle')
+    setApiError('')
+  }
+
+  const handleCheckNickname = async () => {
     if (!canCheck) return
+
     setNicknameStatus('checking')
     setApiError('')
     try {
@@ -41,15 +49,9 @@ export default function NicknamePage() {
     }
   }
 
-  // 닉네임 변경 시 중복 확인 상태 초기화
-  const handleNicknameChange = (e) => {
-    setNickname(e.target.value)
-    setNicknameStatus('idle')
-    setApiError('')
-  }
-
   const handleSignup = async () => {
     if (!canSubmit) return
+
     setSubmitting(true)
     setApiError('')
     try {
@@ -64,62 +66,69 @@ export default function NicknamePage() {
     }
   }
 
-  const statusMsg = () => {
-    if (!touched) return ''
-    if (!isValid) return '3~10자, 한글·영어 소문자·숫자만 가능해요.'
-    if (nicknameStatus === 'checking') return '확인 중...'
-    if (nicknameStatus === 'available') return '사용할 수 있는 닉네임이에요.'
-    if (nicknameStatus === 'taken') return '이미 사용 중인 닉네임이에요.'
-    return '중복 확인을 해주세요.'
-  }
+  const guideText = apiError
+    || (isDuplicate
+      ? '사용할 수 없는 닉네임입니다.'
+      : isAvailable
+      ? '사용할 수 있는 닉네임입니다.'
+      : isChecking
+      ? '중복 확인 중입니다.'
+      : '3~10 사이의 한글, 영어, 소문자, 숫자로만 입력해주세요.')
 
   return (
-    <div className="auth-page">
-      <header className="auth-header">
-        <button className="auth-header__back" onClick={() => navigate(-1)} aria-label="뒤로가기">
-          <ChevronLeftIcon size={24} color="#999" />
-        </button>
-      </header>
+    <div className={`nickname-onboard${touched ? ' nickname-onboard--filled' : ''}${isDuplicate ? ' nickname-onboard--error' : ''}${isAvailable ? ' nickname-onboard--available' : ''}`}>
+      <div className="nickname-onboard__inner">
+        <header className="nickname-onboard__header">
+          <button
+            className="nickname-onboard__back"
+            type="button"
+            onClick={() => navigate(-1)}
+          >
+            ← 나가기
+          </button>
+          <h1 className="nickname-onboard__header-title">회원가입</h1>
+        </header>
 
-      <div className="auth-body nickname-body">
-        <label className="nickname-label">닉네임</label>
+        <h2 className="nickname-onboard__title">
+          <span>반가워요 👋</span>
+          <span>당신을 어떻게 부르면 될까요?</span>
+        </h2>
 
-        <div className="nickname-row">
+        <div className={`nickname-onboard__input-wrap${isDuplicate ? ' nickname-onboard__input-wrap--error' : ''}`}>
           <input
-            className="auth-field__input"
+            className="nickname-onboard__input"
             type="text"
-            placeholder="닉네임"
+            placeholder="닉네임을 입력해주세요."
             value={nickname}
             onChange={handleNicknameChange}
             maxLength={10}
           />
-          <button
-            className={`nickname-check-btn${canCheck ? ' nickname-check-btn--active' : ''}`}
-            type="button"
-            disabled={!canCheck}
-            onClick={handleCheck}
-          >
-            중복 확인
-          </button>
+          {touched && !isDuplicate && (
+            <button
+              className={`nickname-onboard__check${canCheck ? ' nickname-onboard__check--active' : ''}`}
+              type="button"
+              disabled={!canCheck}
+              onClick={handleCheckNickname}
+            >
+              {isChecking ? '확인중' : '중복확인'}
+            </button>
+          )}
         </div>
 
-        {touched && (
-          <p className={`auth-field__msg${nicknameStatus === 'available' ? ' auth-field__msg--success' : nicknameStatus === 'taken' ? ' auth-field__msg--error' : ''}`}>
-            {statusMsg()}
-          </p>
-        )}
-
-        {apiError && <p className="auth-field__msg auth-field__msg--error">{apiError}</p>}
-
-        <div className="nickname-spacer" />
+        <p className={`nickname-onboard__guide${isDuplicate || apiError ? ' nickname-onboard__guide--error' : ''}`}>
+          {guideText}
+        </p>
 
         <button
-          className={`auth-btn auth-btn--pill${canSubmit ? ' auth-btn--active' : ''}`}
+          className={`nickname-onboard__btn${canSubmit ? ' nickname-onboard__btn--active' : ''}`}
+          type="button"
           disabled={!canSubmit}
           onClick={handleSignup}
         >
           {submitting ? '가입 중...' : '가입하기'}
         </button>
+
+        <p className="nickname-onboard__hint">닉네임을 적어주세요.</p>
       </div>
     </div>
   )
