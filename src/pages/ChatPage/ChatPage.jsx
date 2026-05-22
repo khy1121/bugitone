@@ -14,7 +14,7 @@ import {
 import { ROUTES } from '../../constants/routes'
 import './ChatPage.scss'
 
-const CHAR_IMG = '/assets/character/character.svg'
+const CHAR_IMG = '/assets/chatPage/chat_char.svg'
 const MAX_INPUT_HEIGHT = 380
 
 // 로그인 안 된 경우 null 반환 (1 폴백 제거 — 존재하지 않는 userId로 API 호출 방지)
@@ -260,6 +260,13 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 
   const inputRef = useRef(null)
   const messagesEndRef = useRef(null)
+  const quickActionsRef = useRef(null)
+  const quickDragRef = useRef({
+    pointerId: null,
+    startX: 0,
+    scrollLeft: 0,
+    dragged: false,
+  })
 
   const userId = getUserId()
   const bookId = propBookId ?? initialChat?.bookId ?? null
@@ -357,6 +364,54 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
     inputRef.current?.blur()
   }
 
+  const handleQuickPointerDown = (event) => {
+    const scroller = quickActionsRef.current
+    if (!scroller || event.pointerType === 'touch') return
+
+    quickDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: scroller.scrollLeft,
+      dragged: false,
+    }
+
+    scroller.setPointerCapture?.(event.pointerId)
+    scroller.classList.add('chat-room__quick-actions--dragging')
+  }
+
+  const handleQuickPointerMove = (event) => {
+    const scroller = quickActionsRef.current
+    const drag = quickDragRef.current
+
+    if (!scroller || drag.pointerId !== event.pointerId) return
+
+    const deltaX = event.clientX - drag.startX
+    if (Math.abs(deltaX) > 3) {
+      drag.dragged = true
+    }
+
+    scroller.scrollLeft = drag.scrollLeft - deltaX
+  }
+
+  const endQuickDrag = (event) => {
+    const scroller = quickActionsRef.current
+    const drag = quickDragRef.current
+
+    if (!scroller || drag.pointerId !== event.pointerId) return
+
+    scroller.releasePointerCapture?.(event.pointerId)
+    scroller.classList.remove('chat-room__quick-actions--dragging')
+    quickDragRef.current.pointerId = null
+  }
+
+  const handleQuickClickCapture = (event) => {
+    if (!quickDragRef.current.dragged) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    quickDragRef.current.dragged = false
+  }
+
   return (
     <section className={`chat-room${isLanding ? ' chat-room--landing' : ' chat-room--conversation'}`}>
       <div className="chat-room__inner">
@@ -382,8 +437,6 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 
         {isLanding && (
           <div className="chat-room__landing" onClick={handleAreaTap}>
-            <div className="chat-room__char-glow" aria-hidden="true" />
-            <img className="chat-room__char-img" src={CHAR_IMG} alt="" aria-hidden="true" />
             <p className="chat-room__welcome">
               안녕, 난 가독이야 👋{'\n'}오늘은 무슨 이야기를 나눠볼까?
             </p>
@@ -391,6 +444,26 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
               토론하고 싶은 책의 장면 혹은 주제를 입력하면{'\n'}AI 챗봇 '가독이'가 책 내용을
               분석하여 토론을 이끌어 나가요!
             </p>
+            <div
+              ref={quickActionsRef}
+              className="chat-room__quick-actions"
+              aria-label="추천 대화 주제"
+              onPointerDown={handleQuickPointerDown}
+              onPointerMove={handleQuickPointerMove}
+              onPointerUp={endQuickDrag}
+              onPointerCancel={endQuickDrag}
+              onClickCapture={handleQuickClickCapture}
+            >
+              <button className="chat-room__quick-btn" type="button">
+                가독이와 토론하기
+              </button>
+              <button className="chat-room__quick-btn" type="button">
+                가독이와 감상문쓰기
+              </button>
+              <button className="chat-room__quick-btn" type="button">
+                가독이에게 책 추천받기
+              </button>
+            </div>
           </div>
         )}
 
@@ -458,7 +531,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
           </button>
         </div>
 
-        {isLanding && <BottomNav active="chat" className="bottom-nav--chat-room bottom-nav--static" />}
+        {isLanding && <BottomNav active="chat" className="bottom-nav--chat-room" />}
       </div>
     </section>
   )
