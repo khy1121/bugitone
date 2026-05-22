@@ -7,10 +7,12 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles/global.scss'
+import registerServiceWorker from './registerServiceWorker'
 import setVh from './utils/setVh'
 
 // initialize --vh utility for mobile viewport sizing
 setVh()
+registerServiceWorker()
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

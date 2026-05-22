@@ -1,0 +1,19 @@
+{
+  "name": "NADOK",
+  "short_name": "NADOK",
+  "description": "펼치는 순간, 나를 다독이다",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#997c26",
+  "theme_color": "#997c26",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
