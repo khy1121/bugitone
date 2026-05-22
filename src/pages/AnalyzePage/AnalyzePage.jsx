@@ -285,7 +285,7 @@ export default function AnalyzePage() {
           />
         </div>
 
-        <main className="analyze__body">
+        <main className={`analyze__body analyze__body--step-${step}`}>
           <p className="analyze__date">{today}</p>
 
           <h1 className="analyze__question">

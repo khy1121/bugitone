@@ -8,11 +8,11 @@
   );
 
   // Figma: 상태바 60px, 뒤로가기 y=60 → 상태바 바로 아래
-  --analyze-back-y: var(--safe-top, 0px);
+  --analyze-back-y: calc(var(--safe-top, 0px) + 21px);
   // Figma: 프로그레스바 y=105 = 60(상태바) + 45px
-  --analyze-progress-y: calc(var(--safe-top, 0px) + 45px);
+  --analyze-progress-y: calc(var(--safe-top, 0px) + 66px);
   // Figma: date y=157 = 60(상태바) + 97px
-  --analyze-body-y: calc(var(--safe-top, 0px) + 97px);
+  --analyze-body-y: calc(var(--safe-top, 0px) + 118px);
   // 데스크탑 절대 위치용 (768px+ media query에서만 사용)
   --analyze-actions-y: 734px;
 
@@ -73,7 +73,7 @@
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: normal;
   text-align: left;
 
   cursor: pointer;
@@ -164,6 +164,10 @@
   font-weight: 400;
   line-height: 26px;
   letter-spacing: -0.4px;
+}
+
+.analyze__body--step-2 .analyze__hint {
+  margin: 12px 0 41px;
 }
 
 /* ==============================
@@ -289,37 +293,47 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  width: 353px;
+  max-width: 100%;
 }
 
 .analyze__emotion-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 11px;
+  min-height: 44px;
+  align-items: center;
 }
 
 .analyze__chip {
-  min-width: 75px;
   height: 44px;
-  padding: 0 18px;
+  padding: 0 20px;
 
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 20px;
 
   background: #f2f1ec;
 
-  color: #42403a;
+  color: #8e8b7e;
 
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 25.6px;
   letter-spacing: -0.4px;
 
+  box-sizing: border-box;
   cursor: pointer;
 }
 
+.analyze__emotion-row:first-child .analyze__chip {
+  width: 80px;
+  padding: 0;
+}
+
 .analyze__chip--active {
-  border-color: rgba(248, 188, 10, 0.42);
+  border-color: #fbd76c;
   background: #fef8e7;
   color: #42403a;
   font-weight: 600;
@@ -327,7 +341,7 @@
 }
 
 .analyze__chip:disabled {
-  opacity: 0.45;
+  opacity: 1;
   cursor: default;
 }
 
@@ -338,28 +352,29 @@
 .analyze__comforts {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 
-  margin-top: 44px;
+  width: 100%;
+  margin-top: 79px;
 }
 
 .analyze__comfort {
   width: 100%;
-  min-height: 72px;
+  height: 56px;
 
-  padding: 20px;
+  padding: 14px 20px;
 
   border: 1px solid transparent;
-  border-radius: 16px;
+  border-radius: 13px;
 
   background: #f2f1ec;
 
-  color: #42403a;
+  color: #8e8b7e;
 
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 25.6px;
   letter-spacing: -0.4px;
   text-align: left;
 
@@ -368,7 +383,7 @@
 }
 
 .analyze__comfort--active {
-  border-color: rgba(248, 188, 10, 0.42);
+  border-color: #fbd76c;
   background: #fef8e7;
   color: #42403a;
   font-weight: 600;
@@ -581,6 +596,12 @@
 }
 
 @media (min-width: 768px) {
+  .analyze {
+    --analyze-back-y: 60px;
+    --analyze-progress-y: 105px;
+    --analyze-body-y: 157px;
+  }
+
   .analyze__actions {
     position: absolute;
     top: var(--analyze-actions-y);

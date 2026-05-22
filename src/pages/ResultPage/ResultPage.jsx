@@ -7,6 +7,8 @@ import "./ResultPage.scss";
 const LOAD_CHAR_SRC = "/assets/character/LoadChar.svg";
 const LITTLE_PRINCE_SRC = "/assets/character/LittlePrince.svg";
 const PRINCE_SHADOW_SRC = "/assets/character/PrinceShadow.svg";
+const COIN_SRC = "/assets/shop/coin.png";
+const REGENERATE_COIN_COST = 3;
 
 const getCurrentDate = () => {
   const today = new Date();
@@ -25,10 +27,25 @@ export default function ResultPage() {
     emotions = ["공허함", "우울", "무기력"],
     comfort = "위로와 공감",
     loading: initialLoading = true,
-    userName = "김수현",
+    userName: stateUserName = "",
   } = location.state || {};
 
   const [loading, setLoading] = useState(initialLoading);
+  const [coinBanner, setCoinBanner] = useState(null);
+
+  const displayName = useMemo(() => {
+    const savedNickname = window.localStorage.getItem("nickname") || "";
+    return stateUserName || savedNickname || "김수현";
+  }, [stateUserName]);
+
+  const [coinCount, setCoinCount] = useState(() => {
+    const savedCoinCount =
+      window.localStorage.getItem("coinCount") ||
+      window.localStorage.getItem("coins");
+
+    const parsedCoinCount = Number.parseInt(savedCoinCount || "1", 10);
+    return Number.isNaN(parsedCoinCount) ? 1 : parsedCoinCount;
+  });
 
   useEffect(() => {
     if (!loading) return undefined;
@@ -52,11 +69,30 @@ export default function ResultPage() {
   };
 
   const handleRetry = () => {
-    navigate(ROUTES.ANALYZE);
+    setCoinBanner("confirm");
   };
 
   const handleSaveImage = () => {
     console.log("이미지 저장하기");
+  };
+
+  const handleRegenerate = (event) => {
+    event.stopPropagation();
+
+    if (coinCount < REGENERATE_COIN_COST) {
+      setCoinBanner("shortage");
+      return;
+    }
+
+    const nextCoinCount = Math.max(coinCount - REGENERATE_COIN_COST, 0);
+    setCoinCount(nextCoinCount);
+    window.localStorage.setItem("coinCount", String(nextCoinCount));
+    navigate(ROUTES.ANALYZE);
+  };
+
+  const handleBuyCoin = (event) => {
+    event.stopPropagation();
+    navigate(ROUTES.SHOP);
   };
 
   if (loading) {
@@ -82,7 +118,7 @@ export default function ResultPage() {
           <div className="result-loading__visual" aria-hidden="true">
             <div className="result-loading__spinner-wrap">
               <Loading
-                size={238}
+                size={190}
                 label="오늘의 당신을 정독하는 중"
                 className="result-loading__spinner"
               />
@@ -149,8 +185,8 @@ export default function ResultPage() {
         </header>
 
         <section className="result__intro">
-          <h1>{userName}님은...</h1>
-          <p>부기님의 상태를 정독한 결과에요.</p>
+          <h1>{displayName}님은...</h1>
+          <p>{displayName}님의 상태를 정독한 결과에요.</p>
         </section>
 
         <section className="result__book-card">
@@ -184,7 +220,7 @@ export default function ResultPage() {
         </section>
 
         <section className="result__mood-card">
-          <h2>{userName}님의 기분 상태</h2>
+          <h2>{displayName}님의 기분 상태</h2>
 
           <div className="result__chips">
             {moodTags.map((tag) => (
@@ -224,6 +260,74 @@ export default function ResultPage() {
           </button>
         </div>
       </div>
+
+      {coinBanner && (
+        <div
+          className="result-coin-banner"
+          role="presentation"
+          onClick={() => setCoinBanner(null)}
+        >
+          <section
+            className="result-coin-banner__sheet"
+            aria-label={
+              coinBanner === "confirm" ? "다시 생성하기" : "코인이 부족해요"
+            }
+          >
+            <img
+              className="result-coin-banner__coin"
+              src={COIN_SRC}
+              alt=""
+              aria-hidden="true"
+            />
+
+            <h2>
+              {coinBanner === "confirm" ? "다시 생성하기" : "코인이 부족해요"}
+            </h2>
+
+            <p
+              className={
+                coinBanner === "shortage"
+                  ? "result-coin-banner__desc result-coin-banner__desc--danger"
+                  : "result-coin-banner__desc"
+              }
+            >
+              {coinBanner === "confirm"
+                ? `(다독 코인 ${REGENERATE_COIN_COST}개 필요)`
+                : `(잔액 : ${coinCount}개 / 필요 갯수: ${REGENERATE_COIN_COST}개)`}
+            </p>
+
+            <div
+              className={`result-coin-banner__actions${
+                coinBanner === "shortage"
+                  ? " result-coin-banner__actions--single"
+                  : ""
+              }`}
+            >
+              <button
+                className={`result-coin-banner__button ${
+                  coinBanner === "shortage"
+                    ? "result-coin-banner__button--primary"
+                    : "result-coin-banner__button--muted"
+                }`}
+                type="button"
+                onClick={handleBuyCoin}
+              >
+                코인 구매하기
+              </button>
+
+              {coinBanner === "confirm" && (
+                <button
+                  className="result-coin-banner__button result-coin-banner__button--primary"
+                  type="button"
+                  onClick={handleRegenerate}
+                >
+                  네, 지불할게요!
+                </button>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
