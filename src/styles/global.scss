@@ -2,6 +2,25 @@
 @use 'mixins' as *;
 @use 'reset';
 
+// ── Custom fonts (파일을 /public/fonts/ 에 넣은 뒤 활성화됩니다) ──
+@font-face {
+  font-family: 'Tropi Land';
+  src: url('/assets/fonts/TropiLand.ttf') format('truetype');
+  font-weight: 400;
+
+  font-style: normal;
+  font-display: swap;
+
+}
+
+@font-face {
+  font-family: 'tvN EnjoystoriesOTF';
+  src: url('/assets/fonts/tvNEnjoystoriesOTF.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 a {
   color: $color-primary;
   text-decoration: none;
