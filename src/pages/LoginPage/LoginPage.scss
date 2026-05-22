@@ -1,193 +1,181 @@
-﻿@use '../../styles/variables' as *;
+@use '../../styles/variables' as *;
 
-.auth-page {
+// Figma: 온보딩_로그인 (393 × 852, bg=#fdfdfd)
+
+.onboard-login {
   width: 100%;
-  max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
-  margin: 0 auto;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+  height: 100%;
+  overflow: hidden;
+  background: #fdfdfd;
 
-.auth-header {
-  position: relative;
-  padding-top: var(--safe-top, 0px);
-  min-height: calc(var(--safe-top, 0px) + 77px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #000;
-  flex-shrink: 0;
-
-  &__back {
-    position: absolute;
-    left: 19px;
-    bottom: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-  }
-
-  &__title {
-    font-size: 26px;
-    font-family: 'Pretendard', sans-serif;
-    font-weight: 700;
-    color: #000;
-    line-height: 1;
-  }
-}
-
-.auth-body {
-  flex: 1;
-  padding: 32px 29px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.auth-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-
-  &__input {
+  &__inner {
+    position: relative;
     width: 100%;
-    height: 55px;
-    background: $color-input-bg;
-    border: none;
-    border-radius: 12px;
-    padding: 0 16px;
-    font-size: 20px;
-    font-family: 'Pretendard', sans-serif;
-    color: #000;
-    outline: none;
+    max-width: 393px;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     box-sizing: border-box;
-    appearance: none;
+    // Figma: logo y=157/852 ≈ 18.4%
+    padding-top: calc(var(--vh, 1vh) * 18.4);
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: calc(var(--safe-bottom, 0px) + 28px);
+  }
+
+  // "NADOK" — Tropi Land 61px, #f7bb0a
+  &__logo {
+    font-family: 'Tropi Land', fantasy;
+    font-size: 61px;
+    font-weight: 400;
+    color: #f7bb0a;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  &__form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    // Figma: logo_bottom(209) → email_top(273) = 64px
+    margin-top: 64px;
+  }
+
+  // ── Input 컴포넌트 4가지 상태 ─────────────────────────────────
+  // 부모 선택자로 Input.scss의 .input보다 명시도를 높여 override
+  &__form .onboard-login__input {
+    width: 100%;
+    height: 60px;
+    padding: 0 20px;
+    color: $gray-900;
+    transition: background 0.15s, border-color 0.15s, border-radius 0.15s;
+
+    // 이메일 → 비밀번호 간격 12px (인접 형제 선택자)
+    & + & {
+      margin-top: 12px;
+    }
+
+    // 1) 기본(empty): 투명 bg + 연회색 테두리, radius 15
+    background: transparent;
+    border: 1px solid #e6e5e0;
+    border-radius: 15px;
 
     &::placeholder {
-      color: $gray-600;
+      color: $gray-300; // #bbb9b2
     }
 
+    // 2) 입력 중(focused): 흰 bg, 테두리 없음, radius 12
     &:focus {
-      background: $gray-100;
+      background: #fdfdfd;
+      border-color: transparent;
+      border-radius: 12px;
+      box-shadow: none;
     }
+
+    // 3) 입력 완료(filled, unfocused): gray-50 bg, 테두리 없음, radius 15
+    &.input--filled {
+      background: $gray-50; // #f2f1ec
+      border-color: transparent;
+      border-radius: 15px;
+    }
+
+    &.input--filled:focus {
+      background: #fdfdfd;
+      border-color: transparent;
+      border-radius: 12px;
+    }
+
+    // 4) 에러(blurred + invalid): 연빨간 bg + 빨간 테두리, radius 12, 텍스트 빨간색
+    &.input--error {
+      background: rgba(246, 105, 73, 0.07);
+      border: 1px solid #f66949;
+      border-radius: 12px;
+      color: #f66949;
+
+      &::placeholder {
+        color: rgba(246, 105, 73, 0.5);
+      }
+
+      &:focus {
+        background: rgba(246, 105, 73, 0.07);
+        border-color: #f66949;
+        border-radius: 12px;
+      }
+    }
+  }
+
+  // ── 메시지 영역 (이메일 에러 / 비밀번호 힌트 공유) ───────────
+  // Figma: password_bottom(405) → msg_top(413) = 8px gap
+  //        msg_bottom(436) → button_top(453) = 17px gap
+  //        총 48px 고정 영역으로 레이아웃 고정
+  &__msg-area {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 8px;
+    box-sizing: border-box;
   }
 
   &__msg {
-    font-size: 14px;
-    font-family: 'Pretendard', sans-serif;
-    font-weight: 400;
-    color: $gray-700;
-    padding-left: 6px;
-    margin: 2px 0 0;
-    line-height: 1.4;
+    margin: 0;
+    font-family: $font-family-base;
+    font-size: $font-size-body2; // 14px
+    font-weight: $font-weight-body2;
+    color: $gray-600; // 비밀번호 힌트: #757267
 
     &--error {
-      color: $color-danger;
-    }
-
-    &--success {
-      color: $color-success;
+      color: #f66949; // 이메일 에러: Figma rgba(246,105,73,1)
     }
   }
-}
 
-.auth-btn {
-  width: 100%;
-  height: 55px;
-  background: $color-input-bg;
-  border: none;
-  font-size: 20px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
-  color: #000;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-bottom: 8px;
+  // ── Button 컴포넌트 override ──────────────────────────────────
+  // Figma: 353×60, radius=15, bg=#fbd76c
+  // msg-area(48px)가 gap을 담당하므로 margin-top 불필요
+  &__form .onboard-login__btn {
+    height: 60px;
+    border-radius: 15px;
+    background: $color-gold; // #fbd76c
+    color: $gray-800;        // #42403a
+    font-size: $font-size-body1;
+    font-weight: $font-weight-button;
+    box-shadow: none;
 
-  &--pill {
-    border-radius: 70px;
+    &:hover:not(:disabled) {
+      background: $main-200;
+    }
+
+    &:disabled {
+      background: $color-gold;
+      opacity: 0.5;
+    }
   }
 
-  &--active {
-    background: $color-gold;
+  // "회원이 아니신가요? 회원가입" — Figma: 16px 400 #757267, centered
+  // Figma: button_bottom(513) → text_top(521) = 8px
+  &__signup {
+    margin-top: 8px;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    color: $gray-600;
+    text-align: center;
+    width: 100%;
   }
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-.auth-divider {
-  width: 100%;
-  height: 1px;
-  background: #000;
-  margin: 8px 0 16px;
-}
-
-// ── 닉네임 페이지 전용 ──
-.nickname-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 40px 29px 48px;
-  overflow-y: auto;
-}
-
-.nickname-label {
-  font-size: 26px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
-  color: #000;
-  margin: 0 0 14px;
-}
-
-.nickname-row {
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
-
-  .auth-field__input {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-.nickname-check-btn {
-  flex-shrink: 0;
-  height: 55px;
-  padding: 0 14px;
-  background: $color-input-bg;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
-  color: $gray-500;
-  white-space: nowrap;
-  cursor: not-allowed;
-  transition: background 0.15s, color 0.15s;
-
-  &--active {
-    color: #000;
+  &__signup-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    color: $gray-600;
     cursor: pointer;
-
-    &:active {
-      background: $gray-300;
-    }
+    text-decoration: underline;
   }
-}
-
-.nickname-spacer {
-  flex: 1;
 }

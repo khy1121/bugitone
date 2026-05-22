@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
-import { ChevronLeftIcon } from '../../assets/icons'
 import { login } from '../../api/userApi'
+import Input from '../../components/common/Input/Input'
+import Button from '../../components/common/Button/Button'
 import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -11,16 +12,18 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [emailBlurred, setEmailBlurred] = useState(false)
+  const [passwordBlurred, setPasswordBlurred] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [apiError, setApiError] = useState('')
 
-  const emailTouched = email.length > 0
   const emailValid = emailRegex.test(email)
-  const emailError = emailTouched && !emailValid
-  const emailSuccess = emailTouched && emailValid
-
-  const passwordTouched = password.length > 0
   const passwordValid = password.length >= 6 && password.length <= 8
+
+  // 포커스를 벗어난 후에만 빨간 에러 표시
+  const emailError = emailBlurred && !emailValid
+  const passwordError = passwordBlurred && !passwordValid
 
   const canSubmit = emailValid && passwordValid && !submitting
 
@@ -40,62 +43,75 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div className="auth-page">
-      <header className="auth-header">
-        <button className="auth-header__back" onClick={() => navigate(-1)} aria-label="뒤로가기">
-          <ChevronLeftIcon size={24} color="#999" />
-        </button>
-        <span className="auth-header__title">시작하기</span>
-      </header>
+  // 비밀번호 필드 아래 메시지 — Figma: 이메일 에러 우선, 그 다음 비밀번호 힌트
+  const msgText = emailError
+    ? '이메일 형식이 올바르지 않습니다.'
+    : passwordTouched
+    ? '6~8자 이내로 입력해주세요.'
+    : apiError || ''
 
-      <div className="auth-body">
-        <div className="auth-field">
-          <input
-            className="auth-field__input"
+  const msgType = emailError ? 'error' : apiError ? 'error' : 'hint'
+
+  return (
+    <div className="onboard-login">
+      <div className="onboard-login__inner">
+        <h1 className="onboard-login__logo">NADOK</h1>
+
+        <div className="onboard-login__form">
+          <Input
+            className="onboard-login__input"
             type="email"
-            placeholder="이메일"
+            placeholder="이메일을 입력해주세요."
             value={email}
             onChange={e => setEmail(e.target.value)}
+            onBlur={() => setEmailBlurred(true)}
+            error={emailError}
             autoComplete="email"
           />
-          {emailError && (
-            <p className="auth-field__msg auth-field__msg--error">이메일 형식이 올바르지 않습니다.</p>
-          )}
-        </div>
-
-        <div className="auth-field">
-          <input
-            className="auth-field__input"
+          <Input
+            className="onboard-login__input"
             type="password"
-            placeholder="비밀번호(6~8자)"
+            placeholder="비밀번호를 입력해주세요."
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={e => {
+              setPassword(e.target.value)
+              setPasswordTouched(true)
+            }}
+            onBlur={() => setPasswordBlurred(true)}
+            error={passwordError}
             autoComplete="current-password"
           />
-          {passwordTouched && (
-            <p className="auth-field__msg">6자~8자 내외로 설정해주세요.</p>
-          )}
+
+          {/* Figma: 고정 48px 메시지 영역 — 이메일 에러 > 비밀번호 힌트 */}
+          <div className="onboard-login__msg-area">
+            {msgText && (
+              <p className={`onboard-login__msg${msgType === 'error' ? ' onboard-login__msg--error' : ''}`}>
+                {msgText}
+              </p>
+            )}
+          </div>
+
+          <Button
+            className="onboard-login__btn"
+            variant="primary"
+            fullWidth
+            disabled={!canSubmit}
+            onClick={handleLogin}
+          >
+            {submitting ? '로그인 중...' : '로그인'}
+          </Button>
+
+          <p className="onboard-login__signup">
+            회원이 아니신가요?{' '}
+            <button
+              className="onboard-login__signup-link"
+              type="button"
+              onClick={() => navigate(ROUTES.SIGNUP)}
+            >
+              회원가입
+            </button>
+          </p>
         </div>
-
-        {apiError && <p className="auth-field__msg auth-field__msg--error">{apiError}</p>}
-
-        <button
-          className="auth-btn auth-btn--pill auth-btn--active"
-          onClick={handleLogin}
-          disabled={!canSubmit}
-        >
-          {submitting ? '로그인 중...' : '이메일로 로그인하기'}
-        </button>
-
-        <div className="auth-divider" />
-
-        <button
-          className="auth-btn auth-btn--pill"
-          onClick={() => navigate(ROUTES.SIGNUP)}
-        >
-          이메일로 회원가입
-        </button>
       </div>
     </div>
   )
