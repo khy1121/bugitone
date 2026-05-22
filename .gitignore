@@ -29,3 +29,7 @@ Thumbs.db
 
 # 테스트 커버리지
 coverage/
+
+# 임시/압축 파일
+*.zip
+figma-nodes.json
