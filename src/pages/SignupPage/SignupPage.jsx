@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
+import Input from '../../components/common/Input/Input'
+import Button from '../../components/common/Button/Button'
 import './SignupPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -10,36 +12,39 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [passwordFocused, setPasswordFocused] = useState(false)
+  const [emailBlurred, setEmailBlurred] = useState(false)
+  const [passwordBlurred, setPasswordBlurred] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
+  const [confirmBlurred, setConfirmBlurred] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [apiError, setApiError] = useState('')
 
-  const emailTouched = email.length > 0
   const emailValid = emailRegex.test(email)
-  const emailError = emailTouched && !emailValid
-
-  const passwordTouched = password.length > 0
   const passwordValid = password.length >= 6 && password.length <= 8
-  const passwordError = passwordTouched && !passwordValid && !passwordFocused
+  const confirmMatch = confirm === password && confirm.length > 0
 
-  const confirmTouched = confirm.length > 0
-  const confirmMatch = confirm === password
-  const confirmError = confirmTouched && !confirmMatch
-  const confirmValid = confirmTouched && confirmMatch
+  const emailError = emailBlurred && !emailValid
+  const passwordError = passwordBlurred && !passwordValid
+  const confirmError = confirmBlurred && !confirmMatch
 
-  const canSubmit = emailValid && passwordValid && confirmValid
-  const helperText = passwordError
+  const canSubmit = emailValid && passwordValid && confirmMatch && !loading
+
+  const msgText = emailError
+    ? '이메일 형식이 올바르지 않습니다.'
+    : passwordError
     ? '비밀번호 형식이 올바르지 않습니다.'
+    : passwordTouched && !passwordBlurred
+    ? '6~8자 이내로 입력해주세요.'
     : confirmError
     ? '비밀번호가 일치하지 않습니다.'
-    : passwordFocused && passwordTouched
-    ? '6~8자 이내로 입력해주세요.'
-    : ''
-  const helperIsError = passwordError || confirmError
+    : apiError || ''
+
+  const msgIsError = emailError || passwordError || confirmError || !!apiError
 
   const handleNext = () => {
-    if (!canSubmit || loading) return
-
+    if (!canSubmit) return
     setLoading(true)
+    setApiError('')
     window.setTimeout(() => {
       navigate(ROUTES.NICKNAME, { state: { email, password } })
     }, 900)
@@ -48,50 +53,57 @@ export default function SignupPage() {
   return (
     <div className="signup-onboard">
       <div className="signup-onboard__inner">
-        <h1 className="signup-onboard__logo">NADOK</h1>
+        <h1 className="signup-onboard__logo">DOK</h1>
 
-        <form className="signup-onboard__form" onSubmit={(e) => e.preventDefault()}>
-          <input
-            className={`signup-onboard__input${emailTouched ? ' signup-onboard__input--filled' : ''}${emailError ? ' signup-onboard__input--error' : ''}`}
+        <div className="signup-onboard__form">
+          <Input
+            className="signup-onboard__input"
             type="email"
             placeholder="이메일을 입력해주세요."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setEmailBlurred(true)}
+            error={emailError}
             autoComplete="email"
           />
-          <input
-            className={`signup-onboard__input${passwordTouched ? ' signup-onboard__input--filled' : ''}${passwordError ? ' signup-onboard__input--error' : ''}`}
+          <Input
+            className="signup-onboard__input"
             type="password"
             placeholder="비밀번호를 입력해주세요."
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onFocus={() => setPasswordFocused(true)}
-            onBlur={() => setPasswordFocused(false)}
+            onChange={(e) => { setPassword(e.target.value); setPasswordTouched(true) }}
+            onBlur={() => setPasswordBlurred(true)}
+            error={passwordError}
             autoComplete="new-password"
           />
-          <input
-            className={`signup-onboard__input${confirmTouched ? ' signup-onboard__input--filled' : ''}${confirmError ? ' signup-onboard__input--error' : ''}`}
+          <Input
+            className="signup-onboard__input"
             type="password"
             placeholder="비밀번호를 확인해주세요."
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
+            onBlur={() => setConfirmBlurred(true)}
+            error={confirmError}
             autoComplete="new-password"
           />
 
-          {helperText && (
-            <p className={`signup-onboard__msg${helperIsError ? ' signup-onboard__msg--error' : ''}`}>
-              {helperText}
-            </p>
-          )}
+          <div className="signup-onboard__msg-area">
+            {msgText && (
+              <p className={`signup-onboard__msg${msgIsError ? ' signup-onboard__msg--error' : ''}`}>
+                {msgText}
+              </p>
+            )}
+          </div>
 
-          <button
+          <Button
             className="signup-onboard__btn"
-            type="button"
+            variant="primary"
+            fullWidth
             disabled={!canSubmit}
             onClick={handleNext}
           >
             회원가입
-          </button>
+          </Button>
 
           <p className="signup-onboard__login">
             이미 계정이 있으신가요?{' '}
@@ -103,9 +115,7 @@ export default function SignupPage() {
               로그인
             </button>
           </p>
-        </form>
-
-        <div className="signup-onboard__home-indicator" aria-hidden="true" />
+        </div>
 
         {loading && (
           <div className="signup-onboard__loading" role="status" aria-label="회원가입 처리 중">

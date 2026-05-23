@@ -64,7 +64,7 @@ export default function LoginPage() {
           <Input
             className="onboard-login__input"
             type="email"
-            placeholder="이메일을 입력해주세요."
+            placeholder="이메일을  입력해주세요."
             value={email}
             onChange={e => setEmail(e.target.value)}
             onBlur={() => setEmailBlurred(true)}

@@ -8,7 +8,7 @@ const LOAD_CHAR_SRC = "/assets/character/LoadChar.svg";
 const LITTLE_PRINCE_SRC = "/assets/character/LittlePrince.svg";
 const PRINCE_SHADOW_SRC = "/assets/character/PrinceShadow.svg";
 const COIN_SRC = "/assets/shop/coin.png";
-const REGENERATE_COIN_COST = 3;
+const REGENERATE_COIN_COST = 2;
 
 const getCurrentDate = () => {
   const today = new Date();

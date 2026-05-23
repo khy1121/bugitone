@@ -2,15 +2,19 @@
 
 .signup-onboard {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  height: var(--visual-height);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   background: #fefefe;
 
   &__inner {
     position: relative;
     width: 100%;
     max-width: var(--design-width, 393px);
-    height: 100%;
+    height: auto;
+    min-height: max(100%, var(--design-height, 852px));
     margin: 0 auto;
     box-sizing: border-box;
   }
@@ -89,14 +93,14 @@
       color: $gray-900;
     }
 
-    &--filled {
+    &.input--filled {
       border-color: transparent;
       border-radius: 15px;
       background: $gray-50;
       color: $gray-900;
     }
 
-    &--filled:focus {
+    &.input--filled:focus {
       border-color: transparent;
       border-radius: 12px;
       background: #fefefe;
@@ -104,7 +108,7 @@
       color: $gray-900;
     }
 
-    &--error {
+    &.input--error {
       border: 1.6px solid #f66949;
       border-radius: 12px;
       background: rgba(246, 105, 73, 0.07);
@@ -132,10 +136,17 @@
     }
   }
 
-  &__msg {
+  &__msg-area {
     position: absolute;
     top: 212px;
     left: 0;
+    width: 100%;
+    height: 40px;
+    padding-top: 8px;
+    box-sizing: border-box;
+  }
+
+  &__msg {
     margin: 0;
     color: $gray-600;
     font-family: $font-family-base;
@@ -171,8 +182,9 @@
     text-align: center;
 
     &:disabled {
-      cursor: not-allowed;
+      background: $main-300;
       opacity: 1;
+      cursor: not-allowed;
     }
   }
 
@@ -246,5 +258,12 @@
 @keyframes signup-loading-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* 키보드가 열릴 때 3번째 인풋으로 인해 버튼이 뷰 밖으로 밀리는 문제 방지 */
+html.keyboard-open {
+  .signup-onboard__form {
+    top: 245px;
   }
 }

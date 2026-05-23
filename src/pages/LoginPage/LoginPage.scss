@@ -2,15 +2,19 @@
 
 .onboard-login {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  height: var(--visual-height);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   background: #fefefe;
 
   &__inner {
     position: relative;
     width: 100%;
     max-width: var(--design-width, 393px);
-    height: 100%;
+    height: auto;
+    min-height: max(100%, var(--design-height, 852px));
     margin: 0 auto;
     box-sizing: border-box;
   }
