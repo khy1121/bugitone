@@ -1,209 +1,494 @@
 @use '../../styles/variables' as *;
 
 .library {
+  --library-safe-top: env(safe-area-inset-top, 0px);
+  --library-header-top: calc(var(--library-safe-top) + 10px);
+  --library-banner-top: calc(var(--library-safe-top) + 106px);
+  --library-content-top: calc(var(--library-safe-top) + 247px);
+
   position: relative;
   width: 100%;
   max-width: var(--design-width, 393px);
   height: 100%;
+  min-height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  overflow: hidden;
 
-  // library_main.svg: 상단 852px 커버, 스크롤 아래는 배경색으로 이음
   background:
     url('/assets/library/library_main.svg') no-repeat top center / 100% auto,
     #fdf5e0;
+}
+
+.library__header {
+  position: absolute;
+  top: var(--library-header-top);
+  left: 0;
+  right: 0;
+  z-index: 20;
+
+  height: 84px;
+  padding: 0 20px 0 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  box-sizing: border-box;
+  transition: top 180ms ease, height 180ms ease, padding 180ms ease;
+}
+
+.library--searching {
+  .library__header {
+    top: var(--library-safe-top);
+    height: 144px;
+    padding: 78px 20px 0;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .library__brand {
+    display: none;
+  }
+
+  .library__search {
+    width: 353px;
+    min-width: 353px;
+    justify-content: flex-start;
+    gap: 18px;
+    padding: 0 20px;
+    background: #fefefe;
+    border: 1px solid #f8bc0a;
+    box-shadow: 0 0 2px #f19d00;
+  }
+
+  .library__search-input {
+    order: 2;
+  }
+
+  .library__search img {
+    order: 1;
+  }
+}
+
+.library__brand {
+  width: 94px;
+  min-width: 94px;
 
   display: flex;
   flex-direction: column;
+  align-items: center;
+
+  overflow: visible;
+}
+
+.library__logo {
+  width: 100%;
+  margin: 0;
+
+  color: #634b04;
+  font-family: 'Tropi Land', fantasy;
+  font-size: 33.6px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.16;
+  letter-spacing: 0.03em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.library__tagline {
+  width: 100%;
+  margin: 0;
+
+  color: #987b23;
+  font-family: 'tvN EnjoystoriesOTF', 'Pretendard', sans-serif;
+  font-size: 13.44px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 28px;
+  letter-spacing: -0.025em;
+  text-align: center;
+  white-space: nowrap;
   overflow: hidden;
+}
 
-  // ── 헤더 ─────────────────────────────────────────────────────────────
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 84px;
-    padding: 0 20px;
-    flex-shrink: 0;
-    background: transparent;
-  }
+.library__search {
+  width: 243px;
+  min-width: 243px;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  flex: 0 0 48px;
+  padding: 0 16px;
 
-  &__brand {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 
-  &__logo {
-    margin: 0;
-    font-family: 'Tropi Land', fantasy;
-    font-size: 33.6px;
-    font-weight: 400;
-    line-height: 50.4px;
-    color: #634b04;
-    letter-spacing: 1.008px;
-  }
+  border: 0;
+  border-radius: 16px;
+  background: #f1f0f0;
+  box-sizing: border-box;
 
-  &__tagline {
-    margin: 0;
-    font-family: $font-family-base;
-    font-size: 13.44px;
-    font-weight: 400;
-    color: #987a23;
-    letter-spacing: -0.336px;
-    line-height: 28px;
-  }
+  cursor: pointer;
+  transition:
+    width 180ms ease,
+    min-width 180ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  &__action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-
-    img {
-      display: block;
-    }
-  }
-
-  // ── 배너 (SVG 배경과 겹치므로 투명 처리) ────────────────────────────
-  &__banner {
-    height: 85px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    padding-left: 46px;
-    overflow: hidden;
-    // SVG 배경의 배너 영역이 보이도록 투명 유지
-    background: transparent;
-  }
-
-  &__banner-img {
-    width: 301px;
-    height: 85px;
-    object-fit: cover;
+  img {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
     display: block;
-    flex-shrink: 0;
-    opacity: 0; // SVG 배경의 배너 이미지를 보이게 숨김
   }
+}
 
-  // ── 책 목록 ───────────────────────────────────────────────────────────
-  &__content {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    padding: 20px 0 calc(var(--bottom-nav-offset, 120px) + 80px);
-    background: transparent;
+.library__search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+
+  border: 0;
+  outline: 0;
+  background: transparent;
+
+  color: #42403a;
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 26px;
+  letter-spacing: -0.4px;
+
+  &::-webkit-search-cancel-button {
+    display: none;
   }
+}
 
-  &__empty {
-    text-align: center;
-    color: #999;
-    font-size: 14px;
-    font-family: $font-family-base;
-    line-height: 1.6;
-    margin-top: 60px;
+.library__banner {
+  position: absolute;
+  top: var(--library-banner-top);
+  left: 50%;
+  z-index: 5;
+
+  width: 301px;
+  height: 85px;
+
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.library__banner-img {
+  width: 301px;
+  height: 85px;
+  display: block;
+  object-fit: cover;
+}
+
+.library__content {
+  position: absolute;
+  top: var(--library-content-top);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+
+  padding: 0 20px calc(var(--bottom-nav-offset, 120px) + 44px);
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
+}
 
-  // ── 행 ───────────────────────────────────────────────────────────────
-  &__row-wrap {
-    position: relative; // __row-glass 의 absolute 기준점
-    margin-bottom: 32px;
-  }
+.library__empty {
+  margin: 60px 0 0;
 
-  &__row {
-    display: flex;
-    justify-content: center;
-    gap: 28px;
-    padding: 0 50px;
-  }
+  color: #987b23;
+  font-family: $font-family-base;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+}
 
-  &__book {
-    position: relative;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    width: 79px;
-    height: 124px;
-    flex-shrink: 0;
-    z-index: 1;
+.library__row-wrap {
+  position: relative;
+  width: 353px;
+  height: 134px;
+  margin: 0 auto 36px;
+}
 
-    &--empty {
-      cursor: default;
-    }
-  }
+.library__row {
+  position: relative;
+  z-index: 3;
 
-  &__cover {
-    width: 79px;
-    height: 124px;
-    object-fit: cover;
-    display: block;
-    border: 1px solid #d0cfc9;
-    background: $gray-100;
-  }
+  width: 293px;
+  height: 124px;
+  margin: 0 auto;
 
-  // 유리 바 — Figma 1500:2183
-  // 342×22px / rgba(231,207,138,0.5) / border-radius 11 11 0 0 / GLASS(backdrop-filter)
-  // position:absolute 로 책(z-index:1) 위에 오버랩
-  &__row-glass {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+.library__book {
+  position: relative;
+
+  width: 79px;
+  height: 124px;
+  padding: 0;
+  flex: 0 0 79px;
+
+  border: 0;
+  border-radius: 0 4px 0 4px;
+  background: transparent;
+
+  cursor: pointer;
+
+  &::after {
+    content: '';
     position: absolute;
-    bottom: 10px; // 구분선(10px) 바로 위 → 책 하단 22px 를 덮음
-    left: 50%;
-    transform: translateX(-50%);
-    width: 342px;
-    height: 22px;
-    background: rgba(231, 207, 138, 0.5);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border-radius: 11px 11px 0 0;
+    inset: 0;
     z-index: 2;
+
+    border-radius: 0 4px 0 4px;
+    background: linear-gradient(
+      0deg,
+      rgba(99, 75, 4, 0.37) 0%,
+      rgba(99, 75, 4, 0) 20%
+    );
+
     pointer-events: none;
   }
 
-  &__divider {
-    height: 10px;
-    margin: 0 20px;
-    background: linear-gradient(to bottom, #ead098 0%, #bb9750 100%);
-    border-radius: 4px;
+  &--empty {
+    visibility: hidden;
+    cursor: default;
   }
+}
 
-  // ── FAB ──────────────────────────────────────────────────────────────
-  &__fab {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(var(--bottom-nav-offset, 120px) + 16px);
-    z-index: 10;
+.library__cover {
+  width: 79px;
+  height: 124px;
 
-    width: 52px;
-    height: 52px;
+  display: block;
+  object-fit: cover;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  border: 0;
+  border-radius: 0 4px 0 4px;
+  background: #e6e5df;
+}
 
-    border: none;
-    border-radius: 50%;
-    background: $main-300;
-    box-shadow: 0 4px 12px rgba(40, 39, 35, 0.18);
-    cursor: pointer;
+.library__row-glass {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  z-index: 4;
 
-    img {
-      width: 24px;
-      height: 24px;
-      display: block;
-    }
+  width: 342px;
+  height: 22px;
+
+  transform: translateX(-50%);
+
+  border-radius: 11px 11px 0 0;
+  background: rgba(231, 208, 138, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  pointer-events: none;
+}
+
+.library__divider {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 5;
+
+  width: 353px;
+  height: 10px;
+
+  border-radius: 4px;
+  background: linear-gradient(180deg, #ead098 0%, #bb9750 100%);
+}
+
+.library__search-scrollbar {
+  position: absolute;
+  top: calc(var(--library-safe-top) + 275px);
+  right: 6px;
+  z-index: 12;
+
+  width: 5px;
+  height: 125px;
+
+  border-radius: 16px;
+  background: #d2d1cb;
+}
+
+.library__search-results {
+  position: absolute;
+  top: calc(var(--library-safe-top) + 171px);
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 102px);
+  z-index: 11;
+
+  overflow-y: auto;
+  padding: 20px 20px 24px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.library__search-empty {
+  margin: 60px 0 0;
+
+  color: #757267;
+  font-family: $font-family-base;
+  font-size: 14px;
+  text-align: center;
+}
+
+.library__search-item {
+  width: 100%;
+  min-height: 124px;
+  padding: 0;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+
+  border: 0;
+  background: transparent;
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.library__search-cover {
+  width: 79px;
+  height: 124px;
+  flex: 0 0 79px;
+
+  display: block;
+  object-fit: cover;
+
+  border: 0;
+  border-radius: 0 4px 0 4px;
+  background: #e6e5df;
+  box-shadow: 3px 3px 4px rgba(40, 39, 35, 0.16);
+}
+
+.library__search-info {
+  min-width: 0;
+  padding-top: 11px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.library__search-title {
+  margin: 0;
+
+  color: #282723;
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 26px;
+  letter-spacing: -0.4px;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.library__search-author,
+.library__search-meta {
+  margin: 0;
+
+  color: #5c5950;
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 23px;
+  letter-spacing: -0.35px;
+  white-space: nowrap;
+}
+
+.library__search-chips {
+  margin-top: 7px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.library__search-chip {
+  height: 23px;
+  padding: 3px 4px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  border-radius: 6px;
+  box-sizing: border-box;
+
+  font-family: $font-family-base;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.library__search-chip--finished,
+.library__search-chip--reading,
+.library__search-chip--favorite {
+  background: #f2f1ec;
+  color: #8e8b7e;
+}
+
+.library__search-chip--date {
+  background: #fff6dd;
+  color: #c69608;
+}
+
+.library__search-chip-icon {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #a5a298;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.library__search-chip--date img {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .library {
+    --library-header-top: 60px;
+    --library-banner-top: 166px;
+    --library-content-top: 307px;
   }
 }
