@@ -11,6 +11,7 @@ export const ROUTES = {
   NICKNAME: '/signup/nickname',
   BOOK_DETAIL: '/book/:id',
   MEMO_EDIT: '/memo-edit',
+  SHOP: '/shop',
   CHAT: '/chat',
   SEARCH: '/search',
 }

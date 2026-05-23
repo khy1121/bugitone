@@ -129,7 +129,7 @@ function MainView({ onReport, onAccount, onLibrary }) {
         </div>
       </div>
 
-      <BottomNav active="my" />
+      <BottomNav active="my" className="bottom-nav--page" />
     </div>
   )
 }

@@ -3,7 +3,7 @@
 .bottom-nav {
   position: fixed;
   left: 50%;
-  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
   z-index: 100;
 
   width: min(100%, 393px);
@@ -112,6 +112,20 @@
   right: auto;
   top: auto;
   bottom: auto;
+  transform: none;
+}
+
+/* 일반 페이지: position:relative 컨테이너 기준 절대 배치 (CharacterPage 방식 통일) */
+.bottom-nav--page {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  top: auto;
+
+  width: 100%;
+  max-width: 393px;
+
   transform: none;
 }
   

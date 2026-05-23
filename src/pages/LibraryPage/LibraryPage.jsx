@@ -99,7 +99,7 @@ export default function LibraryPage() {
         )}
       </div>
 
-      <BottomNav active="library" />
+      <BottomNav active="library" className="bottom-nav--page" />
     </div>
   )
 }

@@ -12,9 +12,9 @@ import "./BottomNav.scss";
 
 const NAV_ITEMS = [
   {
-    key: "memo",
-    label: "메모",
-    path: ROUTES.MEMO_EDIT,
+    key: "shop",
+    label: "상점",
+    path: ROUTES.SHOP,
     Icon: NavMemoIcon,
   },
   {

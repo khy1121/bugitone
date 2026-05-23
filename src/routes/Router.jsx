@@ -14,6 +14,7 @@ import ResultPage from '../pages/ResultPage/ResultPage'
 import MyPage from '../pages/MyPage/MyPage'
 import ChatPage from '../pages/ChatPage/ChatPage'
 import SearchPage from '../pages/SearchPage/SearchPage'
+import ShopPage from '../pages/ShopPage/ShopPage'
 import { ROUTES } from '../constants/routes'
 
 export default function Router() {
@@ -34,6 +35,7 @@ export default function Router() {
         <Route path={ROUTES.CHAT} element={<ChatPage />} />
         <Route path={ROUTES.MYPAGE} element={<MyPage />} />
         <Route path={ROUTES.SEARCH} element={<SearchPage />} />
+        <Route path={ROUTES.SHOP} element={<ShopPage />} />
       </Routes>
     </BrowserRouter>
   )
