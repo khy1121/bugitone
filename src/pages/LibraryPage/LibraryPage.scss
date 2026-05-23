@@ -1,100 +1,209 @@
+@use '../../styles/variables' as *;
+
 .library {
   position: relative;
   width: 100%;
   max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
+  height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  background: #fff;
+
+  // library_main.svg: 상단 852px 커버, 스크롤 아래는 배경색으로 이음
+  background:
+    url('/assets/library/library_main.svg') no-repeat top center / 100% auto,
+    #fdf5e0;
+
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--bottom-nav-offset);
   overflow: hidden;
 
+  // ── 헤더 ─────────────────────────────────────────────────────────────
   &__header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 78px;
-    position: relative;
+    justify-content: space-between;
+    height: 84px;
+    padding: 0 20px;
     flex-shrink: 0;
+    background: transparent;
   }
 
-  &__title-wrap {
-    background: #D9D9D9;
-    padding: 4px 18px;
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  &__title {
-    font-size: 28px;
-    font-family: 'Pretendard', sans-serif;
+  &__logo {
+    margin: 0;
+    font-family: 'Tropi Land', fantasy;
+    font-size: 33.6px;
     font-weight: 400;
-    color: #000;
-    letter-spacing: -0.02em;
+    line-height: 50.4px;
+    color: #634b04;
+    letter-spacing: 1.008px;
   }
 
-  &__search {
-    position: absolute;
-    right: 18px;
-    background: none;
-    border: none;
-    cursor: pointer;
+  &__tagline {
+    margin: 0;
+    font-family: $font-family-base;
+    font-size: 13.44px;
+    font-weight: 400;
+    color: #987a23;
+    letter-spacing: -0.336px;
+    line-height: 28px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-  }
-
-  &__content {
-    flex: 1;
-    padding: 18px 44px 16px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  &__row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 9px;
-  }
-
-  &__book {
+    width: 28px;
+    height: 28px;
     background: none;
     border: none;
-    cursor: pointer;
     padding: 0;
-    width: 100%;
+    cursor: pointer;
+
+    img {
+      display: block;
+    }
   }
 
-  &__book-empty {
-    width: 100%;
-    aspect-ratio: 74 / 98;
+  // ── 배너 (SVG 배경과 겹치므로 투명 처리) ────────────────────────────
+  &__banner {
+    height: 85px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding-left: 46px;
+    overflow: hidden;
+    // SVG 배경의 배너 영역이 보이도록 투명 유지
+    background: transparent;
   }
 
-  &__cover {
-    width: 100%;
-    aspect-ratio: 74 / 98;
-    background: #D9D9D9;
-    border: 1px solid #565656;
-    display: block;
+  &__banner-img {
+    width: 301px;
+    height: 85px;
     object-fit: cover;
+    display: block;
+    flex-shrink: 0;
+    opacity: 0; // SVG 배경의 배너 이미지를 보이게 숨김
+  }
+
+  // ── 책 목록 ───────────────────────────────────────────────────────────
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding: 20px 0 calc(var(--bottom-nav-offset, 120px) + 80px);
+    background: transparent;
   }
 
   &__empty {
     text-align: center;
     color: #999;
     font-size: 14px;
-    font-family: 'Pretendard', sans-serif;
+    font-family: $font-family-base;
     line-height: 1.6;
-    margin-top: 80px;
+    margin-top: 60px;
+  }
+
+  // ── 행 ───────────────────────────────────────────────────────────────
+  &__row-wrap {
+    position: relative; // __row-glass 의 absolute 기준점
+    margin-bottom: 32px;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    padding: 0 50px;
+  }
+
+  &__book {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 79px;
+    height: 124px;
+    flex-shrink: 0;
+    z-index: 1;
+
+    &--empty {
+      cursor: default;
+    }
+  }
+
+  &__cover {
+    width: 79px;
+    height: 124px;
+    object-fit: cover;
+    display: block;
+    border: 1px solid #d0cfc9;
+    background: $gray-100;
+  }
+
+  // 유리 바 — Figma 1500:2183
+  // 342×22px / rgba(231,207,138,0.5) / border-radius 11 11 0 0 / GLASS(backdrop-filter)
+  // position:absolute 로 책(z-index:1) 위에 오버랩
+  &__row-glass {
+    position: absolute;
+    bottom: 10px; // 구분선(10px) 바로 위 → 책 하단 22px 를 덮음
+    left: 50%;
+    transform: translateX(-50%);
+    width: 342px;
+    height: 22px;
+    background: rgba(231, 207, 138, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 11px 11px 0 0;
+    z-index: 2;
+    pointer-events: none;
   }
 
   &__divider {
-    width: 100%;
-    height: 12px;
-    background: #D9D9D9;
-    border-radius: 999px;
-    margin: 8px 0 14px;
+    height: 10px;
+    margin: 0 20px;
+    background: linear-gradient(to bottom, #ead098 0%, #bb9750 100%);
+    border-radius: 4px;
+  }
+
+  // ── FAB ──────────────────────────────────────────────────────────────
+  &__fab {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(var(--bottom-nav-offset, 120px) + 16px);
+    z-index: 10;
+
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+    background: $main-300;
+    box-shadow: 0 4px 12px rgba(40, 39, 35, 0.18);
+    cursor: pointer;
+
+    img {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
   }
 }
