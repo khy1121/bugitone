@@ -5,6 +5,7 @@
   left: 50%;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
   z-index: 100;
+  --bottom-nav-fill-height: calc(18px + env(safe-area-inset-bottom, 0px));
 
   width: min(100%, 393px);
   height: 84px;
@@ -16,6 +17,17 @@
   background: $color-white;
   border-radius: 20px 20px 0 0;
   filter: drop-shadow(0 -4px 4.05px rgba(40, 39, 35, 0.04));
+}
+
+.bottom-nav::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: var(--bottom-nav-fill-height);
+  background: $color-white;
+  pointer-events: none;
 }
 
 .bottom-nav__item {
@@ -92,6 +104,10 @@
   border-radius: 0;
   box-shadow: none;
   filter: drop-shadow(0 -4px 4.05px rgba(40, 40, 40, 0.11));
+
+  &::after {
+    display: none;
+  }
 
   .bottom-nav__item {
     height: 84px;
