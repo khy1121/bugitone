@@ -2,7 +2,9 @@
 
 .book-detail {
   --book-safe-top: env(safe-area-inset-top, 0px);
-  --book-hero-height: calc(var(--book-safe-top) + 545px);
+  --book-status-height: var(--app-status-height, max(var(--book-safe-top), 60px));
+  --book-hero-height: 545px;
+  --book-hero-rgb: 184, 215, 189;
 
   position: relative;
   width: 100%;
@@ -40,21 +42,29 @@
 
 .book-detail__hero {
   position: relative;
-  height: var(--book-hero-height);
+  height: auto;
   min-height: var(--book-hero-height);
+  padding-top: calc(var(--book-status-height) + 328px);
+  padding-bottom: 18px;
 
   background:
-    linear-gradient(180deg, #b8d7bd 0%, rgba(184, 215, 189, 0.27) 51%, #fefefe 51%, #fefefe 100%);
+    linear-gradient(
+      180deg,
+      rgb(var(--book-hero-rgb)) 0,
+      rgba(var(--book-hero-rgb), 0.27) 278px,
+      #fefefe 278px,
+      #fefefe 100%
+    );
 }
 
 .book-detail__topbar {
   position: absolute;
-  top: calc(var(--book-safe-top) + 21px);
-  left: 18px;
-  right: 18px;
+  top: var(--book-status-height);
+  left: 20px;
+  right: 21px;
   z-index: 5;
 
-  height: 40px;
+  height: 60px;
 
   display: flex;
   align-items: center;
@@ -63,7 +73,7 @@
 
 .book-detail__top-actions {
   display: flex;
-  gap: 13px;
+  gap: 20px;
 }
 
 .book-detail__round-btn {
@@ -90,7 +100,7 @@
 
 .book-detail__cover {
   position: absolute;
-  top: calc(var(--book-safe-top) + 96px);
+  top: calc(var(--book-status-height) + 96px);
   left: 50%;
 
   width: 133px;
@@ -107,16 +117,19 @@
   transform: translateX(-50%);
 }
 
-.book-detail__summary {
-  position: absolute;
-  top: calc(var(--book-safe-top) + 328px);
+.book-detail__hero-info {
+  position: relative;
   left: 20px;
-  right: 20px;
+  width: calc(100% - 40px);
+}
+
+.book-detail__summary {
+  position: relative;
 
   text-align: center;
 
   h1 {
-    width: 229px;
+    width: min(290px, 100%);
     margin: 0 auto;
 
     color: #282723;
@@ -125,6 +138,11 @@
     line-height: 26px;
     letter-spacing: -0.45px;
     word-break: keep-all;
+
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   p {
@@ -135,14 +153,17 @@
     font-weight: 400;
     line-height: 26px;
     letter-spacing: -0.4px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
 .book-detail__meta-cards {
-  position: absolute;
-  top: calc(var(--book-safe-top) + 403px);
-  left: 30px;
-  right: 30px;
+  position: relative;
+  width: 333px;
+  margin: 19px auto 0;
 
   display: grid;
   grid-template-columns: 162px 153px;
@@ -165,36 +186,95 @@
 }
 
 .book-detail__status-card {
+  position: relative;
+  width: 162px;
+  min-width: 162px;
+  max-width: 162px;
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
   padding: 8px 16px;
+  flex: 0 0 162px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
+  display: block;
+  appearance: none;
+  overflow: hidden;
+  box-sizing: border-box;
 
   color: #42403a;
+  font-family: 'Pretendard', sans-serif;
   font-size: 17.6px;
   font-weight: 400;
   line-height: 28px;
   letter-spacing: -0.44px;
+  text-align: left;
+
+  cursor: pointer;
 }
 
 .book-detail__check {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
+  position: absolute;
+  left: 21px;
+  top: calc(50% - 0.5px);
+  width: 33px;
+  height: 33px;
+  transform: translateY(-50%);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   border-radius: 50%;
-  background: #f8bc0a;
+  background: transparent;
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 33px;
+    height: 33px;
   }
+}
+
+.book-detail__check--favorite {
+  background: transparent;
+}
+
+.book-detail__status-label {
+  position: absolute;
+  top: 17px;
+  left: 63.5px;
+
+  color: #42403a;
+  font-size: 17.6px;
+  font-weight: 400;
+  line-height: 28px;
+  letter-spacing: -0.44px;
+  white-space: nowrap;
+}
+
+.book-detail__status-card--finished .book-detail__check {
+  left: 22px;
+  top: 15px;
+  transform: none;
+}
+
+.book-detail__status-card--finished .book-detail__status-label {
+  width: auto;
+  white-space: nowrap;
+}
+
+.book-detail__status-card--favorite .book-detail__check {
+  left: 21px;
+  top: 14.5px;
+  transform: none;
+}
+
+.book-detail__status-card--favorite .book-detail__status-label {
+  top: 18px;
+  left: 75px;
+}
+
+.book-detail__status-card--reading .book-detail__status-label {
+  top: 18px;
+  left: 64px;
 }
 
 .book-detail__date-card {
@@ -587,26 +667,44 @@
 .book-memo {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
 }
 
-.book-memo__write-btn {
-  align-self: flex-end;
-  height: 44px;
-  padding: 0 16px;
+.book-memo__header {
+  height: 75px;
 
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    color: #42403a;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: -0.45px;
+  }
+}
+
+.book-memo__write-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   border: 0;
-  border-radius: 15px;
-  background: #f2f1ec;
+  border-radius: 50%;
+  background: #f6f4ea;
 
-  color: #42403a;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  img,
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 
   cursor: pointer;
 }
@@ -621,20 +719,42 @@
 .book-memo__list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 9px;
 }
 
 .memo-card {
-  padding: 16px;
+  width: 100%;
+  min-height: 64px;
+  padding: 19px 22px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
 
   border-radius: 15px;
-  background: #f2f1ec;
+  border: 0;
+  background: #f6f4ea;
+  box-sizing: border-box;
 
-  p {
-    margin: 0;
-    color: #42403a;
+  color: #42403a;
+  font-family: 'Pretendard', sans-serif;
+  text-align: left;
+  cursor: pointer;
+
+  svg {
+    flex: 0 0 26px;
+  }
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+
     font-size: 15px;
-    line-height: 24px;
+    font-weight: 400;
+    line-height: 25.6px;
+    letter-spacing: -0.4px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   time {
@@ -642,23 +762,6 @@
     margin-top: 10px;
     color: #757267;
     font-size: 12px;
-  }
-}
-
-.memo-card__top {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-
-  button {
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    flex: 0 0 24px;
-
-    border: 0;
-    background: transparent;
-    cursor: pointer;
   }
 }
 
@@ -941,7 +1044,7 @@
 
 @media (min-width: 768px) {
   .book-detail {
-    --book-safe-top: 0px;
+    --book-status-height: 60px;
     --book-hero-height: 545px;
   }
 }

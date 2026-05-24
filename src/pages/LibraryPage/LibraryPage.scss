@@ -1,10 +1,10 @@
 @use '../../styles/variables' as *;
 
 .library {
-  --library-safe-top: env(safe-area-inset-top, 0px);
-  --library-header-top: calc(var(--library-safe-top) + 10px);
-  --library-banner-top: calc(var(--library-safe-top) + 106px);
-  --library-content-top: calc(var(--library-safe-top) + 247px);
+  --library-safe-top: var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px));
+  --library-top-gap: 20px;
+  --library-header-top: calc(var(--library-safe-top) + var(--library-top-gap));
+  --library-content-top: calc(var(--library-header-top) + 106px);
 
   position: relative;
   width: 100%;
@@ -40,7 +40,7 @@
 
 .library--searching {
   .library__header {
-    top: var(--library-safe-top);
+    top: var(--library-header-top);
     height: 144px;
     padding: 78px 20px 0;
     align-items: flex-start;
@@ -171,15 +171,10 @@
 }
 
 .library__banner {
-  position: absolute;
-  top: var(--library-banner-top);
-  left: 50%;
-  z-index: 5;
-
   width: 301px;
   height: 85px;
+  margin: 0 auto 56px;
 
-  transform: translateX(-50%);
   pointer-events: none;
 }
 
@@ -209,6 +204,10 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.library__shelves {
+  width: 100%;
 }
 
 .library__empty {
@@ -252,6 +251,7 @@
   border: 0;
   border-radius: 0 4px 0 4px;
   background: transparent;
+  filter: drop-shadow(3px 3px 4px rgba(40, 39, 35, 0.16));
 
   cursor: pointer;
 
@@ -323,7 +323,7 @@
 
 .library__search-scrollbar {
   position: absolute;
-  top: calc(var(--library-safe-top) + 275px);
+  top: calc(var(--library-header-top) + 275px);
   right: 6px;
   z-index: 12;
 
@@ -336,7 +336,7 @@
 
 .library__search-results {
   position: absolute;
-  top: calc(var(--library-safe-top) + 171px);
+  top: calc(var(--library-header-top) + 171px);
   left: 0;
   right: 0;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 102px);
@@ -487,8 +487,6 @@
 
 @media (min-width: 768px) {
   .library {
-    --library-header-top: 60px;
-    --library-banner-top: 166px;
-    --library-content-top: 307px;
+    --library-safe-top: 60px;
   }
 }

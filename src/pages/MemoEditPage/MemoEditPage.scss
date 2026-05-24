@@ -71,3 +71,137 @@
     }
   }
 }
+
+.memo-view {
+  width: 100%;
+  max-width: var(--design-width, 393px);
+  height: var(--app-frame-height);
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #fefefe;
+  color: #42403a;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.memo-view__header {
+  position: relative;
+  height: calc(120px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  background: #fefefe;
+  box-shadow: 0 2px 4.05px rgba(40, 40, 40, 0.23);
+  box-sizing: border-box;
+
+  h1 {
+    position: absolute;
+    left: 94px;
+    right: 58px;
+    bottom: 21px;
+    margin: 0;
+
+    overflow: hidden;
+
+    color: #42403a;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 22px;
+    letter-spacing: -0.4569px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.memo-view__back,
+.memo-view__delete {
+  position: absolute;
+  bottom: 11px;
+
+  height: 39px;
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+  font-family: 'Pretendard', sans-serif;
+  cursor: pointer;
+}
+
+.memo-view__back {
+  left: 20px;
+
+  color: #757267;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.memo-view__delete {
+  right: 20px;
+  width: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.memo-view__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px 20px calc(33px + env(safe-area-inset-bottom, 0px));
+
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.memo-view__summary {
+  padding: 0 14px;
+  margin: 0 0 39px;
+
+  ol {
+    margin: 0;
+    padding-left: 17px;
+  }
+
+  li {
+    color: #42403a;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 23px;
+    letter-spacing: -0.35px;
+  }
+}
+
+.memo-view__content {
+  color: #42403a;
+
+  p {
+    margin: 0 0 18px;
+
+    color: #757267;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 23px;
+    letter-spacing: -0.35px;
+    word-break: keep-all;
+
+    &.memo-view__line--strong {
+      margin: 0 0 24px;
+      color: #42403a;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 25.6px;
+      letter-spacing: -0.4px;
+    }
+  }
+}

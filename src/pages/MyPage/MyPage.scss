@@ -1,646 +1,942 @@
-.mypage {
-  box-sizing: border-box;
-  *,
-  *::before,
-  *::after { box-sizing: border-box; }
+@use '../../styles/variables' as *;
 
+// ── 공통 래퍼 ────────────────────────────────────────────────────────────────
+
+.mypage {
   position: relative;
   width: 100%;
   max-width: var(--design-width, 393px);
-  height: var(--app-frame-height);
+  height: var(--app-frame-height, 100%);
   margin: 0 auto;
   overflow: hidden;
-  background: #fff;
-  font-family: 'Pretendard', sans-serif;
+  background: #f5f4f3;
+  font-family: $font-family-base;
+  box-sizing: border-box;
 
-  &__header-line {
-    position: absolute;
-    top: 77px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: #000;
-    z-index: 1;
+  *, *::before, *::after { box-sizing: border-box; }
+
+  // ── 공통 헤더 ──────────────────────────────────────────────────────────────
+
+  &__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px));
+    height: calc(44px + var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px)));
+    padding-left: 20px;
+    padding-right: 20px;
+    flex-shrink: 0;
+    background: #f5f4f3;
+  }
+
+  &__header-title {
+    margin: 0;
+    font-size: $font-size-h2;
+    font-weight: $font-weight-h2;
+    line-height: $line-height-h2;
+    color: $gray-800;
+    letter-spacing: $letter-spacing-base;
   }
 
   &__back {
     position: absolute;
-    top: 87px;
-    left: 23px;
-    width: 29px;
-    height: 22px;
+    left: 16px;
+    top: calc(var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px)) + 22px);
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 36px;
+    height: 36px;
     padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
-    z-index: 10;
   }
 
-  // ── 공통 타이틀 ──
-  &__title {
-    position: absolute;
-    top: 91px;
-    left: 131px;
-    margin: 0;
-    font-size: 26px;
-    font-weight: 400;
-    line-height: 31px;
-    color: #000;
+  // ── 공통 섹션 라벨 ──────────────────────────────────────────────────────────
 
-    &--report {
-      left: 130px;
-      font-weight: 700;
-    }
-
-    &--account {
-      left: 174px;
-      font-weight: 700;
-    }
-
-    &--library {
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-weight: 700;
-    }
-  }
-
-  // ── 메인뷰: 스크롤 콘텐츠 ──
-  &--main {
-    .mypage__scroll-content {
-      position: absolute;
-      top: 136px;
-      left: 0;
-      right: 0;
-      bottom: var(--bottom-nav-offset);
-      overflow-y: auto;
-      padding: 8px 36px 16px;
-      -webkit-overflow-scrolling: touch;
-    }
-  }
-
-  // ── 섹션 라벨 (main view: flow) ──
   &__section-label {
-    display: block;
-    margin: 0 0 12px;
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 31px;
-    color: #000;
-
-    &--gap {
-      margin-top: 20px;
-    }
-
-    // report view: absolute positions
-    &--char    { position: absolute; top: 181px; left: 24px; }
-    &--emotion { position: absolute; top: 523px; left: 21px; }
-  }
-
-  // ── 카드 (공통) ──
-  &__card {
     display: flex;
     align-items: center;
-    border: 0;
-    background: #d9d9d9;
-    border-radius: 14px;
-    cursor: pointer;
-    text-align: left;
-    width: 100%;
-
-    &--account {
-      height: 83px;
-      padding: 0 16px 0 0;
-      gap: 12px;
-    }
-
-    &--record {
-      height: 139px;
-      padding: 0 16px;
-    }
-
-    &--library {
-      height: 67px;
-      padding: 0 12px 0 20px;
-    }
+    height: 42px;
+    margin: 0;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: $line-height-body1;
+    color: $gray-800;
+    letter-spacing: $letter-spacing-base;
   }
 
-  &__card-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-  }
+  // ── 공통 화살표 ────────────────────────────────────────────────────────────
 
-  &__card-record-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    padding-left: 23px;
-  }
-
-  // ── 내 서재 목록 ──
-  &__library-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  &__library-label {
-    flex: 1;
-    font-size: 20px;
-    font-weight: 400;
-    color: #000;
-    text-align: left;
-  }
-
-  &__library-count {
-    font-size: 20px;
-    font-weight: 400;
-    color: #000;
-    margin-right: 8px;
-  }
-
-  // ── 아바타 ──
-  &__avatar {
-    background: #d9d9d9;
-    border-radius: 50%;
-    flex-shrink: 0;
-
-    &--sm {
-      width: 59px;
-      height: 59px;
-      margin-left: 23px;
-    }
-
-    &--lg {
-      position: absolute;
-      top: 122px;
-      left: 139px;
-      width: 116px;
-      height: 116px;
-    }
-  }
-
-  &__user-name {
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 26.3px;
-    color: #000;
-  }
-
-  &__user-id {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 19.1px;
-    color: #000;
-  }
-
-  &__record-title {
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 26.3px;
-    color: #000;
-  }
-
-  &__record-sub {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 19.1px;
-    color: #000;
-  }
-
-  // ── 화살표 ──
   &__arrow {
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 4px;
   }
 
-  // ── 리포트: 캐릭터 영역 ──
-  &__char-area {
-    position: absolute;
-    top: 226px;
-    left: 18px;
-    width: 358px;
-    height: 226px;
-    background: #d9d9d9;
+  // ── 공통 아바타 ────────────────────────────────────────────────────────────
+
+  &__avatar {
+    background: #ffeaa6;
+    border-radius: 25px;
+    flex-shrink: 0;
+    width: 68px;
+    height: 68px;
+
+    &--lg {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 12px;
+      display: block;
+      border-radius: 50%;
+      background: $gray-200;
+    }
+  }
+
+  // ── 공통 카드 ──────────────────────────────────────────────────────────────
+
+  &__card {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: #fdfdfd;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    text-align: left;
+    padding: 20px;
+    gap: 10px;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  // ── 공통 API 에러 ──────────────────────────────────────────────────────────
+
+  &__api-error {
+    text-align: center;
+    font-size: $font-size-caption;
+    color: $color-danger;
+    margin: 8px 0 0;
+  }
+}
+
+// ── 메인 뷰 ──────────────────────────────────────────────────────────────────
+
+.mypage--main {
+  display: flex;
+  flex-direction: column;
+  background: #f5f4f3;
+
+  .mypage__scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 20px calc(var(--bottom-nav-offset, 100px) + 8px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  // 계정 카드
+  .mypage__card--account {
+    padding: 6px 20px;
+    align-items: center;
+    min-height: 80px;
+  }
+
+  .mypage__card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mypage__user-name {
+    font-size: $font-size-h3;
+    font-weight: 600;
+    line-height: $line-height-h3;
+    color: $gray-900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mypage__user-id {
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    line-height: $line-height-body2;
+    color: $gray-500;
+  }
+
+  // 내 기록 카드들
+  .mypage__card--report {
+    margin-bottom: 16px;
+    min-height: 92px;
+    align-items: center;
+  }
+
+  .mypage__card--memo {
+    min-height: 93px;
+    align-items: center;
+  }
+
+  .mypage__card-report-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mypage__report-title {
+    font-size: $font-size-h3;
+    font-weight: 600;
+    line-height: $line-height-h3;
+    color: $gray-900;
+  }
+
+  .mypage__report-sub {
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    line-height: $line-height-body2;
+    color: $gray-500;
+  }
+
+  // 캐릭터 버블 (월 리포트 카드)
+  .mypage__char-bubbles {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .mypage__char-bubble {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #fdfdfd;
+
+    & + & { margin-left: -10px; }
+
+    &--1 { background: #c2e684; }
+    &--2 { background: #ff9d84; }
+    &--3 { background: $gray-100; }
+  }
+
+  .mypage__char-more {
+    margin-left: 4px;
+    font-size: $font-size-caption;
+    font-weight: $font-weight-caption;
+    color: $gray-800;
+    white-space: nowrap;
+  }
+
+  // 내 서재 카드
+  .mypage__library-card {
+    background: #fdfdfd;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .mypage__library-divider {
+    height: 1px;
+    background: $gray-100;
+    margin: 0 20px;
+  }
+
+  .mypage__library-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 56px;
+    padding: 8px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 12px;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  .mypage__library-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
+
+  .mypage__library-label {
+    flex: 1;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: $line-height-body1;
+    color: $gray-900;
+  }
+
+  .mypage__library-count {
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    color: $gray-400;
+  }
+}
+
+// ── 월 리포트 뷰 ──────────────────────────────────────────────────────────────
+
+.mypage--report {
+  display: flex;
+  flex-direction: column;
+  background: #f5f4f3;
+
+  .mypage__report-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mypage__char-area {
+    background: $gray-50;
     border-radius: 14px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 18px;
-    padding: 19px 0;
+    gap: 16px;
+    padding: 20px 16px;
+    margin-bottom: 24px;
   }
 
-  &__char-row {
+  .mypage__char-row {
     display: flex;
-    gap: 26px;
-    padding-left: 15px;
+    gap: 20px;
   }
 
-  &__char-bubble {
-    width: 85px;
-    height: 85px;
+  .mypage__char-bubble {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    background: #bbb;
+    background: $gray-200;
     flex-shrink: 0;
   }
 
-  // ── 리포트: 감정 태그 ──
-  &__emotion-row {
-    position: absolute;
-    top: 568px;
-    left: 15px;
+  .mypage__emotion-row {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
+}
 
-  // ── 계정: 이름 ──
-  &__account-name {
+// ── 계정 뷰 ──────────────────────────────────────────────────────────────────
+
+.mypage--account {
+  display: flex;
+  flex-direction: column;
+  background: #f5f4f3;
+  position: relative;
+
+  .mypage__back-text {
     position: absolute;
-    top: 245px;
-    left: 156px;
-    margin: 0;
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 26.3px;
-    color: #000;
-  }
-
-  // ── 계정: 정보 행 ──
-  &__info-list {
-    position: absolute;
-    top: 306px;
-    left: 0;
-    width: 393px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__info-row {
+    left: 16px;
+    top: calc(var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px)) + 22px);
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    height: 70px;
-    padding: 0 20px 0 23px;
-    gap: 10px;
-    border-bottom: 1px solid #e6e6e4;
+    gap: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    color: $gray-800;
+    font-family: $font-family-base;
+    letter-spacing: $letter-spacing-base;
+    padding: 6px 4px;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  &__info-icon {
-    width: 36px;
-    height: 36px;
-    background: #d9d9d9;
-    flex-shrink: 0;
-  }
-
-  &__info-label {
-    font-size: 19px;
-    font-weight: 400;
-    line-height: 22.7px;
-    color: #000;
+  .mypage__account-scroll {
     flex: 1;
-  }
-
-  &__info-value {
-    font-size: 19px;
-    font-weight: 400;
-    line-height: 22.7px;
-    color: #000;
-    margin-right: 8px;
-  }
-
-  &__copy-btn {
-    font-size: 19px;
-    font-weight: 400;
-    line-height: 22.7px;
-    color: #000;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: 'Pretendard', sans-serif;
-  }
-
-  // ── 계정: 로그아웃 ──
-  &__logout {
-    position: absolute;
-    top: 603px;
-    left: 151px;
-    font-size: 26px;
-    font-weight: 400;
-    line-height: 31px;
-    color: #000;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: 'Pretendard', sans-serif;
-  }
-
-  // ── 계정: 회원탈퇴 ──
-  &__withdraw {
-    position: absolute;
-    top: 650px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-    color: #999;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: 'Pretendard', sans-serif;
-    text-decoration: underline;
-  }
-
-  &__delete-confirm {
-    position: absolute;
-    top: 640px;
-    left: 20px;
-    right: 20px;
-    background: #f5f5f5;
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-
-    &__text {
-      margin: 0 0 12px;
-      font-size: 16px;
-      color: #333;
-    }
-
-    &__btns {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    &__yes {
-      flex: 1;
-      height: 40px;
-      background: #c94b4b;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      cursor: pointer;
-      font-family: 'Pretendard', sans-serif;
-      &:disabled { opacity: 0.6; cursor: not-allowed; }
-    }
-
-    &__no {
-      flex: 1;
-      height: 40px;
-      background: #e0e0e0;
-      color: #333;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      cursor: pointer;
-      font-family: 'Pretendard', sans-serif;
-    }
-  }
-
-  &__api-error {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 14px;
-    color: #c94b4b;
-    margin: 0;
-  }
-
-  // ── 정보 수정 뷰 ──
-  &--edit {
-    .mypage__edit-form {
-      position: absolute;
-      top: 136px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      overflow-y: auto;
-      padding: 8px 24px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-  }
-
-  &__edit-field {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    padding: 20px 0 32px;
   }
 
-  &__edit-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #555;
-    font-family: 'Pretendard', sans-serif;
+  // 프로필 카드 래퍼 (20px 좌우 패딩)
+  .mypage__profile-wrap {
+    padding: 0 20px;
+    margin-bottom: 16px;
   }
 
-  &__edit-input {
-    height: 48px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 0 14px;
-    font-size: 16px;
-    font-family: 'Pretendard', sans-serif;
-    outline: none;
-    color: #000;
-    background: #fff;
-    width: 100%;
-    box-sizing: border-box;
-    appearance: none;
-
-    &:focus { border-color: #333; }
-  }
-
-  &__edit-submit {
-    height: 52px;
-    background: #000;
-    color: #fff;
-    border: none;
-    border-radius: 26px;
-    font-size: 18px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'Pretendard', sans-serif;
-    margin-top: 8px;
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-  }
-
-  &__edit-success {
-    text-align: center;
-    font-size: 14px;
-    color: #4caf50;
-    margin: 0;
-  }
-
-  // ── 서재 카테고리 뷰 ──
-  &__cat-tabs {
-    position: absolute;
-    top: 112px;
-    left: 0;
-    right: 0;
-    height: 44px;
+  .mypage__profile-card {
+    background: #fdfdfd;
+    border-radius: 20px;
+    padding: 38px 20px;
     display: flex;
-    border-bottom: 1px solid #e0e0e0;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mypage__profile-avatar {
+    position: relative;
+    width: 124px;
+    height: 124px;
+    background: #ffeaa6;
+    border-radius: 45px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+
+    img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+    }
+
+    &:active .mypage__profile-avatar-overlay {
+      opacity: 1;
+    }
+  }
+
+  .mypage__profile-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    border-radius: 45px;
+  }
+
+  .mypage__profile-name {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: $gray-900;
+    letter-spacing: $letter-spacing-base;
+  }
+
+  .mypage__profile-edit-btn {
+    height: 32px;
+    padding: 0 17px;
+    background: $main-300;
+    border: none;
+    border-radius: 16px;
+    font-size: $font-size-body2;
+    font-weight: 600;
+    color: $gray-800;
+    cursor: pointer;
+    font-family: $font-family-base;
+    letter-spacing: $letter-spacing-base;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  // 회원정보 카드 래퍼
+  .mypage__info-wrap {
+    padding: 0 20px;
+  }
+
+  .mypage__acct-info-card {
+    background: #fdfdfd;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .mypage__acct-info-head {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    color: $gray-600;
+    letter-spacing: $letter-spacing-base;
+  }
+
+  .mypage__acct-info-row {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    padding: 8px 20px;
+    gap: 12px;
+    border-top: 1px solid $gray-100;
+    width: 100%;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    cursor: default;
+    font-family: $font-family-base;
+    -webkit-tap-highlight-color: transparent;
+
+    &[type='button'] {
+      cursor: pointer;
+      &:active { opacity: 0.85; }
+    }
+  }
+
+  .mypage__acct-info-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
+
+  .mypage__acct-info-label {
+    flex: 1;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    color: $color-black;
+    letter-spacing: $letter-spacing-base;
+  }
+
+  .mypage__acct-info-value {
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    color: $gray-400;
+    letter-spacing: $letter-spacing-base;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 로그아웃 버튼 래퍼
+  .mypage__logout-wrap {
+    padding: 0 20px;
+
+    &--bottom {
+      margin-top: auto;
+      padding-top: 24px;
+    }
+  }
+
+  .mypage__acct-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 60px;
+    background: $main-300;
+    border: none;
+    border-radius: 15px;
+    font-size: $font-size-body1;
+    font-weight: 600;
+    color: $gray-900;
+    cursor: pointer;
+    font-family: $font-family-base;
+    letter-spacing: $letter-spacing-base;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+}
+
+// ── 공통 오버레이 ──────────────────────────────────────────────────────────────
+
+.mypage__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(22, 22, 21, 0.65);
+  z-index: $z-modal;
+  display: flex;
+  align-items: flex-end;
+
+  &--center {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// ── 닉네임 변경 바텀 시트 ──────────────────────────────────────────────────────
+
+.mypage__sheet {
+  width: 100%;
+  background: #fdfdfd;
+  border-radius: 30px 30px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mypage__sheet-title-row {
+  height: 59px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.mypage__sheet-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: $gray-800;
+  letter-spacing: $letter-spacing-base;
+}
+
+.mypage__sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 20px 20px;
+}
+
+.mypage__sheet-chip {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 12px 20px;
+  border-radius: 15px;
+  background: $gray-50;
+  gap: 8px;
+  border: 1.5px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+
+  &--active {
+    background: #fef8e7;
+  }
+
+  &--error {
+    background: rgba(246, 105, 73, 0.1);
+    border-color: #f66949;
+  }
+}
+
+.mypage__sheet-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: $font-size-body1;
+  font-weight: $font-weight-body1;
+  color: $gray-900;
+  font-family: $font-family-base;
+  letter-spacing: $letter-spacing-base;
+  min-width: 0;
+
+  &::placeholder {
+    color: $gray-500;
+    font-weight: $font-weight-body1;
+  }
+
+  .mypage__sheet-chip--active & {
+    font-weight: 600;
+    color: $gray-800;
+  }
+
+  .mypage__sheet-chip--error & {
+    color: #f66949;
+  }
+}
+
+.mypage__sheet-dup {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 6px;
+  border: none;
+  background: $gray-100;
+  color: $gray-500;
+  font-size: $font-size-caption;
+  font-weight: $font-weight-caption;
+  font-family: $font-family-base;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+
+  &--active {
+    background: $main-300;
+    color: $gray-900;
+  }
+
+  &:disabled { cursor: not-allowed; opacity: 0.6; }
+}
+
+.mypage__sheet-hint {
+  margin: 0;
+  font-size: $font-size-body2;
+  font-weight: $font-weight-body2;
+  color: $gray-500;
+  letter-spacing: $letter-spacing-base;
+  padding: 0 4px;
+
+  &--ok {
+    color: $gray-500;
+  }
+
+  &--error {
+    color: #f66949;
+  }
+}
+
+.mypage__sheet-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 60px;
+  background: $main-300;
+  border: none;
+  border-radius: 15px;
+  font-size: $font-size-body1;
+  font-weight: 600;
+  color: $gray-900;
+  cursor: pointer;
+  font-family: $font-family-base;
+  letter-spacing: $letter-spacing-base;
+  margin-top: 4px;
+  -webkit-tap-highlight-color: transparent;
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:not(:disabled):active { opacity: 0.85; }
+}
+
+// ── 로그아웃 모달 ──────────────────────────────────────────────────────────────
+
+.mypage__logout-modal {
+  width: 310px;
+  background: #fdfdfd;
+  border-radius: 12px;
+  padding: 28px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mypage__logout-modal-icon {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.mypage__logout-modal-title {
+  margin: 0;
+  font-size: $font-size-body1;
+  font-weight: 600;
+  color: $gray-900;
+  letter-spacing: $letter-spacing-base;
+}
+
+.mypage__logout-modal-sub {
+  margin: 0 0 8px;
+  font-size: $font-size-body2;
+  font-weight: $font-weight-body2;
+  color: $gray-500;
+  letter-spacing: $letter-spacing-base;
+}
+
+.mypage__logout-modal-btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.mypage__logout-modal-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 12px;
+  font-size: $font-size-body1;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: $font-family-base;
+  letter-spacing: $letter-spacing-base;
+  -webkit-tap-highlight-color: transparent;
+
+  &--cancel {
+    background: transparent;
+    border: 1px solid $gray-300;
+    color: $gray-500;
+  }
+
+  &--confirm {
+    background: #f7bb0a;
+    border: none;
+    color: $gray-900;
+  }
+
+  &:active { opacity: 0.85; }
+}
+
+
+// ── 서재 카테고리 뷰 ──────────────────────────────────────────────────────────
+
+.mypage--library {
+  display: flex;
+  flex-direction: column;
+
+  .mypage__cat-tabs {
+    display: flex;
+    border-bottom: 1.5px solid $gray-100;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    flex-shrink: 0;
+
     &::-webkit-scrollbar { display: none; }
   }
 
-  &__cat-tab {
+  .mypage__cat-tab {
     flex: 1;
     min-width: 0;
     height: 44px;
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 13px;
-    font-family: 'Pretendard', sans-serif;
-    color: #999;
+    font-size: $font-size-caption;
+    font-family: $font-family-base;
+    color: $gray-500;
     white-space: nowrap;
-    padding: 0 4px;
+    padding: 0 8px;
     position: relative;
     text-align: center;
+    letter-spacing: $letter-spacing-base;
 
     &--active {
-      color: #000;
+      color: $gray-900;
       font-weight: 700;
 
       &::after {
         content: '';
         position: absolute;
-        bottom: -1px;
+        bottom: -1.5px;
         left: 0;
         right: 0;
         height: 2px;
-        background: #C94B4B;
+        background: $color-danger;
       }
     }
   }
 
-  &__book-list {
-    position: absolute;
-    top: 156px;
-    left: 0;
-    right: 0;
-    bottom: 0;
+  .mypage__book-list {
+    flex: 1;
     overflow-y: auto;
     padding: 8px 20px 24px;
   }
 
-  &__book-item {
+  .mypage__book-item {
     display: flex;
     align-items: flex-start;
     gap: 14px;
     width: 100%;
     background: none;
     border: none;
-    padding: 14px 0;
+    padding: 16px 0;
     cursor: pointer;
     text-align: left;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  &__book-cover {
+  .mypage__book-cover {
     width: 72px;
     height: 96px;
     object-fit: cover;
-    background: #d9d9d9;
-    border: 1px solid #ccc;
+    background: $gray-200;
+    border-radius: 4px;
     flex-shrink: 0;
   }
 
-  &__book-info {
+  .mypage__book-info {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
-    padding-top: 2px;
+    padding-top: 4px;
   }
 
-  &__book-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: #000;
+  .mypage__book-title {
+    font-size: $font-size-body1;
+    font-weight: 600;
+    color: $gray-900;
     margin: 0;
-    line-height: 1.3;
+    line-height: $line-height-body1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  &__book-date {
-    font-size: 12px;
-    color: #999;
+  .mypage__book-date {
+    font-size: $font-size-caption;
+    color: $gray-500;
     margin: 0;
   }
 
-  &__book-divider {
+  .mypage__book-divider {
     height: 1px;
-    background: #e0e0e0;
+    background: $gray-100;
   }
 
-  &__empty {
+  .mypage__empty {
     text-align: center;
-    color: #999;
-    font-size: 16px;
-    padding: 40px 0;
+    color: $gray-400;
+    font-size: $font-size-body1;
+    padding: 48px 0;
   }
 
   // ── 별점 ──
-  &__stars {
+  .mypage__stars {
     display: flex;
     gap: 2px;
   }
 
-  &__star {
-    font-size: 18px;
-    color: #ccc;
+  .mypage__star {
+    font-size: 16px;
+    color: $gray-200;
     line-height: 1;
 
-    &--on {
-      color: #F5A623;
-    }
+    &--on { color: $main-400; }
   }
 
   // ── 진행 바 ──
-  &__progress {
+  .mypage__progress {
     display: flex;
     flex-direction: column;
     gap: 4px;
 
     &__track {
       height: 6px;
-      background: #e0e0e0;
+      background: $gray-100;
       border-radius: 3px;
       overflow: hidden;
     }
 
     &__fill {
       height: 100%;
-      background: #4C0105;
+      background: $color-danger;
       border-radius: 3px;
     }
 
     &__labels {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      color: #555;
+      font-size: $font-size-caption;
+      color: $gray-600;
     }
   }
 }
