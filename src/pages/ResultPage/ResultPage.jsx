@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
+import { createEmotionAnalysis } from "../../api/emotionApi";
 import Loading from "../../components/common/LoadingSpinner/LoadingSpinner";
 import "./ResultPage.scss";
 
@@ -9,6 +10,12 @@ const LITTLE_PRINCE_SRC = "/assets/character/LittlePrince.svg";
 const PRINCE_SHADOW_SRC = "/assets/character/PrinceShadow.svg";
 const COIN_SRC = "/assets/shop/coin.png";
 const REGENERATE_COIN_COST = 2;
+
+const getUserId = () => {
+  const stored = window.localStorage.getItem("userId");
+  const id = Number(stored);
+  return stored && id > 0 ? id : null;
+};
 
 const getCurrentDate = () => {
   const today = new Date();
@@ -19,11 +26,22 @@ const getCurrentDate = () => {
   return `${year}.${month}.${date}`;
 };
 
+const FALLBACK_ANALYSIS = {
+  character: {
+    characterName: "어른이 된 어린왕자",
+    bookQuote: "중요한 것은 눈에 보이지 않아. 마음으로 보아야 해",
+    characterImgUrl: LITTLE_PRINCE_SRC,
+    methodReason:
+      "뿌듯함과 지침이 동시에 느껴지는 오늘, 어린 왕자처럼 작은 것들의 소중함을 알면서도 그 무게에 지쳐있는 당신과 닮았어요.",
+  },
+};
+
 export default function ResultPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const {
+    prompt = "",
     emotions = ["공허함", "우울", "무기력"],
     comfort = "위로와 공감",
     loading: initialLoading = true,
@@ -32,6 +50,8 @@ export default function ResultPage() {
 
   const [loading, setLoading] = useState(initialLoading);
   const [coinBanner, setCoinBanner] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [apiError, setApiError] = useState("");
 
   const displayName = useMemo(() => {
     const savedNickname = window.localStorage.getItem("nickname") || "";
@@ -50,12 +70,38 @@ export default function ResultPage() {
   useEffect(() => {
     if (!loading) return undefined;
 
+    const userId = getUserId();
+
+    if (prompt.trim() && userId) {
+      let cancelled = false;
+
+      createEmotionAnalysis({
+        userId,
+        inputText: prompt.trim(),
+        emotionTag: emotions.join(","),
+        comfortMethod: comfort,
+      })
+        .then((result) => {
+          if (!cancelled) setAnalysis(result);
+        })
+        .catch((error) => {
+          if (!cancelled) setApiError(error?.message ?? "감정 분석에 실패했습니다.");
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const timer = window.setTimeout(() => {
       setLoading(false);
     }, 1800);
 
     return () => window.clearTimeout(timer);
-  }, [loading]);
+  }, [comfort, emotions, loading, prompt]);
 
   const moodTags = useMemo(() => {
     const normalized =
@@ -63,6 +109,16 @@ export default function ResultPage() {
 
     return normalized.slice(0, 3);
   }, [emotions]);
+
+  const displayAnalysis = analysis ?? FALLBACK_ANALYSIS;
+  const character = displayAnalysis.character ?? {};
+  const characterName = character.characterName || FALLBACK_ANALYSIS.character.characterName;
+  const bookQuote = character.bookQuote || FALLBACK_ANALYSIS.character.bookQuote;
+  const characterImage = character.characterImgUrl || FALLBACK_ANALYSIS.character.characterImgUrl;
+  const methodReason =
+    character.methodReason ||
+    displayAnalysis.methodReason ||
+    FALLBACK_ANALYSIS.character.methodReason;
 
   const handleBack = () => {
     navigate(ROUTES.CHARACTER);
@@ -190,7 +246,7 @@ export default function ResultPage() {
         </section>
 
         <section className="result__book-card">
-          <h2>어른이 된 어린왕자</h2>
+          <h2>{characterName}</h2>
           <p className="result__book-meta">어린왕자 ㅣ 앙투안 드 생텍쥐페리</p>
 
           <div className="result__book-visual">
@@ -203,17 +259,15 @@ export default function ResultPage() {
 
             <img
               className="result__book-image"
-              src={LITTLE_PRINCE_SRC}
-              alt="어른이 된 어린왕자"
+              src={characterImage}
+              alt={characterName}
             />
           </div>
 
           <div className="result__quote-box">
             <span className="result__quote-side result__quote-side--left" />
             <p>
-              “ 중요한 것은 눈에 보이지 않아.
-              <br />
-              마음으로 보아야 해”
+              “ {bookQuote}”
             </p>
             <span className="result__quote-side result__quote-side--right" />
           </div>
@@ -236,13 +290,7 @@ export default function ResultPage() {
           </div>
 
           <div className="result__piece-card">
-            <p>
-              뿌듯함과 지침이 동시에 느껴지는 오늘,
-              <br />
-              어린 왕자처럼 작은 것들의 소중함을 알면서도
-              <br />
-              그 무게에 지쳐있는 당신과 닮았어요.
-            </p>
+            <p>{apiError || methodReason}</p>
           </div>
         </section>
 

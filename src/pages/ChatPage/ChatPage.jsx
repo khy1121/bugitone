@@ -7,6 +7,7 @@ import {
   getRoomList,
   searchRoomList,
   createRoom,
+  createNoBookRoom,
   getMessages,
   sendMessage,
   deleteRoom,
@@ -14,7 +15,7 @@ import {
 import { ROUTES } from '../../constants/routes'
 import './ChatPage.scss'
 
-const CHAR_IMG = '/assets/chatPage/chat_char.svg'
+const CHAR_IMG = '/assets/character/character.svg'
 const MAX_INPUT_HEIGHT = 380
 
 // 로그인 안 된 경우 null 반환 (1 폴백 제거 — 존재하지 않는 userId로 API 호출 방지)
@@ -25,10 +26,15 @@ const getUserId = () => {
 }
 
 const toMsg = (m) => ({
-  id: m.messageId,
-  role: m.role.toLowerCase(),
-  text: m.content,
+  id: m.messageId ?? m.id ?? `${m.role}-${m.createdAt ?? Date.now()}`,
+  role: String(m.role ?? '').toLowerCase() === 'ai' ? 'ai' : 'user',
+  text: m.content ?? '',
 })
+
+const toNumberId = (value) => {
+  const id = Number(value)
+  return Number.isInteger(id) && id > 0 ? id : null
+}
 
 /* ==============================
    Icons
@@ -250,7 +256,7 @@ function ChatList({ open, onClose, onSelectChat }) {
    Chat Room
 ============================== */
 
-function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
+function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
   const [activeRoomId, setActiveRoomId] = useState(initialChat?.id ?? null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -269,11 +275,11 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
   })
 
   const userId = getUserId()
-  const bookId = propBookId ?? initialChat?.bookId ?? null
+  const bookId = toNumberId(propBookId ?? initialChat?.bookId)
 
   const isTyping = input.length > 0
   const canSend = input.trim().length > 0
-  const isLanding = !activeRoomId && messages.length === 0 && !loading
+  const isLanding = messages.length === 0 && !loading && !pageLoading
 
   // 기존 채팅방 선택 시 메시지 내역 로드
   useEffect(() => {
@@ -326,14 +332,9 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 
       // 첫 메시지: 채팅방 먼저 생성
       if (!roomId) {
-        if (!bookId) {
-          // bookId 없이는 채팅방 생성 불가 — 사용자에게 안내
-          setMessages((prev) => prev.filter((m) => m.id !== tempId))
-          setSendError('책 상세 페이지에서 가독이챗을 시작해주세요.')
-          setLoading(false)
-          return
-        }
-        const room = await createRoom({ userId, bookId, topic: text })
+        const room = bookId
+          ? await createRoom({ userId, bookId, topic: text })
+          : await createNoBookRoom({ userId, topic: text })
         roomId = room.roomId
         setActiveRoomId(roomId)
       }
@@ -424,6 +425,13 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
         </div>
 
         <header className="chat-room__header">
+          <button
+            className="chat-room__back-btn"
+            type="button"
+            onClick={onBack}
+          >
+            ← 나가기
+          </button>
           <h1 className="chat-room__title">가독이 chat</h1>
           <button
             className="chat-room__menu-btn"
@@ -437,6 +445,9 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 
         {isLanding && (
           <div className="chat-room__landing" onClick={handleAreaTap}>
+            <div className="chat-room__landing-character" aria-hidden="true">
+              <img src={CHAR_IMG} alt="" />
+            </div>
             <p className="chat-room__welcome">
               안녕, 난 가독이야 👋{'\n'}오늘은 무슨 이야기를 나눠볼까?
             </p>
@@ -542,10 +553,10 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer }) {
 ============================== */
 
 export default function ChatPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [activeChat, setActiveChat] = useState(null)
   const location = useLocation()
   const navigate = useNavigate()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [activeChat, setActiveChat] = useState(location.state?.selectedChat ?? null)
 
   const userId = getUserId()
   const bookId = location.state?.bookId ?? null
@@ -566,6 +577,7 @@ export default function ChatPage() {
         initialChat={activeChat}
         bookId={bookId}
         onOpenDrawer={() => setDrawerOpen(true)}
+        onBack={() => navigate(-1)}
       />
       <ChatList
         open={drawerOpen}

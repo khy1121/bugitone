@@ -8,11 +8,13 @@
   );
 
   // Figma: 상태바 60px, 뒤로가기 y=60 → 상태바 바로 아래
-  --analyze-back-y: calc(var(--safe-top, 0px) + 21px);
+  --analyze-status-height: var(--app-status-height, max(var(--safe-top, 0px), 60px));
+  --analyze-header-y: var(--analyze-status-height);
+  --analyze-back-y: var(--analyze-header-y);
   // Figma: 프로그레스바 y=105 = 60(상태바) + 45px
-  --analyze-progress-y: calc(var(--safe-top, 0px) + 66px);
+  --analyze-progress-y: calc(var(--analyze-status-height) + 45px);
   // Figma: date y=157 = 60(상태바) + 97px
-  --analyze-body-y: calc(var(--safe-top, 0px) + 118px);
+  --analyze-body-y: calc(var(--analyze-status-height) + 97px);
   // 데스크탑 절대 위치용 (768px+ media query에서만 사용)
   --analyze-actions-y: 734px;
 
@@ -55,7 +57,7 @@
 ============================== */
 
 .analyze__back {
-  position: absolute;
+  position: fixed;
   top: var(--analyze-back-y);
   left: var(--analyze-inline-padding);
   z-index: 10;
@@ -80,13 +82,16 @@
 }
 
 .analyze__progress {
-  position: absolute;
+  position: fixed;
   top: var(--analyze-progress-y);
-  left: var(--analyze-inline-padding);
-  right: var(--analyze-inline-padding);
+  left: 50%;
+  right: auto;
+  z-index: 9;
 
-  width: auto;
+  width: var(--analyze-content-width);
+  max-width: var(--analyze-design-content-width);
   height: 6px;
+  transform: translateX(-50%);
 
   overflow: hidden;
 
@@ -498,6 +503,73 @@
 }
 
 /* ==============================
+   Invalid Diary Dialog
+============================== */
+
+.analyze__invalid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(40, 40, 40, 0.62);
+}
+
+.analyze__invalid-dialog {
+  width: 310px;
+  height: 244px;
+  padding: 16px 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border-radius: 12px;
+  background: #fefefe;
+  box-sizing: border-box;
+}
+
+.analyze__invalid-icon {
+  width: 82px;
+  height: 82px;
+  display: block;
+  object-fit: contain;
+}
+
+.analyze__invalid-message {
+  margin: 10px 0 20px;
+
+  color: #282723;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 25.6px;
+  letter-spacing: -0.4px;
+  text-align: center;
+}
+
+.analyze__invalid-retry {
+  width: 270px;
+  height: 52px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 12px;
+  background: #f8bc0a;
+
+  color: #282723;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 25.6px;
+  letter-spacing: -0.4px;
+
+  cursor: pointer;
+}
+
+/* ==============================
    Keyboard State
 ============================== */
 
@@ -597,6 +669,7 @@
 
 @media (min-width: 768px) {
   .analyze {
+    --analyze-header-y: 60px;
     --analyze-back-y: 60px;
     --analyze-progress-y: 105px;
     --analyze-body-y: 157px;

@@ -36,6 +36,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
+  --chat-status-height: var(--app-status-height, max(var(--safe-top, 0px), 60px));
 
   pointer-events: none;
 
@@ -108,7 +109,7 @@
   // Header — Figma y=60 = var(--safe-top)
   &__header {
     position: absolute;
-    top: var(--safe-top, 0px);
+    top: var(--chat-status-height);
     left: 25px;
     right: 20px;
 
@@ -149,7 +150,7 @@
   // Search — Figma y=132 → safe-top + 72px (132-60=72)
   &__search {
     position: absolute;
-    top: calc(var(--safe-top, 0px) + 72px);
+    top: calc(var(--chat-status-height) + 72px);
     left: 20px;
     right: 20px;
 
@@ -210,7 +211,7 @@
   // Body — Figma y=212 → safe-top + 152px (212-60=152)
   &__body {
     position: absolute;
-    top: calc(var(--safe-top, 0px) + 152px);
+    top: calc(var(--chat-status-height) + 152px);
     left: 0;
     right: 0;
     bottom: 0;
@@ -222,7 +223,7 @@
 
   &__body--search {
     bottom: auto;
-    height: calc(100% - (var(--safe-top, 0px) + 152px));
+    height: calc(100% - (var(--chat-status-height) + 152px));
     max-height: 640px;
   }
 
@@ -355,6 +356,9 @@
 
 .chat-room {
   position: relative;
+  --chat-status-height: var(--app-status-height, max(var(--safe-top, 0px), 60px));
+  --chat-header-height: var(--page-header-height, 60px);
+  --chat-content-top: calc(var(--chat-status-height) + var(--chat-header-height));
 
   width: 100%;
   height: var(--visual-height);
@@ -437,7 +441,7 @@
   // Header — Figma y=60 = var(--safe-top)
   &__header {
     position: absolute;
-    top: var(--safe-top, 0px);
+    top: var(--chat-status-height);
     left: 0;
 
     width: 100%;
@@ -468,6 +472,29 @@
     cursor: pointer;
   }
 
+  &__back-btn {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+
+    height: 40px;
+    padding: 10px 0;
+
+    border: 0;
+    background: transparent;
+
+    color: $gray-800;
+
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: 20px;
+    letter-spacing: 0;
+
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+
   &__title {
     margin: 0;
 
@@ -484,7 +511,7 @@
   // Landing — below header (safe-top + 60px header height)
   &__landing {
     position: absolute;
-    top: calc(var(--safe-top, 0px) + 60px);
+    top: var(--chat-content-top);
     left: 0;
     right: 0;
     bottom: 0;
@@ -492,7 +519,7 @@
 
   &--landing &__inner {
     background:
-      url('/assets/chatPage/chat_bg.svg') center / cover no-repeat,
+      url('/assets/chatPage/chat_bg2.svg') center / cover no-repeat,
       #fefefe;
   }
 
@@ -500,10 +527,34 @@
     display: none;
   }
 
+  &__landing-character {
+    position: absolute;
+    left: 6px;
+    top: 0;
+
+    width: 151px;
+    height: 151px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: $radius-pill;
+    background: rgba(255, 235, 177, 0.62);
+    filter: drop-shadow(0 0 24px rgba(248, 188, 10, 0.34));
+
+    img {
+      width: 84px;
+      height: 92px;
+      object-fit: contain;
+      transform: rotate(6deg);
+    }
+  }
+
   &__welcome {
     position: absolute;
     left: 20px;
-    top: 219px;
+    top: 159px;
 
     width: min(340px, calc(100% - 40px));
     margin: 0;
@@ -522,7 +573,7 @@
   &__desc {
     position: absolute;
     left: 20px;
-    top: 291px;
+    top: 231px;
 
     width: min(333px, calc(100% - 40px));
     margin: 0;
@@ -542,7 +593,7 @@
     position: absolute;
     left: 20px;
     right: 0;
-    top: 357px;
+    top: 297px;
 
     display: flex;
     flex-direction: row;
@@ -597,7 +648,7 @@
 
   &__page-loading {
     position: absolute;
-    top: calc(var(--safe-top, 0px) + 60px);
+    top: var(--chat-content-top);
     left: 0;
     right: 0;
     bottom: 0;
@@ -611,7 +662,7 @@
     position: absolute;
     left: 20px;
     right: 20px;
-    bottom: calc(200px + var(--safe-bottom, 0px));
+    bottom: calc(167px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
 
     margin: 0;
     padding: 10px 16px;
@@ -629,20 +680,20 @@
   }
 
   &--conversation &__send-error {
-    bottom: calc(120px + var(--safe-bottom, 0px));
+    bottom: calc(120px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
   }
 
   // Messages — same top as landing
   &__messages {
     position: absolute;
-    top: calc(var(--safe-top, 0px) + 60px);
+    top: var(--chat-content-top);
     left: 0;
     right: 0;
-    bottom: calc(130px + var(--safe-bottom, 0px));
+    bottom: calc(114px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
 
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 24px;
 
     padding: 44px 20px 0;
 
@@ -666,13 +717,14 @@
 
   &__message--ai {
     justify-content: flex-start;
-    padding-top: 200px;
+    min-height: 213px;
+    padding-top: 79px;
   }
 
   &__avatar {
     position: absolute;
     left: 0;
-    top: 136px;
+    top: 0;
 
     width: 64px;
     height: 64px;
@@ -686,7 +738,7 @@
 
     img {
       width: 36px;
-      height: 40px;
+      height: 39px;
       object-fit: contain;
     }
   }
@@ -713,7 +765,8 @@
   }
 
   &__bubble--user {
-    width: 278px;
+    width: fit-content;
+    max-width: 278px;
     background: $main-300;
     color: $gray-900;
 
@@ -723,11 +776,11 @@
 
   &__bubble--ai {
     width: 220px;
-    min-height: 253px;
+    min-height: 134px;
 
     align-items: stretch;
 
-    padding: 14px 20px 22px;
+    padding: 14px 32px;
 
     background: $gray-50;
     color: $gray-900;
@@ -773,7 +826,7 @@
     position: absolute;
     left: 20px;
     right: 20px;
-    bottom: calc(129px + var(--safe-bottom, 0px));
+    bottom: calc(54px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
 
     width: auto;
     min-height: 60px;
@@ -788,8 +841,12 @@
     background: $gray-100;
   }
 
+  &--landing .chat-room__input-wrap {
+    bottom: calc(96px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+  }
+
   &--conversation .chat-room__input-wrap {
-    bottom: calc(54px + var(--safe-bottom, 0px));
+    bottom: calc(54px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
   }
 
   &__input-wrap--typing {
@@ -853,8 +910,8 @@
   }
 
   &__send--active {
-    background: transparent;
-    color: $main-500;
+    background: $main-500;
+    color: $color-surface;
     cursor: pointer;
   }
 
@@ -871,36 +928,45 @@
   }
 
   .bottom-nav--chat-room {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(33px + var(--safe-bottom, 0px));
     z-index: 4;
-    --bottom-nav-fill-height: calc(33px + var(--safe-bottom, 0px));
-
-    width: 100%;
-    height: 68px;
-
-    transform: none;
     background: #fefefe;
     border-radius: 20px 20px 0 0;
-    filter: drop-shadow(0 -4px 4.05px rgba(40, 39, 35, 0.04));
-
-    .bottom-nav__item {
-      height: 68px;
-      grid-template-rows: 26px 18px;
-      row-gap: 4px;
-      padding: 0;
-    }
-
-    .bottom-nav__icon {
-      width: 26px;
-      height: 26px;
-    }
+    filter: drop-shadow(0 0 4.05px rgba(40, 40, 40, 0.23));
 
     .bottom-nav__item--active .bottom-nav__label {
       color: $gray-900;
       font-weight: $font-weight-caption;
+    }
+  }
+}
+
+/* ==============================
+   Keyboard open (mobile)
+   setVh.js가 html.keyboard-open 클래스를 토글
+============================== */
+
+html.keyboard-open {
+  .chat-room--landing {
+    .bottom-nav--chat-room {
+      display: none;
+    }
+
+    .chat-room__input-wrap {
+      bottom: 20px;
+    }
+
+    .chat-room__send-error {
+      bottom: 80px;
+    }
+  }
+
+  .chat-room--conversation {
+    .chat-room__input-wrap {
+      bottom: 20px;
+    }
+
+    .chat-room__send-error {
+      bottom: 80px;
     }
   }
 }
@@ -954,15 +1020,31 @@
   }
 
   .chat-room__quick-actions {
-    top: 357px;
+    top: 297px;
     bottom: auto;
   }
 
   .chat-room__messages {
-    bottom: 130px;
+    bottom: 114px;
   }
 
   .chat-room--conversation .chat-room__input-wrap {
     bottom: 54px;
+  }
+
+  .chat-room .chat-room__input-wrap {
+    bottom: 54px;
+  }
+
+  .chat-room--landing .chat-room__input-wrap {
+    bottom: 129px;
+  }
+
+  .chat-room .chat-room__send-error {
+    bottom: 200px;
+  }
+
+  .chat-room--conversation .chat-room__send-error {
+    bottom: 120px;
   }
 }

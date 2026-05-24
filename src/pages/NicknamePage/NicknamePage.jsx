@@ -42,7 +42,11 @@ export default function NicknamePage() {
     setNicknameStatus('checking')
     setApiError('')
     try {
-      await checkNickname(nickname)
+      const result = await checkNickname(nickname)
+      if (result?.available === false) {
+        setNicknameStatus('taken')
+        return
+      }
       setNicknameStatus('available')
     } catch {
       setNicknameStatus('taken')
@@ -56,8 +60,12 @@ export default function NicknamePage() {
     setApiError('')
     try {
       const profile = await signup({ email, password, nickname })
+      if (!profile?.userId) {
+        throw new Error('회원가입 응답에 사용자 정보가 없습니다.')
+      }
       localStorage.setItem('userId', String(profile.userId))
       localStorage.setItem('nickname', profile.nickname ?? '')
+      localStorage.setItem('email', profile.email ?? email)
       navigate(ROUTES.HOME, { replace: true })
     } catch (err) {
       setApiError(err?.message ?? '회원가입에 실패했습니다.')

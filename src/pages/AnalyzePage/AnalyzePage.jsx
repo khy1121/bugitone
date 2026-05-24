@@ -7,7 +7,10 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
+import { validateEmotionInput } from "../../api/emotionApi";
 import "./AnalyzePage.scss";
+
+const ALERT_ICON_SRC = "/assets/alert-02.svg";
 
 const QUESTIONS = [
   ["오늘 하루 있었던", "일기를 간단하게 적어주세요."],
@@ -60,6 +63,8 @@ export default function AnalyzePage() {
   const [diaryMaxHeight, setDiaryMaxHeight] = useState(DIARY_MAX_HEIGHT);
   const [viewportTick, setViewportTick] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showInvalidDialog, setShowInvalidDialog] = useState(false);
+  const [validating, setValidating] = useState(false);
 
   const canNext = useMemo(() => {
     if (step === 1) return diary.trim().length > 0;
@@ -145,10 +150,27 @@ export default function AnalyzePage() {
     setStep((current) => current - 1);
   };
 
-  const handleNext = () => {
-    if (!canNext) return;
+  const handleNext = async () => {
+    if (!canNext || validating) return;
 
     if (step < 3) {
+      if (step === 1) {
+        setValidating(true);
+
+        try {
+          const result = await validateEmotionInput(diary.trim());
+          if (!result?.valid) {
+            setShowInvalidDialog(true);
+            return;
+          }
+        } catch (error) {
+          setShowInvalidDialog(true);
+          return;
+        } finally {
+          setValidating(false);
+        }
+      }
+
       setStep((current) => current + 1);
       return;
     }
@@ -165,6 +187,7 @@ export default function AnalyzePage() {
 
   const handleDiaryChange = (event) => {
     setDiary(event.target.value);
+    setShowInvalidDialog(false);
 
     window.requestAnimationFrame(() => {
       scrollDiaryToBottomIfNeeded();
@@ -261,6 +284,13 @@ export default function AnalyzePage() {
         behavior: "smooth",
       });
     }
+  };
+
+  const handleRetryDiary = () => {
+    setShowInvalidDialog(false);
+    requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+    });
   };
 
   return (
@@ -397,10 +427,10 @@ export default function AnalyzePage() {
           <button
             className={`analyze__next${canNext ? " analyze__next--active" : ""}`}
             type="button"
-            disabled={!canNext}
+            disabled={!canNext || validating}
             onClick={handleNext}
           >
-            다음 단계로
+            {validating ? "확인 중..." : "다음 단계로"}
           </button>
         </div>
 
@@ -408,6 +438,22 @@ export default function AnalyzePage() {
           <p className="analyze__empty-guide">일기를 적어주세요.</p>
         )}
       </div>
+
+      {showInvalidDialog && (
+        <div className="analyze__invalid-overlay" role="dialog" aria-modal="true" aria-labelledby="analyze-invalid-title">
+          <section className="analyze__invalid-dialog">
+            <img className="analyze__invalid-icon" src={ALERT_ICON_SRC} alt="" aria-hidden="true" />
+            <p id="analyze-invalid-title" className="analyze__invalid-message">
+              일기를 분석할 수 없어요.
+              <br />
+              다시 한 번 작성해주세요.
+            </p>
+            <button className="analyze__invalid-retry" type="button" onClick={handleRetryDiary}>
+              다시 시도하기
+            </button>
+          </section>
+        </div>
+      )}
 
       {showConfirm && (
         <div className="analyze__overlay" role="dialog" aria-modal="true">

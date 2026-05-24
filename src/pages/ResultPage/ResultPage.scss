@@ -16,6 +16,7 @@
   position: relative;
   overflow: hidden;
   background: #fefefe;
+  --result-header-y: var(--app-status-height, max(var(--safe-top, 0px), 60px));
 
   &__inner {
     position: relative;
@@ -31,7 +32,7 @@
 
   &__back-btn {
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 21px);
+    top: var(--result-header-y);
     left: 20px;
     z-index: 10;
 
@@ -53,7 +54,7 @@
 
   &__date {
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 118px);
+    top: calc(var(--result-header-y) + 97px);
     left: 20px;
 
     margin: 0;
@@ -67,7 +68,7 @@
 
   &__title {
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 151px);
+    top: calc(var(--result-header-y) + 130px);
     left: 20px;
 
     margin: 0;
@@ -81,7 +82,7 @@
 
   &__visual {
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 255px);
+    top: calc(var(--result-header-y) + 234px);
     left: 50%;
 
     width: 328px;
@@ -168,7 +169,7 @@
 
   &__quote {
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 599px);
+    top: calc(var(--result-header-y) + 578px);
     left: 50%;
 
     width: calc(100% - 80px);
@@ -193,6 +194,7 @@
 
 .result {
   position: relative;
+  --result-header-y: var(--app-status-height, max(var(--safe-top, 0px), 60px));
 
   overflow-x: hidden;
   overflow-y: auto;
@@ -213,7 +215,7 @@
     margin: 0 auto;
 
     padding:
-      calc(env(safe-area-inset-top, 0px) + 21px)
+      var(--result-header-y)
       20px
       calc(env(safe-area-inset-bottom, 0px) + 34px);
 
@@ -769,6 +771,8 @@
 
 @media (min-width: 768px) {
   .result-loading {
+    --result-header-y: 60px;
+
     &__back-btn {
       top: 60px;
     }
@@ -791,6 +795,8 @@
   }
 
   .result {
+    --result-header-y: 60px;
+
     &__content {
       padding-top: 60px;
     }
@@ -808,19 +814,19 @@
 @media (max-height: 760px) {
   .result-loading {
     &__back-btn {
-      top: calc(env(safe-area-inset-top, 0px) + 21px);
+      top: var(--result-header-y);
     }
 
     &__date {
-      top: calc(env(safe-area-inset-top, 0px) + 106px);
+      top: calc(var(--result-header-y) + 85px);
     }
 
     &__title {
-      top: calc(env(safe-area-inset-top, 0px) + 141px);
+      top: calc(var(--result-header-y) + 120px);
     }
 
     &__visual {
-      top: calc(env(safe-area-inset-top, 0px) + 301px);
+      top: calc(var(--result-header-y) + 280px);
 
       width: 220px;
       height: 220px;

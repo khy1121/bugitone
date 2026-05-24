@@ -33,8 +33,12 @@ export default function LoginPage() {
     setApiError('')
     try {
       const profile = await login({ email, password })
+      if (!profile?.userId) {
+        throw new Error('로그인 응답에 사용자 정보가 없습니다.')
+      }
       localStorage.setItem('userId', String(profile.userId))
       localStorage.setItem('nickname', profile.nickname ?? '')
+      localStorage.setItem('email', profile.email ?? email)
       navigate(ROUTES.HOME)
     } catch (err) {
       setApiError(err?.message ?? '로그인에 실패했습니다.')
