@@ -42,12 +42,15 @@ body {
   // 물리 safe-area (iPhone 노치 / 홈 인디케이터)
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-status-height: max(var(--safe-top), 60px);
+  --app-home-indicator-height: max(var(--safe-bottom), 33px);
+  --page-header-height: 60px;
 
   // 레이아웃 상수
   --page-inline-padding: 20px;
-  --bottom-nav-height: 84px;
-  --bottom-nav-gap: 18px;
-  --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--bottom-nav-gap) + var(--safe-bottom));
+  --bottom-nav-height: 68px;
+  --bottom-nav-gap: 0px;
+  --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--app-home-indicator-height));
 }
 
 // ── Body / Root ────────────────────────────────────────────────────────

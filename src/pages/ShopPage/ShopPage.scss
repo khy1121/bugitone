@@ -1,7 +1,7 @@
 @use '../../styles/variables' as *;
 
 .shop-page {
-  --shop-header-y: calc(var(--safe-top, 0px) + 21px);
+  --shop-header-y: var(--app-status-height, max(var(--safe-top, 0px), 60px));
   --shop-design-height: 1159px;
 
   width: 100%;

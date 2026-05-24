@@ -3,12 +3,16 @@
 .bottom-nav {
   position: fixed;
   left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  right: auto;
+  bottom: 33px;
+  bottom: max(env(safe-area-inset-bottom, 0px), 33px);
   z-index: 100;
-  --bottom-nav-fill-height: calc(18px + env(safe-area-inset-bottom, 0px));
+  --bottom-nav-fill-height: 33px;
+  --bottom-nav-fill-height: max(env(safe-area-inset-bottom, 0px), 33px);
 
-  width: min(100%, 393px);
-  height: 84px;
+  width: min(100%, var(--design-width, 393px));
+  max-width: var(--design-width, 393px);
+  height: var(--bottom-nav-height, 68px);
 
   display: flex;
   align-items: center;
@@ -16,7 +20,7 @@
   transform: translateX(-50%);
   background: $color-white;
   border-radius: 20px 20px 0 0;
-  filter: drop-shadow(0 -4px 4.05px rgba(40, 39, 35, 0.04));
+  filter: drop-shadow(0 0 4.05px rgba(40, 40, 40, 0.23));
 }
 
 .bottom-nav::after {
@@ -32,10 +36,10 @@
 
 .bottom-nav__item {
   flex: 1;
-  height: 84px;
+  height: var(--bottom-nav-height, 68px);
 
   display: grid;
-  grid-template-rows: 30px 18px;
+  grid-template-rows: 26px 18px;
   justify-items: center;
   align-content: center;
   row-gap: 4px;
@@ -48,8 +52,8 @@
 }
 
 .bottom-nav__icon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
 
   display: flex;
   align-items: center;
@@ -88,30 +92,14 @@
 
 /* 캐릭터 랜딩 페이지 전용: 페이지 inner 기준 하단 배치 */
 .bottom-nav--character-landing {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-  top: auto;
-
-  width: 100%;
-  max-width: 393px;
-  height: 84px;
-
-  transform: none;
-
   background: transparent;
   border-radius: 0;
   box-shadow: none;
   filter: drop-shadow(0 -4px 4.05px rgba(40, 40, 40, 0.11));
 
   &::after {
-    display: none;
-  }
-
-  .bottom-nav__item {
-    height: 84px;
-    padding: 0;
+    display: block;
+    background: transparent;
   }
 
   .bottom-nav__item--active {
@@ -133,15 +121,6 @@
 
 /* 일반 페이지: position:relative 컨테이너 기준 절대 배치 (CharacterPage 방식 통일) */
 .bottom-nav--page {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-  top: auto;
-
-  width: 100%;
-  max-width: 393px;
-
-  transform: none;
+  /* Position is intentionally owned by .bottom-nav. */
 }
   

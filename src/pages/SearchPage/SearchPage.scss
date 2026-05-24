@@ -1,6 +1,7 @@
 .search-page {
-  --search-safe-top: env(safe-area-inset-top, 0px);
-  --search-header-top: calc(var(--search-safe-top) + 10px);
+  --search-safe-top: var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px));
+  --search-top-gap: 20px;
+  --search-header-top: calc(var(--search-safe-top) + var(--search-top-gap));
 
   position: relative;
   width: 100%;
@@ -37,7 +38,7 @@
 
 .search-page--results {
   .search-page__header {
-    top: var(--search-safe-top);
+    top: var(--search-header-top);
     height: 144px;
     padding: 78px 20px 0;
     align-items: flex-start;
@@ -170,7 +171,7 @@
 
 .search-page__scrollbar {
   position: absolute;
-  top: calc(var(--search-safe-top) + 195px);
+  top: calc(var(--search-header-top) + 195px);
   right: 6px;
   z-index: 2;
 
@@ -183,7 +184,7 @@
 
 .search-page__results {
   position: absolute;
-  top: calc(var(--search-safe-top) + 171px);
+  top: calc(var(--search-header-top) + 171px);
   left: 0;
   right: 0;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 102px);
