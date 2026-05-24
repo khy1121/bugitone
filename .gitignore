@@ -33,3 +33,6 @@ coverage/
 # 임시/압축 파일
 *.zip
 figma-nodes.json
+
+# Local API reference exports
+/api/
