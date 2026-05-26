@@ -26,3 +26,9 @@ export const createEmotionAnalysis = ({ userId, inputText, emotionTag, comfortMe
       comfortMethod,
     })
     .then(unwrap)
+
+export const getMonthlyCharacters = (userId) =>
+  axiosInstance.get(`/emotion-inputs/${userId}/characters`).then(unwrap)
+
+export const getMonthlyEmotions = (userId) =>
+  axiosInstance.get(`/emotion-inputs/${userId}/emotions`).then(unwrap)

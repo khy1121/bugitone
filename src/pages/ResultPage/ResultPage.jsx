@@ -50,11 +50,13 @@ export default function ResultPage() {
     comfort = "위로와 공감",
     loading: initialLoading = true,
     userName: stateUserName = "",
+    analysis: initialAnalysis = null,
+    returnTo = ROUTES.CHARACTER,
   } = location.state || {};
 
-  const [loading, setLoading] = useState(initialLoading);
+  const [loading, setLoading] = useState(initialAnalysis ? false : initialLoading);
   const [coinBanner, setCoinBanner] = useState(null);
-  const [analysis, setAnalysis] = useState(null);
+  const [analysis, setAnalysis] = useState(initialAnalysis);
   const [apiError, setApiError] = useState("");
 
   const displayName = useMemo(() => {
@@ -127,7 +129,7 @@ export default function ResultPage() {
     FALLBACK_ANALYSIS.character.methodReason;
 
   const handleBack = () => {
-    navigate(ROUTES.CHARACTER);
+    navigate(returnTo);
   };
 
   const handleRetry = () => {
