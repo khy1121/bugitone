@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
+import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import './SignupPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function SignupPage() {
   const navigate = useNavigate()
+  const pageRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -28,6 +30,10 @@ export default function SignupPage() {
   const confirmError = confirmBlurred && !confirmMatch
 
   const canSubmit = emailValid && passwordValid && confirmMatch && !loading
+  const keyboard = useKeyboardAwareInput({
+    scrollRef: pageRef,
+    resetScrollOnFocus: true,
+  })
 
   const msgText = emailError
     ? '이메일 형식이 올바르지 않습니다.'
@@ -51,7 +57,10 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="signup-onboard">
+    <div
+      ref={pageRef}
+      className={`signup-onboard${keyboard.isKeyboardFocused ? ' signup-onboard--keyboard' : ''}`}
+    >
       <div className="signup-onboard__inner">
         <h1 className="signup-onboard__logo">DOK</h1>
 
@@ -62,7 +71,11 @@ export default function SignupPage() {
             placeholder="이메일을 입력해주세요."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            onBlur={() => setEmailBlurred(true)}
+            onFocus={keyboard.handleFocus}
+            onBlur={(event) => {
+              setEmailBlurred(true)
+              keyboard.handleBlur(event)
+            }}
             error={emailError}
             autoComplete="email"
           />
@@ -72,7 +85,11 @@ export default function SignupPage() {
             placeholder="비밀번호를 입력해주세요."
             value={password}
             onChange={(e) => { setPassword(e.target.value); setPasswordTouched(true) }}
-            onBlur={() => setPasswordBlurred(true)}
+            onFocus={keyboard.handleFocus}
+            onBlur={(event) => {
+              setPasswordBlurred(true)
+              keyboard.handleBlur(event)
+            }}
             error={passwordError}
             autoComplete="new-password"
           />
@@ -82,7 +99,11 @@ export default function SignupPage() {
             placeholder="비밀번호를 확인해주세요."
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            onBlur={() => setConfirmBlurred(true)}
+            onFocus={keyboard.handleFocus}
+            onBlur={(event) => {
+              setConfirmBlurred(true)
+              keyboard.handleBlur(event)
+            }}
             error={confirmError}
             autoComplete="new-password"
           />

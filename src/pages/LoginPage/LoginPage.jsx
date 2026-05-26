@@ -1,15 +1,17 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { login } from '../../api/userApi'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
+import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const pageRef = useRef(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [emailBlurred, setEmailBlurred] = useState(false)
@@ -26,6 +28,10 @@ export default function LoginPage() {
   const passwordError = passwordBlurred && !passwordValid
 
   const canSubmit = emailValid && passwordValid && !submitting
+  const keyboard = useKeyboardAwareInput({
+    scrollRef: pageRef,
+    resetScrollOnFocus: true,
+  })
 
   const handleLogin = async () => {
     if (!canSubmit) return
@@ -60,7 +66,10 @@ export default function LoginPage() {
   const msgType = msgIsError ? 'error' : 'hint'
 
   return (
-    <div className="onboard-login">
+    <div
+      ref={pageRef}
+      className={`onboard-login${keyboard.isKeyboardFocused ? ' onboard-login--keyboard' : ''}`}
+    >
       <div className="onboard-login__inner">
         <h1 className="onboard-login__logo">DOK</h1>
 
@@ -71,7 +80,11 @@ export default function LoginPage() {
             placeholder="이메일을  입력해주세요."
             value={email}
             onChange={e => setEmail(e.target.value)}
-            onBlur={() => setEmailBlurred(true)}
+            onFocus={keyboard.handleFocus}
+            onBlur={(event) => {
+              setEmailBlurred(true)
+              keyboard.handleBlur(event)
+            }}
             error={emailError}
             autoComplete="email"
           />
@@ -84,7 +97,11 @@ export default function LoginPage() {
               setPassword(e.target.value)
               setPasswordTouched(true)
             }}
-            onBlur={() => setPasswordBlurred(true)}
+            onFocus={keyboard.handleFocus}
+            onBlur={(event) => {
+              setPasswordBlurred(true)
+              keyboard.handleBlur(event)
+            }}
             error={passwordError}
             autoComplete="current-password"
           />

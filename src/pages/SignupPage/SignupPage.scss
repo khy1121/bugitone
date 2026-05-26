@@ -253,17 +253,22 @@
     height: 114px;
     object-fit: cover;
   }
+
+  &--keyboard {
+    height: var(--visual-height);
+    min-height: unset;
+    overscroll-behavior: contain;
+
+    .signup-onboard__inner {
+      height: auto;
+      min-height: max(var(--design-height, 852px), var(--app-height, 100%));
+      overflow: visible;
+    }
+  }
 }
 
 @keyframes signup-loading-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-/* 키보드가 열릴 때 3번째 인풋으로 인해 버튼이 뷰 밖으로 밀리는 문제 방지 */
-html.keyboard-open {
-  .signup-onboard__form {
-    top: 245px;
   }
 }

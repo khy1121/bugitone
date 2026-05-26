@@ -118,8 +118,7 @@
   }
 
   &__check {
-    position: relative;
-    right: 0;
+    flex: 0 0 auto;
   }
 
   &__input {
@@ -146,28 +145,6 @@
 
   &__input-wrap--error &__input {
     color: #f66949;
-  }
-
-  &__check {
-    flex: 0 0 auto;
-    height: 40px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 10px;
-    background: #e6e5df;
-    color: $gray-600;
-    cursor: not-allowed;
-    font-family: $font-family-base;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1;
-    white-space: nowrap;
-
-    &--active {
-      background: $main-300;
-      color: $gray-800;
-      cursor: pointer;
-    }
   }
 
   &__guide {
@@ -290,14 +267,17 @@
       top: 480px;
     }
 
-    .nickname-onboard__check {
-      height: 32px;
-      width: 73px;
-      padding: 0 13px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: $font-weight-body1;
-      letter-spacing: -0.3px;
+  }
+
+  &--keyboard {
+    height: var(--visual-height);
+    min-height: unset;
+    overscroll-behavior: contain;
+
+    .nickname-onboard__inner {
+      height: auto;
+      min-height: max(var(--design-height, 852px), var(--app-height, 100%));
+      overflow: visible;
     }
   }
 }

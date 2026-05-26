@@ -1,14 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { signup, checkNickname } from '../../api/userApi'
+import DuplicateCheckButton from '../../components/common/DuplicateCheckButton/DuplicateCheckButton'
+import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
+import {
+  NICKNAME_RULE_MESSAGE,
+  isValidNickname,
+} from '../../utils/nicknameValidation'
 import './NicknamePage.scss'
-
-const nicknameRegex = /^[가-힣a-z0-9]{3,10}$/
 
 export default function NicknamePage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const pageRef = useRef(null)
   const { email, password } = location.state ?? {}
 
   const [nickname, setNickname] = useState('')
@@ -17,12 +22,17 @@ export default function NicknamePage() {
   const [apiError, setApiError] = useState('')
 
   const touched = nickname.length > 0
-  const isValid = nicknameRegex.test(nickname)
+  const isValid = isValidNickname(nickname)
+  const isInvalidFormat = touched && !isValid
   const isChecking = nicknameStatus === 'checking'
   const isDuplicate = nicknameStatus === 'taken'
   const isAvailable = nicknameStatus === 'available'
   const canCheck = touched && isValid && !isChecking
   const canSubmit = isAvailable && !submitting
+  const keyboard = useKeyboardAwareInput({
+    scrollRef: pageRef,
+    resetScrollOnFocus: true,
+  })
 
   useEffect(() => {
     if (!email || !password) {
@@ -75,16 +85,21 @@ export default function NicknamePage() {
   }
 
   const guideText = apiError
-    || (isDuplicate
+    || (isInvalidFormat
+      ? NICKNAME_RULE_MESSAGE
+      : isDuplicate
       ? '사용할 수 없는 닉네임입니다.'
       : isAvailable
       ? '사용할 수 있는 닉네임입니다.'
       : isChecking
       ? '중복 확인 중입니다.'
-      : '3~10 사이의 한글, 영어, 소문자, 숫자로만 입력해주세요.')
+      : NICKNAME_RULE_MESSAGE)
 
   return (
-    <div className={`nickname-onboard${touched ? ' nickname-onboard--filled' : ''}${isDuplicate ? ' nickname-onboard--error' : ''}${isAvailable ? ' nickname-onboard--available' : ''}`}>
+    <div
+      ref={pageRef}
+      className={`nickname-onboard${touched ? ' nickname-onboard--filled' : ''}${isDuplicate || isInvalidFormat ? ' nickname-onboard--error' : ''}${isAvailable ? ' nickname-onboard--available' : ''}${keyboard.isKeyboardFocused ? ' nickname-onboard--keyboard' : ''}`}
+    >
       <div className="nickname-onboard__inner">
         <header className="nickname-onboard__header">
           <button
@@ -102,28 +117,29 @@ export default function NicknamePage() {
           <span>당신을 어떻게 부르면 될까요?</span>
         </h2>
 
-        <div className={`nickname-onboard__input-wrap${isDuplicate ? ' nickname-onboard__input-wrap--error' : ''}`}>
+        <div className={`nickname-onboard__input-wrap${isDuplicate || isInvalidFormat ? ' nickname-onboard__input-wrap--error' : ''}`}>
           <input
             className="nickname-onboard__input"
             type="text"
             placeholder="닉네임을 입력해주세요."
             value={nickname}
             onChange={handleNicknameChange}
+            onFocus={keyboard.handleFocus}
+            onBlur={keyboard.handleBlur}
             maxLength={10}
           />
           {touched && !isDuplicate && (
-            <button
-              className={`nickname-onboard__check${canCheck ? ' nickname-onboard__check--active' : ''}`}
-              type="button"
+            <DuplicateCheckButton
+              className="nickname-onboard__check"
+              active={canCheck}
+              checking={isChecking}
               disabled={!canCheck}
               onClick={handleCheckNickname}
-            >
-              {isChecking ? '확인중' : '중복확인'}
-            </button>
+            />
           )}
         </div>
 
-        <p className={`nickname-onboard__guide${isDuplicate || apiError ? ' nickname-onboard__guide--error' : ''}`}>
+        <p className={`nickname-onboard__guide${isDuplicate || isInvalidFormat || apiError ? ' nickname-onboard__guide--error' : ''}`}>
           {guideText}
         </p>
 
