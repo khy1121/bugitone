@@ -100,6 +100,65 @@
 
   // ── 공통 카드 ──────────────────────────────────────────────────────────────
 
+  &__profile-image {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #ffeaa6;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &--sm {
+      width: 68px;
+      height: 68px;
+      border-radius: 25px;
+
+      img {
+        width: 56px;
+        height: 56px;
+      }
+    }
+
+    &--lg {
+      width: 124px;
+      height: 124px;
+      border-radius: 45px;
+
+      img {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+    &--editable {
+      cursor: pointer;
+    }
+
+    &--custom img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__profile-image-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
   &__card {
     display: flex;
     align-items: center;
@@ -146,7 +205,7 @@
   .mypage__card--account {
     padding: 6px 20px;
     align-items: center;
-    min-height: 80px;
+    min-height: 92px;
   }
 
   .mypage__card-info {
@@ -369,7 +428,7 @@
     -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
-    padding: 20px 0 32px;
+    padding: 20px 0 49px;
   }
 
   // 프로필 카드 래퍼 (20px 좌우 패딩)
@@ -381,7 +440,8 @@
   .mypage__profile-card {
     background: #fdfdfd;
     border-radius: 20px;
-    padding: 38px 20px;
+    min-height: 300px;
+    padding: 38px 20px 36px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -410,7 +470,16 @@
       object-fit: cover;
     }
 
+    &--custom img {
+      width: 100%;
+      height: 100%;
+    }
+
     &:active .mypage__profile-avatar-overlay {
+      opacity: 1;
+    }
+
+    &:active .mypage__profile-image-overlay {
       opacity: 1;
     }
   }
@@ -431,8 +500,35 @@
     margin: 0;
     font-size: 26px;
     font-weight: 700;
+    line-height: 35.28px;
     color: $gray-900;
     letter-spacing: $letter-spacing-base;
+    text-align: center;
+  }
+
+  .mypage__profile-name-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    font-family: $font-family-base;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  .mypage__profile-name-pill {
+    min-width: 142px;
+    max-width: 100%;
+    min-height: 36px;
+    padding: 0 18px;
+    border-radius: 17px;
+    background: $gray-100;
+    color: $gray-900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .mypage__profile-edit-btn {
@@ -450,11 +546,16 @@
     -webkit-tap-highlight-color: transparent;
 
     &:active { opacity: 0.85; }
+
+    &--done {
+      min-width: 106px;
+    }
   }
 
   // 회원정보 카드 래퍼
   .mypage__info-wrap {
     padding: 0 20px;
+    margin-top: 0;
   }
 
   .mypage__acct-info-card {
@@ -475,6 +576,7 @@
   }
 
   .mypage__acct-info-row {
+    appearance: none;
     display: flex;
     align-items: center;
     height: 56px;
@@ -488,6 +590,12 @@
     border-bottom: none;
     cursor: default;
     font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: $line-height-body1;
+    color: $color-black;
+    letter-spacing: $letter-spacing-base;
+    text-align: left;
     -webkit-tap-highlight-color: transparent;
 
     &[type='button'] {
@@ -506,13 +614,18 @@
 
   .mypage__acct-info-label {
     flex: 1;
+    font-family: $font-family-base;
     font-size: $font-size-body1;
     font-weight: $font-weight-body1;
+    line-height: $line-height-body1;
     color: $color-black;
     letter-spacing: $letter-spacing-base;
+    text-align: left;
+    white-space: nowrap;
   }
 
   .mypage__acct-info-value {
+    max-width: 148px;
     font-size: $font-size-body2;
     font-weight: $font-weight-body2;
     color: $gray-400;
@@ -554,15 +667,119 @@
   }
 }
 
+.mypage--account-edit {
+  .mypage__profile-card {
+    padding-top: 38px;
+    padding-bottom: 36px;
+  }
+}
+
+// ── 생년월일 수정 뷰 ───────────────────────────────────────────────────────────
+
+.mypage--birthday {
+  display: flex;
+  flex-direction: column;
+  background: #f5f4f3;
+
+  .mypage__back-text {
+    position: absolute;
+    left: 16px;
+    top: calc(var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px)) + 22px);
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    color: $gray-800;
+    font-family: $font-family-base;
+    letter-spacing: $letter-spacing-base;
+    padding: 6px 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mypage__birthday-content {
+    flex: 1;
+    padding: 82px 20px 0;
+  }
+
+  .mypage__birthday-picker {
+    width: 267px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 73px);
+    gap: 24px;
+  }
+
+  .mypage__birthday-column {
+    height: 56px;
+    border-top: 1px solid $gray-100;
+    border-bottom: 1px solid $gray-100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mypage__birthday-column select {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    appearance: none;
+    color: $gray-800;
+    font-family: $font-family-base;
+    font-size: $font-size-h3;
+    font-weight: 700;
+    line-height: $line-height-h3;
+    text-align: center;
+    text-align-last: center;
+    letter-spacing: $letter-spacing-base;
+    cursor: pointer;
+  }
+
+  .mypage__birthday-save {
+    width: 100%;
+    height: 60px;
+    margin-top: 57px;
+    border: 0;
+    border-radius: 15px;
+    background: $main-300;
+    color: $gray-900;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: 600;
+    letter-spacing: $letter-spacing-base;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    &:not(:disabled):active { opacity: 0.85; }
+  }
+}
+
 // ── 공통 오버레이 ──────────────────────────────────────────────────────────────
 
 .mypage__overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(22, 22, 21, 0.65);
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: 100%;
+  max-width: var(--design-width, 393px);
+  height: var(--visual-height);
+  transform: translateX(-50%);
+  background: rgba(22, 22, 21, 0.68);
   z-index: $z-modal;
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
 
   &--center {
     align-items: center;
@@ -570,15 +787,35 @@
   }
 }
 
+@media (min-width: $breakpoint-mobile) {
+  .mypage__overlay {
+    position: absolute;
+    inset: 0;
+    left: 0;
+    max-width: none;
+    height: 100%;
+    transform: none;
+  }
+}
+
 // ── 닉네임 변경 바텀 시트 ──────────────────────────────────────────────────────
 
 .mypage__sheet {
   width: 100%;
+  min-height: 280px;
   background: #fdfdfd;
   border-radius: 30px 30px 0 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mypage__sheet--keyboard {
+  max-height: calc(var(--visual-height) - var(--safe-top, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mypage__sheet-title-row {
@@ -586,6 +823,7 @@
   padding: 0 20px;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -598,10 +836,11 @@
 }
 
 .mypage__sheet-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 20px 20px;
+  padding: 18px 20px 38px;
 }
 
 .mypage__sheet-chip {
@@ -617,11 +856,14 @@
 
   &--active {
     background: #fef8e7;
+    box-shadow: 0 0 2px #f19d00;
   }
 
   &--error {
-    background: rgba(246, 105, 73, 0.1);
+    background: rgba(246, 105, 73, 0.07);
     border-color: #f66949;
+    border-width: 1.6px;
+    border-radius: 12px;
   }
 }
 
@@ -654,25 +896,6 @@
 
 .mypage__sheet-dup {
   flex-shrink: 0;
-  height: 32px;
-  padding: 0 13px;
-  border-radius: 6px;
-  border: none;
-  background: $gray-100;
-  color: $gray-500;
-  font-size: $font-size-caption;
-  font-weight: $font-weight-caption;
-  font-family: $font-family-base;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
-
-  &--active {
-    background: $main-300;
-    color: $gray-900;
-  }
-
-  &:disabled { cursor: not-allowed; opacity: 0.6; }
 }
 
 .mypage__sheet-hint {
@@ -708,11 +931,182 @@
   cursor: pointer;
   font-family: $font-family-base;
   letter-spacing: $letter-spacing-base;
-  margin-top: 4px;
+  margin-top: auto;
   -webkit-tap-highlight-color: transparent;
 
   &:disabled { opacity: 0.6; cursor: not-allowed; }
   &:not(:disabled):active { opacity: 0.85; }
+}
+
+// ── 성별 선택 시트 ────────────────────────────────────────────────────────────
+
+.mypage__gender-sheet {
+  width: 100%;
+  min-height: 360px;
+  background: #fdfdfd;
+  border-radius: 30px 30px 0 0;
+  padding: 0 20px calc(20px + env(safe-area-inset-bottom, 0));
+  display: flex;
+  flex-direction: column;
+}
+
+.mypage__gender-sheet-head {
+  height: 59px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mypage__gender-sheet-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 26px;
+  color: $gray-800;
+  letter-spacing: $letter-spacing-base;
+}
+
+.mypage__gender-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.mypage__gender-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 52px;
+  padding: 0 18px;
+  border: 1px solid $gray-100;
+  border-radius: 15px;
+  background: #fefefe;
+  color: $gray-800;
+  font-family: $font-family-base;
+  font-size: $font-size-body1;
+  font-weight: $font-weight-body1;
+  letter-spacing: $letter-spacing-base;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active { opacity: 0.85; }
+
+  &.chip--selected {
+    border-color: $main-500;
+    background: #fef8e7;
+    font-weight: 600;
+    color: $gray-900;
+    box-shadow: none;
+  }
+}
+
+.mypage__gender-option-check {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid $gray-200;
+  border-radius: 50%;
+
+  .mypage__gender-option.chip--selected & {
+    border-color: $main-500;
+    background: radial-gradient(circle, $main-500 0 44%, transparent 48%);
+  }
+}
+
+.mypage__gender-save {
+  width: 100%;
+  height: 60px;
+  margin-top: auto;
+  border: 0;
+  border-radius: 15px;
+  background: $main-300;
+  color: $gray-900;
+  font-family: $font-family-base;
+  font-size: $font-size-body1;
+  font-weight: 600;
+  letter-spacing: $letter-spacing-base;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active { opacity: 0.85; }
+}
+
+// ── 계정 저장 확인 모달 ────────────────────────────────────────────────────────
+
+.mypage__confirm-modal {
+  width: 310px;
+  height: 244px;
+  background: #fefefe;
+  border-radius: 12px;
+  padding: 16px 17px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mypage__confirm-modal-icon {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+}
+
+.mypage__confirm-modal-title {
+  margin: 8px 0 0;
+  font-size: $font-size-body1;
+  font-weight: 600;
+  line-height: $line-height-body1;
+  color: $gray-900;
+  letter-spacing: $letter-spacing-base;
+}
+
+.mypage__confirm-modal-sub {
+  margin: 3px 0 16px;
+  font-size: $font-size-body2;
+  font-weight: $font-weight-body2;
+  line-height: 23px;
+  color: $gray-500;
+  letter-spacing: $letter-spacing-base;
+  text-align: center;
+}
+
+.mypage__confirm-modal-actions {
+  display: flex;
+  gap: 13px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.mypage__confirm-modal-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 12px;
+  font-family: $font-family-base;
+  font-size: $font-size-body1;
+  font-weight: 600;
+  letter-spacing: $letter-spacing-base;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):active { opacity: 0.85; }
+
+  &--cancel {
+    background: transparent;
+    border: 1px solid $gray-200;
+    color: $gray-500;
+  }
+
+  &--confirm {
+    background: $main-500;
+    border: 0;
+    color: $gray-900;
+  }
 }
 
 // ── 로그아웃 모달 ──────────────────────────────────────────────────────────────
@@ -783,6 +1177,80 @@
   &:active { opacity: 0.85; }
 }
 
+
+// ── 내 메모 뷰 ───────────────────────────────────────────────────────────────
+
+.mypage--memo {
+  display: flex;
+  flex-direction: column;
+  background: #f5f4f3;
+
+  .mypage__memo-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 20px 24px;
+  }
+
+  .mypage__empty {
+    text-align: center;
+    color: $gray-400;
+    font-size: $font-size-body1;
+    padding: 48px 0;
+  }
+
+  .mypage__memo-divider {
+    height: 1px;
+    background: $gray-100;
+  }
+
+  .mypage__memo-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 64px;
+    padding: 16px 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 8px;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  .mypage__memo-row-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .mypage__memo-row-label {
+    flex: 1;
+    font-size: $font-size-body1;
+    font-weight: 600;
+    color: $gray-900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: $line-height-body1;
+  }
+
+  .mypage__memo-row-count {
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    color: $gray-400;
+    flex-shrink: 0;
+  }
+
+  .mypage__memo-row-date {
+    font-size: $font-size-caption;
+    color: $gray-500;
+  }
+}
 
 // ── 서재 카테고리 뷰 ──────────────────────────────────────────────────────────
 
