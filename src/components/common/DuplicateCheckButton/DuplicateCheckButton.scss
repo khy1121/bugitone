@@ -1,0 +1,39 @@
+@use '../../../styles/variables' as *;
+
+.duplicate-check-button {
+  width: 73px;
+  min-width: 73px;
+  height: 32px;
+  padding: 0 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 6px;
+  background: $gray-100;
+  box-sizing: border-box;
+
+  color: $gray-500;
+  font-family: $font-family-base;
+  font-size: $font-size-caption;
+  font-weight: $font-weight-body1;
+  line-height: 1.6;
+  letter-spacing: -0.3px;
+  text-align: center;
+  white-space: nowrap;
+
+  cursor: not-allowed;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &--active {
+    background: $main-300;
+    color: $gray-900;
+    cursor: pointer;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
