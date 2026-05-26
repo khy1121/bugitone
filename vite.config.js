@@ -16,12 +16,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: [
-        'icons/*.png',
-        'pwa-icon.svg',
-        'assets/fonts/*.ttf',
-        'assets/onBoarding/*.svg',
-      ],
       manifest: {
         name: 'NADOK',
         short_name: 'NADOK',
@@ -50,7 +44,7 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,woff2}'],
-        globIgnores: ['**/assets/shop/event.svg'],
+        globIgnores: ['**/assets/shop/event.svg', '**/icons/*.png'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
