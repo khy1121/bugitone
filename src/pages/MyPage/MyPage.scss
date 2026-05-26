@@ -9,7 +9,7 @@
   height: var(--app-frame-height, 100%);
   margin: 0 auto;
   overflow: hidden;
-  background: #f5f4f3;
+  background: #FEFEFE;
   font-family: $font-family-base;
   box-sizing: border-box;
 
@@ -358,39 +358,202 @@
   .mypage__report-content {
     flex: 1;
     overflow-y: auto;
-    padding: 24px 20px;
+    -webkit-overflow-scrolling: touch;
+    padding: 24px 0 36px;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 26px;
   }
 
-  .mypage__char-area {
-    background: $gray-50;
-    border-radius: 14px;
+  .mypage__report-section {
     display: flex;
     flex-direction: column;
+  }
+
+  .mypage__report-section-title {
+    margin: 0 20px 4px;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 30px;
+    color: $gray-900;
+    letter-spacing: $letter-spacing-base;
+  }
+
+  .mypage__report-character-list {
+    display: flex;
     gap: 16px;
-    padding: 20px 16px;
-    margin-bottom: 24px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 0px 20px 0;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
-  .mypage__char-row {
+  .mypage__report-character {
+    flex: 0 0 152px;
+    width: 152px;
+    scroll-snap-align: start;
+  }
+
+  .mypage__report-character-media {
+    height: 90px;
+    margin: 20px 0 0 0;
+    border-radius: 16px 16px 0 0;
     display: flex;
-    gap: 20px;
+    align-items: flex-end;
+    justify-content: center;
+    background: linear-gradient(0deg, #FFE8A3 73.53%, #FFD968 109.15%), #FFF;
+    position: relative;
+    img {
+      height: 112px;
+      transform: translateY(5px);
+      width: auto;
+    }
   }
 
-  .mypage__char-bubble {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: $gray-200;
-    flex-shrink: 0;
+  .mypage__report-character--2 .mypage__report-character-media {
+    background: linear-gradient(0deg, #C3F4FF 73.53%, #93EBFF 109.15%), #FFF;
   }
 
-  .mypage__emotion-row {
+  .mypage__report-character--3 .mypage__report-character-media {
+    background: linear-gradient(0deg, #FFEAC3 73.53%, #FFD78C 109.15%), #FFF;
+  }
+
+  .mypage__report-character-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    min-height: 118px;
+    margin-top: -24px;
+    padding: 12px 10px 12px;
+    border-radius: 16px;
+    background: $gray-0;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(40, 39, 35, 0.03);
+
+    h2 {
+      color: #000;
+      font-family: Pretendard;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 160%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: $letter-spacing-base;
+      margin: 0;
+
+      p {
+        color: $gray-700;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 18px; /* 150% */
+        margin: 0;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        letter-spacing: $letter-spacing-base;
+      }
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 96px;
+      height: 36px;
+      border: 0;
+      border-radius: 12px;
+      background: $main-0;
+      color: $main-700;
+      font-family: $font-family-base;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+      cursor: pointer;
+      letter-spacing: $letter-spacing-base;
+      -webkit-tap-highlight-color: transparent;
+
+      &:hover {
+        cursor: pointer;
+      }
+      &:active {
+        transform: translateY(1px);
+      }
+    }
+  }
+
+  .mypage__report-emotion-card {
+    min-height: 118px;
+    margin: 0 20px;
+    padding: 18px 20px 14px;
+    border-radius: 18px;
+    background: $gray-0;
+    box-shadow: 0 8px 20px rgba(40, 39, 35, 0.03);
+
+    h2 {
+      margin: 0 0 18px;
+      color: $gray-900;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 30px;
+      letter-spacing: $letter-spacing-base;
+    }
+  }
+
+  .mypage__report-emotions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .mypage__report-emotion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 82px;
+    min-height: 40px;
+    padding: 9px 20px;
+    border-radius: 20px;
+    background: $gray-50;
+    color: $gray-700;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 160%;
+    letter-spacing: $letter-spacing-base;
+    white-space: nowrap;
+  }
+
+  .mypage__report-empty {
+    margin: 0 20px;
+    padding: 22px 18px;
+    border-radius: 16px;
+    background: $gray-0;
+    color: $gray-500;
+    font-size: $font-size-body2;
+    line-height: $line-height-body2;
+    letter-spacing: $letter-spacing-base;
+  }
+
+  .mypage__report-empty--in-card {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .mypage__api-error--report {
+    margin: -10px 20px 0;
+    text-align: left;
   }
 }
 
@@ -1258,153 +1421,242 @@
   display: flex;
   flex-direction: column;
 
-  .mypage__cat-tabs {
-    display: flex;
-    border-bottom: 1.5px solid $gray-100;
-    overflow-x: auto;
+  .mypage__header {
+    background: #FEFEFE;
+  }
+
+  .mypage__library-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 25px 0 max(36px, env(safe-area-inset-bottom, 0px));
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    flex-shrink: 0;
 
-    &::-webkit-scrollbar { display: none; }
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .mypage__cat-tabs {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
   }
 
   .mypage__cat-tab {
-    flex: 1;
-    min-width: 0;
-    height: 44px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: $font-size-caption;
-    font-family: $font-family-base;
-    color: $gray-500;
-    white-space: nowrap;
-    padding: 0 8px;
     position: relative;
-    text-align: center;
-    letter-spacing: $letter-spacing-base;
+    height: 39px;
+    max-width: 98px;
+    width: 100%;
+    padding: 0 0 5px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 160%; /* 25.6px */
+    letter-spacing: -0.4px;
+    font-family: $font-family-base;
+    color: $gray-800;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
 
     &--active {
       color: $gray-900;
-      font-weight: 700;
+      font-weight: 600;
 
       &::after {
         content: '';
         position: absolute;
-        bottom: -1.5px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: $color-danger;
+        bottom: 0;
+        left: 8px;
+        right: 8px;
+        height: 5px;
+        border-radius: 8px 8px 0 0;
+        background: $main-500;
       }
     }
   }
 
+  .mypage__library-count {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 13px 20px;
+    color: $gray-800;
+    font-family: $font-family-base;
+    letter-spacing: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    strong {
+    font-size: 16px;
+    font-weight: 600;
+      color: $main-600;
+    }
+  }
+
+  .mypage__library-banner {
+    width: calc(100% - 40px);
+    min-height: 108px;
+    margin: 20px;
+  }
+
+  .mypage__library-banner img {
+  }
+
   .mypage__book-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 0 20px;
   }
 
   .mypage__book-item {
     display: flex;
     align-items: flex-start;
-    gap: 14px;
+    gap: 24px;
     width: 100%;
-    background: none;
+    min-width: 0;
+    padding: 0;
     border: none;
-    padding: 16px 0;
+    background: transparent;
     cursor: pointer;
     text-align: left;
     -webkit-tap-highlight-color: transparent;
   }
 
   .mypage__book-cover {
-    width: 72px;
-    height: 96px;
+    width: 79px;
+    height: 123px;
+    flex: 0 0 79px;
     object-fit: cover;
+    border: 0;
+    border-radius: 0 4px 0 4px;
     background: $gray-200;
-    border-radius: 4px;
-    flex-shrink: 0;
+    box-shadow: 3px 3px 4px rgba(40, 39, 35, 0.16);
   }
 
   .mypage__book-info {
     flex: 1;
+    min-width: 0;
+    padding-top: 17px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-    padding-top: 4px;
+    overflow: hidden;
   }
 
   .mypage__book-title {
-    font-size: $font-size-body1;
-    font-weight: 600;
-    color: $gray-900;
     margin: 0;
-    line-height: $line-height-body1;
+    color: $gray-900;
+    font-family: $font-family-base;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .mypage__book-date {
-    font-size: $font-size-caption;
-    color: $gray-500;
+  .mypage__book-author,
+  .mypage__book-meta {
     margin: 0;
+    color: $gray-700;
+    font-family: $font-family-base;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 23px;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .mypage__book-divider {
-    height: 1px;
-    background: $gray-100;
+  .mypage__book-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    margin-top: 7px;
+    overflow: hidden;
+  }
+
+  .mypage__book-status-chip,
+  .mypage__book-date-chip,
+  .mypage__book-progress-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 23px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: $font-family-base;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  .mypage__book-status-chip {
+    flex: 0 0 auto;
+    background: $gray-50;
+    color: $gray-500;
+  }
+
+  .mypage__book-date-chip {
+    min-width: 0;
+    max-width: 132px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: $main-0;
+    color: $main-600;
+  }
+
+  .mypage__book-progress-chip {
+    min-width: 0;
+    max-width: 132px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: $main-0;
+    color: $main-600;
+  }
+
+  .mypage__book-chip-icon,
+  .mypage__book-date-chip img {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+  }
+
+  .mypage__book-chip-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $gray-400;
+    font-size: 11px;
+    line-height: 1;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .mypage__book-date-chip img {
+    display: block;
   }
 
   .mypage__empty {
-    text-align: center;
+    margin: 0;
+    padding: 48px 0;
     color: $gray-400;
     font-size: $font-size-body1;
-    padding: 48px 0;
-  }
-
-  // ── 별점 ──
-  .mypage__stars {
-    display: flex;
-    gap: 2px;
-  }
-
-  .mypage__star {
-    font-size: 16px;
-    color: $gray-200;
-    line-height: 1;
-
-    &--on { color: $main-400; }
-  }
-
-  // ── 진행 바 ──
-  .mypage__progress {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    &__track {
-      height: 6px;
-      background: $gray-100;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    &__fill {
-      height: 100%;
-      background: $color-danger;
-      border-radius: 3px;
-    }
-
-    &__labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: $font-size-caption;
-      color: $gray-600;
-    }
+    line-height: $line-height-body1;
+    text-align: center;
   }
 }
