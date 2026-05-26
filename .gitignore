@@ -36,4 +36,4 @@ figma-nodes.json
 
 # Local API reference exports
 /api/*
-!/api/\[...path\].js
+!/api/proxy.js
