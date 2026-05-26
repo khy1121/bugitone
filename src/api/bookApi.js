@@ -46,6 +46,12 @@ export const removeMyBook = (mainId, userId) =>
 export const getBookMemos = (mainId) =>
   axiosInstance.get(`/main-study/${mainId}/memos`).then(unwrap)
 
+export const getAllMemos = (userId) =>
+  axiosInstance.get(`/memos/${userId}`).then(unwrap)
+
+export const getMemoDetail = (userId, memoId) =>
+  axiosInstance.get(`/memos/${userId}/${memoId}`).then(unwrap)
+
 export const createMemo = (body) =>
   // 백엔드가 인증 토큰 외에 user_id를 요구하면 여기 params에 추가해야 합니다.
   axiosInstance.post('/memos', body).then(unwrap)

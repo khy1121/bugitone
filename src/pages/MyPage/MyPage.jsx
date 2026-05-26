@@ -13,7 +13,7 @@ import {
 import libraryBannerImage from "../../assets/banner.svg";
 import { ROUTES } from "../../constants/routes";
 import { updateUser, checkNickname } from "../../api/userApi";
-import { getMyBooks } from "../../api/bookApi";
+import { getAllMemos, getMyBooks } from "../../api/bookApi";
 import {
   getMonthlyCharacters,
   getMonthlyEmotions,
@@ -154,6 +154,15 @@ function toLibraryBookArray(data) {
   return [];
 }
 
+function toMemoArray(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.memos)) return data.memos;
+  if (Array.isArray(data?.memoList)) return data.memoList;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.content)) return data.content;
+  return [];
+}
+
 function parseBookPageCount(value) {
   return Number.parseInt(`${value || ""}`.replace(/[^0-9]/g, ""), 10) || 0;
 }
@@ -258,6 +267,39 @@ function normalizeLibraryBook(raw) {
 
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, "") : "";
+}
+
+function normalizeMemoSummary(raw) {
+  const memo = raw?.memo ?? raw ?? {};
+  const memoId =
+    memo.memoId ??
+    memo.memo_id ??
+    memo.id ??
+    raw?.memoId ??
+    raw?.memo_id ??
+    raw?.id;
+  const date =
+    normalizeLibraryDate(memo.updatedAt ?? memo.updated_at ?? raw?.updatedAt ?? raw?.updated_at) ||
+    normalizeLibraryDate(memo.createdAt ?? memo.created_at ?? raw?.createdAt ?? raw?.created_at) ||
+    normalizeLibraryDate(memo.date ?? raw?.date);
+
+  return {
+    ...memo,
+    id: memoId,
+    memoId,
+    title: memo.title ?? memo.memoTitle ?? memo.memo_title ?? raw?.title ?? "제목 없음",
+    content:
+      memo.content ??
+      memo.memoContent ??
+      memo.memo_content ??
+      raw?.content ??
+      raw?.memoContent ??
+      raw?.memo_content ??
+      "",
+    date,
+    createdAt: memo.createdAt ?? memo.created_at ?? raw?.createdAt ?? raw?.created_at,
+    updatedAt: memo.updatedAt ?? memo.updated_at ?? raw?.updatedAt ?? raw?.updated_at,
+  };
 }
 
 function getMemoTitle(memo) {
@@ -1556,11 +1598,47 @@ function LibraryCategoryView({
 
 function MemoView({ onBack }) {
   const navigate = useNavigate();
+  const userId = getCurrentUserId();
   const [selectedBook, setSelectedBook] = useState(null);
+  const [memoList, setMemoList] = useState(() => (userId ? [] : null));
+  const [loading, setLoading] = useState(Boolean(userId));
+  const [error, setError] = useState("");
   const booksWithMemos = getBooksWithMemos();
+  const useApiMemos = Boolean(userId);
+
+  useEffect(() => {
+    if (!userId) {
+      setMemoList(null);
+      setLoading(false);
+      setError("");
+      return undefined;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+
+    getAllMemos(userId)
+      .then((data) => {
+        if (cancelled) return;
+        setMemoList(toMemoArray(data).map(normalizeMemoSummary));
+      })
+      .catch((apiError) => {
+        if (cancelled) return;
+        setMemoList([]);
+        setError(apiError?.message ?? "메모를 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const handleBack = () => {
-    if (selectedBook) {
+    if (!useApiMemos && selectedBook) {
       setSelectedBook(null);
     } else {
       onBack();
@@ -1572,12 +1650,53 @@ function MemoView({ onBack }) {
       <div className="mypage__header">
         <BackButton onClick={handleBack} />
         <h1 className="mypage__header-title">
-          {selectedBook ? selectedBook.title : "내 메모"}
+          {!useApiMemos && selectedBook ? selectedBook.title : "내 메모"}
         </h1>
       </div>
 
       <div className="mypage__memo-scroll">
-        {selectedBook === null ? (
+        {useApiMemos ? (
+          loading ? (
+            <p className="mypage__empty">메모를 불러오는 중이에요.</p>
+          ) : error ? (
+            <p className="mypage__empty">{error}</p>
+          ) : memoList.length === 0 ? (
+            <p className="mypage__empty">아직 메모가 없어요.</p>
+          ) : (
+            memoList.map((memo, idx) => (
+              <React.Fragment key={memo.memoId ?? memo.id ?? idx}>
+                <button
+                  type="button"
+                  className="mypage__memo-row"
+                  onClick={() =>
+                    navigate(ROUTES.MEMO_EDIT, {
+                      state: {
+                        memo,
+                        memoId: memo.memoId ?? memo.id,
+                        mode: "view",
+                      },
+                    })
+                  }
+                >
+                  <div className="mypage__memo-row-info">
+                    <span className="mypage__memo-row-label">
+                      {getMemoTitle(memo)}
+                    </span>
+                    {memo.date && (
+                      <span className="mypage__memo-row-date">{memo.date}</span>
+                    )}
+                  </div>
+                  <span className="mypage__arrow">
+                    <ChevronRightIcon size={20} color="#8e8b7e" />
+                  </span>
+                </button>
+                {idx < memoList.length - 1 && (
+                  <div className="mypage__memo-divider" />
+                )}
+              </React.Fragment>
+            ))
+          )
+        ) : selectedBook === null ? (
           booksWithMemos.length === 0 ? (
             <p className="mypage__empty">아직 메모가 없어요.</p>
           ) : (

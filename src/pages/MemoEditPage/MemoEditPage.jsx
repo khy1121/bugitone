@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { Mark, mergeAttributes } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { createMemo, deleteMemo, updateMemo } from '../../api/bookApi'
+import { createMemo, deleteMemo, getMemoDetail, updateMemo } from '../../api/bookApi'
 import MemoToolbar from '../../components/common/MemoToolbar/MemoToolbar'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import './MemoEditPage.scss'
@@ -82,15 +82,31 @@ function getMemoSummary(content) {
 
 function mergeMemoResult(result, fallback) {
   const source = result?.memo ?? result ?? {}
+  const memoId =
+    source.id ??
+    source.memoId ??
+    source.memo_id ??
+    fallback.id ??
+    fallback.memoId
 
   return {
     ...fallback,
     ...source,
-    id: source.id ?? source.memoId ?? fallback.id,
-    memoId: source.memoId ?? source.id ?? fallback.memoId,
-    title: source.title ?? fallback.title,
-    content: source.content ?? fallback.content,
-    date: source.date ?? source.createdAt ?? source.updatedAt ?? fallback.date,
+    id: memoId,
+    memoId,
+    title: source.title ?? source.memoTitle ?? source.memo_title ?? fallback.title,
+    content:
+      source.content ??
+      source.memoContent ??
+      source.memo_content ??
+      fallback.content,
+    date:
+      source.date ??
+      source.updatedAt ??
+      source.updated_at ??
+      source.createdAt ??
+      source.created_at ??
+      fallback.date,
   }
 }
 
@@ -174,10 +190,11 @@ export default function MemoEditPage() {
   const routeBookId = location.state?.routeBookId ?? bookId
   const mainId = location.state?.mainId
   const initialMemo = location.state?.memo
+  const stateMemoId = location.state?.memoId
   const [memo, setMemo] = useState(initialMemo)
   const [pageMode, setPageMode] = useState(location.state?.mode ?? 'edit')
   const [focusEditorOnEdit, setFocusEditorOnEdit] = useState(false)
-  const memoId = memo?.id ?? memo?.memoId
+  const memoId = memo?.id ?? memo?.memoId ?? memo?.memo_id ?? stateMemoId
   const isViewMode = pageMode === 'view'
   const [title, setTitle] = useState(getMemoTitle(initialMemo))
   const [saving, setSaving] = useState(false)
@@ -224,6 +241,31 @@ export default function MemoEditPage() {
   useEffect(() => {
     editor?.setEditable(!isViewMode)
   }, [editor, isViewMode])
+
+  useEffect(() => {
+    const userId = getUserId()
+
+    if (!editor || !userId || !memoId) {
+      return undefined
+    }
+
+    let cancelled = false
+
+    getMemoDetail(userId, memoId)
+      .then((result) => {
+        if (cancelled) return
+
+        const nextMemo = mergeMemoResult(result, memo ?? { id: memoId, memoId })
+        setMemo(nextMemo)
+        setTitle(getMemoTitle(nextMemo))
+        editor.commands.setContent(getMemoContent(nextMemo))
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [editor, memoId])
 
   useEffect(() => {
     if (!editor || isViewMode || !focusEditorOnEdit) return undefined
@@ -346,17 +388,19 @@ export default function MemoEditPage() {
     const plainContent = stripHtml(content)
     const nextTitle = title.trim() || (!requireTitle ? plainContent.slice(0, 30).trim() || '무제' : '')
     const hasSavableContent = Boolean(plainContent) || Boolean(memoId)
+    const userId = getUserId()
 
     if (!nextTitle) {
       openTitleSheet(true)
       return false
     }
 
-    if (!nextTitle || !hasSavableContent || !bookId) {
+    const canPersist = Boolean(userId && memoId) || Boolean(bookId)
+
+    if (!nextTitle || !hasSavableContent || !canPersist) {
       return false
     }
 
-    const userId = getUserId()
     setSaving(true)
 
     try {
