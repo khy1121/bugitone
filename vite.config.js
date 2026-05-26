@@ -2,24 +2,31 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || 'http://localhost:8080'
+
+const apiProxy = {
+  '/api': {
+    target: apiProxyTarget,
+    changeOrigin: true,
+  },
+}
+
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-
-      // 프리캐시할 정적 에셋 패턴 (빌드 결과물 외 추가 파일)
       includeAssets: [
         'icons/*.png',
+        'pwa-icon.svg',
         'assets/fonts/*.ttf',
         'assets/onBoarding/*.svg',
       ],
-
       manifest: {
-        name: '가독이',
-        short_name: '가독이',
-        description: '나만의 독서 기록 & AI 채팅 앱',
-        theme_color: '#f8bc0a',
+        name: 'NADOK',
+        short_name: 'NADOK',
+        description: 'Personal reading notes and AI chat',
+        theme_color: '#997c26',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
@@ -27,32 +34,24 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'icons/icon-192.png',
+            src: '/icons/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
-            src: 'icons/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512.png',
+            src: '/icons/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
           },
         ],
       },
-
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        // 빌드 결과물 전체 프리캐시
         globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,woff2}'],
         globIgnores: ['**/assets/shop/event.svg'],
-
         runtimeCaching: [
-          // API 요청: 네트워크 우선 → 실패 시 캐시 반환 (최대 1일)
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
             handler: 'NetworkFirst',
@@ -65,7 +64,6 @@ export default defineConfig({
               networkTimeoutSeconds: 8,
             },
           },
-          // 외부 폰트(Pretendard CDN): 캐시 우선
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
             handler: 'CacheFirst',
@@ -81,12 +79,16 @@ export default defineConfig({
       },
     }),
   ],
-
   server: {
     port: 5173,
     host: '0.0.0.0',
+    proxy: apiProxy,
   },
-
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
+    proxy: apiProxy,
+  },
   css: {
     preprocessorOptions: {
       scss: {

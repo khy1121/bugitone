@@ -35,4 +35,5 @@ coverage/
 figma-nodes.json
 
 # Local API reference exports
-/api/
+/api/*
+!/api/\[...path\].js
