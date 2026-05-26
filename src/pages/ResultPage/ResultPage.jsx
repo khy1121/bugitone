@@ -27,10 +27,14 @@ const getCurrentDate = () => {
 };
 
 const FALLBACK_ANALYSIS = {
+  inputId: null,
+  resultId: null,
+  createdAt: "",
   character: {
     characterName: "어른이 된 어린왕자",
     bookQuote: "중요한 것은 눈에 보이지 않아. 마음으로 보아야 해",
     characterImgUrl: LITTLE_PRINCE_SRC,
+    author: "앙투안 드 생텍쥐페리",
     methodReason:
       "뿌듯함과 지침이 동시에 느껴지는 오늘, 어린 왕자처럼 작은 것들의 소중함을 알면서도 그 무게에 지쳐있는 당신과 닮았어요.",
   },
@@ -115,6 +119,8 @@ export default function ResultPage() {
   const characterName = character.characterName || FALLBACK_ANALYSIS.character.characterName;
   const bookQuote = character.bookQuote || FALLBACK_ANALYSIS.character.bookQuote;
   const characterImage = character.characterImgUrl || FALLBACK_ANALYSIS.character.characterImgUrl;
+  const characterAuthor =
+    character.author || FALLBACK_ANALYSIS.character.author;
   const methodReason =
     character.methodReason ||
     displayAnalysis.methodReason ||
@@ -247,7 +253,7 @@ export default function ResultPage() {
 
         <section className="result__book-card">
           <h2>{characterName}</h2>
-          <p className="result__book-meta">어린왕자 ㅣ 앙투안 드 생텍쥐페리</p>
+          <p className="result__book-meta">저자 ㅣ {characterAuthor}</p>
 
           <div className="result__book-visual">
             <img

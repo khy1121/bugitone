@@ -11,16 +11,9 @@
   background-position: center center;
   background-repeat: no-repeat;
 
-  &__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(153, 124, 38, 0.53);
-    z-index: 1;
-  }
-
   &__inner {
     position: relative;
-    z-index: 2;
+    z-index: 1;
     width: 100%;
     max-width: 393px;
     height: 100%;

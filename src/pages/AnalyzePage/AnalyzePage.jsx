@@ -8,9 +8,11 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { validateEmotionInput } from "../../api/emotionApi";
+import useKeyboardAwareInput from "../../hooks/useKeyboardAwareInput";
 import "./AnalyzePage.scss";
 
 const ALERT_ICON_SRC = "/assets/alert-02.svg";
+const EXIT_ALERT_ICON_SRC = "/assets/character/alert-circle.svg";
 
 const QUESTIONS = [
   ["오늘 하루 있었던", "일기를 간단하게 적어주세요."],
@@ -34,8 +36,6 @@ const DIARY_VIEWPORT_MARGIN = 16;
 const ACTION_HEIGHT = 60;
 const ACTION_BOTTOM_OFFSET = 58;
 
-const KEYBOARD_BLUR_DELAY = 420;
-
 const formatToday = () => {
   const today = new Date();
   const year = today.getFullYear();
@@ -50,7 +50,6 @@ export default function AnalyzePage() {
   const pageRef = useRef(null);
   const diaryGroupRef = useRef(null);
   const textareaRef = useRef(null);
-  const blurTimerRef = useRef(null);
 
   const today = useMemo(() => formatToday(), []);
 
@@ -58,13 +57,29 @@ export default function AnalyzePage() {
   const [diary, setDiary] = useState("");
   const [emotions, setEmotions] = useState([]);
   const [comfort, setComfort] = useState("");
-  const [isDiaryFocused, setIsDiaryFocused] = useState(false);
   const [diaryHeight, setDiaryHeight] = useState(DIARY_EMPTY_HEIGHT);
   const [diaryMaxHeight, setDiaryMaxHeight] = useState(DIARY_MAX_HEIGHT);
   const [viewportTick, setViewportTick] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showInvalidDialog, setShowInvalidDialog] = useState(false);
+  const [invalidMessage, setInvalidMessage] = useState(
+    "일기를 분석할 수 없어요.\n다시 한 번 작성해주세요.",
+  );
   const [validating, setValidating] = useState(false);
+  const keyboard = useKeyboardAwareInput({
+    scrollRef: pageRef,
+    targetRef: diaryGroupRef,
+    resetScrollOnBlur: true,
+    onFocus: () => {
+      window.requestAnimationFrame(() => {
+        scrollDiaryGroupIntoView();
+      });
+    },
+    onBlurSettled: () => {
+      setDiaryMaxHeight(DIARY_MAX_HEIGHT);
+    },
+  });
+  const isDiaryFocused = keyboard.isKeyboardFocused;
 
   const canNext = useMemo(() => {
     if (step === 1) return diary.trim().length > 0;
@@ -74,14 +89,6 @@ export default function AnalyzePage() {
 
   const diaryCounterText =
     diary.length >= 300 ? `(${diary.length} / 300)` : `(${diary.length}/300)`;
-
-  useEffect(() => {
-    return () => {
-      if (blurTimerRef.current) {
-        window.clearTimeout(blurTimerRef.current);
-      }
-    };
-  }, []);
 
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
@@ -159,11 +166,20 @@ export default function AnalyzePage() {
 
         try {
           const result = await validateEmotionInput(diary.trim());
-          if (!result?.valid) {
+          const isValid = result?.valid ?? result?.is_valid;
+
+          if (!isValid) {
+            setInvalidMessage("일기를 분석할 수 없어요.\n다시 한 번 작성해주세요.");
             setShowInvalidDialog(true);
             return;
           }
         } catch (error) {
+          const isServerError = error?.status === 0 || error?.status >= 500;
+          setInvalidMessage(
+            isServerError
+              ? "AI 서비스가 잠시 불안정해요.\n잠시 후 다시 시도해주세요."
+              : error?.message || "일기를 분석할 수 없어요.\n다시 한 번 작성해주세요.",
+          );
           setShowInvalidDialog(true);
           return;
         } finally {
@@ -188,36 +204,12 @@ export default function AnalyzePage() {
   const handleDiaryChange = (event) => {
     setDiary(event.target.value);
     setShowInvalidDialog(false);
+    setInvalidMessage("일기를 분석할 수 없어요.\n다시 한 번 작성해주세요.");
 
     window.requestAnimationFrame(() => {
       scrollDiaryToBottomIfNeeded();
       scrollDiaryGroupIntoView();
     });
-  };
-
-  const handleDiaryFocus = () => {
-    if (blurTimerRef.current) {
-      window.clearTimeout(blurTimerRef.current);
-      blurTimerRef.current = null;
-    }
-
-    setIsDiaryFocused(true);
-
-    window.requestAnimationFrame(() => {
-      scrollDiaryGroupIntoView();
-    });
-  };
-
-  const handleDiaryBlur = () => {
-    if (blurTimerRef.current) {
-      window.clearTimeout(blurTimerRef.current);
-    }
-
-    blurTimerRef.current = window.setTimeout(() => {
-      setIsDiaryFocused(false);
-      setDiaryMaxHeight(DIARY_MAX_HEIGHT);
-      pageRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }, KEYBOARD_BLUR_DELAY);
   };
 
   const toggleEmotion = (emotion) => {
@@ -348,8 +340,8 @@ export default function AnalyzePage() {
                     rows={1}
                     maxLength={300}
                     onChange={handleDiaryChange}
-                    onFocus={handleDiaryFocus}
-                    onBlur={handleDiaryBlur}
+                    onFocus={keyboard.handleFocus}
+                    onBlur={keyboard.handleBlur}
                     placeholder="일기를 입력해주세요."
                   />
                 </div>
@@ -444,9 +436,12 @@ export default function AnalyzePage() {
           <section className="analyze__invalid-dialog">
             <img className="analyze__invalid-icon" src={ALERT_ICON_SRC} alt="" aria-hidden="true" />
             <p id="analyze-invalid-title" className="analyze__invalid-message">
-              일기를 분석할 수 없어요.
-              <br />
-              다시 한 번 작성해주세요.
+              {invalidMessage.split("\n").map((line) => (
+                <React.Fragment key={line}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
             </p>
             <button className="analyze__invalid-retry" type="button" onClick={handleRetryDiary}>
               다시 시도하기
@@ -456,12 +451,18 @@ export default function AnalyzePage() {
       )}
 
       {showConfirm && (
-        <div className="analyze__overlay" role="dialog" aria-modal="true">
-          <div className="analyze__dialog">
-            <p>
-              뒤로 나가시면 작성하신 내용은{"\n"}
-              복원되지 않습니다.{"\n"}
-              정말로 나가시겠습니까?
+        <div
+          className="analyze__overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="analyze-exit-title"
+        >
+          <section className="analyze__dialog">
+            <img className="analyze__dialog-icon" src={EXIT_ALERT_ICON_SRC} alt="" aria-hidden="true" />
+            <p id="analyze-exit-title" className="analyze__dialog-message">
+              뒤로 나가시면 작성하신 내용은
+              <br />
+              <strong>복원되지 않습니다.</strong> 정말로 나가시겠습니까?
             </p>
 
             <div className="analyze__dialog-actions">
@@ -470,10 +471,10 @@ export default function AnalyzePage() {
               </button>
 
               <button type="button" onClick={() => setShowConfirm(false)}>
-                아니요, 계속 쓸래요
+                계속 쓸래요
               </button>
             </div>
-          </div>
+          </section>
         </div>
       )}
     </div>

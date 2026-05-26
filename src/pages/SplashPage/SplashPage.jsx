@@ -16,7 +16,6 @@ export default function SplashPage() {
 
   return (
     <div className="splash">
-      <div className="splash__overlay" />
       <div className="splash__inner">
         <div className="splash__logo-group">
           <h1 className="splash__title">DOK</h1>
