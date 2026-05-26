@@ -1,12 +1,20 @@
 import axiosInstance from './axiosInstance'
 
+const toErrorMessage = (value) => {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (typeof value?.message === 'string') return value.message
+  if (typeof value?.error === 'string') return value.error
+  return '요청을 처리하지 못했습니다.'
+}
+
 const unwrap = (response) => {
   const body = response.data
 
   if (body?.isSuccess === false) {
     throw {
       status: body.httpStatus || response.status,
-      message: body.message || '요청을 처리하지 못했습니다.',
+      message: toErrorMessage(body.message) || '요청을 처리하지 못했습니다.',
       data: body,
     }
   }
