@@ -20,6 +20,11 @@ import './ChatPage.scss'
 const LANDING_CHAR_IMG = '/assets/character/character.svg'
 const CHAT_CHAR_IMG = '/assets/chatPage/chat_char.svg'
 const MAX_INPUT_HEIGHT = 380
+const QUICK_ACTIONS = [
+  '가독이와 토론하기',
+  '가독이와 감상문쓰기',
+  '가독이에게 책 추천받기',
+]
 
 // 로그인 안 된 경우 null 반환 (1 폴백 제거 — 존재하지 않는 userId로 API 호출 방지)
 const getUserId = () => {
@@ -364,11 +369,11 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
     })
   }
 
-  const handleSend = async () => {
-    if (!canSend || loading) return
+  const sendChatMessage = async (rawText) => {
+    const text = rawText.trim()
+    if (!text || loading) return
     setSendError('')
 
-    const text = input.trim()
     setInput('')
     resetInputHeight()
     inputRef.current?.blur()
@@ -402,6 +407,14 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSend = () => {
+    sendChatMessage(input)
+  }
+
+  const handleQuickAction = (text) => {
+    sendChatMessage(text)
   }
 
   const handleKeyDown = (e) => {
@@ -520,13 +533,28 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
               onPointerCancel={endQuickDrag}
               onClickCapture={handleQuickClickCapture}
             >
-              <button className="chat-room__quick-btn" type="button">
+              <button
+                className="chat-room__quick-btn"
+                type="button"
+                onClick={() => handleQuickAction(QUICK_ACTIONS[0])}
+                disabled={loading}
+              >
                 가독이와 토론하기
               </button>
-              <button className="chat-room__quick-btn" type="button">
+              <button
+                className="chat-room__quick-btn"
+                type="button"
+                onClick={() => handleQuickAction(QUICK_ACTIONS[1])}
+                disabled={loading}
+              >
                 가독이와 감상문쓰기
               </button>
-              <button className="chat-room__quick-btn" type="button">
+              <button
+                className="chat-room__quick-btn"
+                type="button"
+                onClick={() => handleQuickAction(QUICK_ACTIONS[2])}
+                disabled={loading}
+              >
                 가독이에게 책 추천받기
               </button>
             </div>

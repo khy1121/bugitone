@@ -1,17 +1,18 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || 'http://localhost:8080'
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:8080'
+  const apiProxy = {
+    '/api': {
+      target: apiProxyTarget,
+      changeOrigin: true,
+    },
+  }
 
-const apiProxy = {
-  '/api': {
-    target: apiProxyTarget,
-    changeOrigin: true,
-  },
-}
-
-export default defineConfig({
+  return {
   plugins: [
     react(),
     VitePWA({
@@ -90,4 +91,5 @@ export default defineConfig({
       },
     },
   },
+  }
 })
