@@ -430,7 +430,17 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
 
   const handleQuickPointerDown = (event) => {
     const scroller = quickActionsRef.current
-    if (!scroller || event.pointerType === 'touch') return
+    const isQuickButton =
+      event.target instanceof Element &&
+      event.target.closest('.chat-room__quick-btn')
+
+    if (
+      !scroller ||
+      event.pointerType === 'touch' ||
+      isQuickButton
+    ) {
+      return
+    }
 
     quickDragRef.current = {
       pointerId: event.pointerId,
@@ -465,7 +475,12 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
 
     scroller.releasePointerCapture?.(event.pointerId)
     scroller.classList.remove('chat-room__quick-actions--dragging')
-    quickDragRef.current.pointerId = null
+    quickDragRef.current = {
+      pointerId: null,
+      startX: 0,
+      scrollLeft: scroller.scrollLeft,
+      dragged: drag.dragged,
+    }
   }
 
   const handleQuickClickCapture = (event) => {
