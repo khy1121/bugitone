@@ -702,8 +702,10 @@
 
   img,
   svg {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
+    display: block;
+    object-fit: contain;
   }
 
   cursor: pointer;
@@ -725,7 +727,7 @@
 .memo-card {
   width: 100%;
   min-height: 64px;
-  padding: 19px 22px;
+  padding: 0 22px;
 
   display: flex;
   align-items: center;
@@ -740,10 +742,49 @@
   font-family: 'Pretendard', sans-serif;
   text-align: left;
   cursor: pointer;
+}
+
+.memo-card__edit,
+.memo-card__preview {
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+.memo-card__edit {
+  width: 26px;
+  height: 64px;
+  flex: 0 0 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   svg {
     flex: 0 0 26px;
   }
+
+  img {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: block;
+    object-fit: contain;
+  }
+}
+
+.memo-card__preview {
+  min-width: 0;
+  min-height: 64px;
+  flex: 1 1 auto;
+
+  display: flex;
+  align-items: center;
 
   span {
     min-width: 0;

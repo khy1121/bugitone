@@ -9,13 +9,13 @@ import {
   getBookMemos,
   getMyBooks,
   removeMyBook,
+  searchBooks,
   updateMyBook,
 } from '../../api/bookApi'
 import {
   ChevronLeftIcon,
   CheckIcon,
   TrashIcon,
-  PencilIcon,
 } from '../../assets/icons'
 import './BookDetailPage.scss'
 
@@ -25,6 +25,8 @@ const BOOK_STATE_ICON_SRC = '/assets/library/bookState.svg'
 const BOOK_DATE_ICON_SRC = '/assets/library/bookDate.svg'
 const CALENDAR_ICON_SRC = '/assets/library/calendar-01.svg'
 const EDIT_ICON_SRC = '/assets/library/edit.svg'
+const MEMO_WRITE_ICON_SRC = '/assets/library/pencil-edit-02.svg'
+const MEMO_CARD_ICON_SRC = '/assets/library/edit.svg'
 const SAVE_ICON_SRC = '/assets/library/save.svg'
 const BOOK_CHAT_CHARACTER_SRC = '/assets/shop/character.svg'
 const DEFAULT_HERO_RGB = '184, 215, 189'
@@ -143,23 +145,24 @@ function isIsbnLike(value) {
 
 function normalizeBook(raw) {
   const source = raw?.book ?? raw
+  const original = raw?.raw?.book ?? raw?.raw ?? {}
   return {
-    id: raw?.mainId ?? raw?.mainStudyId ?? raw?.main_id ?? raw?.bookId ?? raw?.book_id ?? raw?.id ?? source?.id ?? source?.isbn13 ?? source?.isbn,
-    mainId: raw?.mainId ?? raw?.mainStudyId ?? raw?.main_id ?? source?.mainId ?? null,
-    bookId: raw?.bookId ?? raw?.book_id ?? source?.bookId ?? source?.book_id ?? null,
-    isbn: source?.isbn13 ?? source?.isbn ?? raw?.isbn13 ?? raw?.isbn,
-    title: source?.title ?? raw?.title ?? '제목 없음',
-    author: source?.author ?? raw?.author ?? '',
-    category: source?.categoryName ?? source?.category ?? raw?.categoryName ?? raw?.category ?? '',
-    cover: source?.coverUrl ?? source?.cover_url ?? source?.cover ?? source?.coverImage ?? source?.thumbnail ?? raw?.coverUrl ?? raw?.cover_url ?? raw?.cover ?? raw?.coverImage ?? raw?.thumbnail ?? FALLBACK_COVER,
-    status: normalizeStatus(raw?.readingStatus ?? raw?.reading_status ?? raw?.status ?? source?.readingStatus ?? source?.status),
-    startDate: normalizeDate(raw?.startDate ?? raw?.startedAt ?? raw?.readStartDate ?? source?.startDate),
-    endDate: normalizeDate(raw?.endDate ?? raw?.finishedAt ?? raw?.readEndDate ?? source?.endDate),
-    description: source?.bookIntro ?? source?.book_intro ?? source?.description ?? raw?.bookIntro ?? raw?.book_intro ?? raw?.description ?? '',
-    publisher: source?.publisher ?? raw?.publisher ?? '',
-    publishYear: source?.publishYear ?? source?.pubDate ?? raw?.publishYear ?? raw?.pubDate ?? '',
-    isbn13: source?.isbn13 ?? raw?.isbn13,
-    pages: source?.pageCount ?? source?.page_count ?? source?.pages ?? source?.page ?? raw?.pageCount ?? raw?.page_count ?? raw?.pages ?? raw?.page ?? '',
+    id: raw?.mainId ?? raw?.mainStudyId ?? raw?.main_id ?? raw?.bookId ?? raw?.book_id ?? raw?.id ?? source?.id ?? source?.isbn13 ?? source?.isbn ?? original?.isbn13 ?? original?.isbn,
+    mainId: raw?.mainId ?? raw?.mainStudyId ?? raw?.main_id ?? source?.mainId ?? original?.mainId ?? null,
+    bookId: raw?.bookId ?? raw?.book_id ?? source?.bookId ?? source?.book_id ?? original?.bookId ?? original?.book_id ?? null,
+    isbn: source?.isbn13 ?? source?.isbn ?? raw?.isbn13 ?? raw?.isbn ?? original?.isbn13 ?? original?.isbn,
+    title: source?.title ?? raw?.title ?? original?.title ?? '제목 없음',
+    author: source?.author ?? raw?.author ?? original?.author ?? '',
+    category: source?.categoryName ?? source?.category ?? raw?.categoryName ?? raw?.category ?? original?.categoryName ?? original?.category ?? '',
+    cover: source?.coverUrl ?? source?.cover_url ?? source?.cover ?? source?.coverImage ?? source?.thumbnail ?? raw?.coverUrl ?? raw?.cover_url ?? raw?.cover ?? raw?.coverImage ?? raw?.thumbnail ?? original?.coverUrl ?? original?.cover_url ?? original?.cover ?? original?.coverImage ?? original?.thumbnail ?? FALLBACK_COVER,
+    status: normalizeStatus(raw?.readingStatus ?? raw?.reading_status ?? raw?.status ?? source?.readingStatus ?? source?.status ?? original?.readingStatus ?? original?.status),
+    startDate: normalizeDate(raw?.startDate ?? raw?.startedAt ?? raw?.readStartDate ?? source?.startDate ?? original?.startDate),
+    endDate: normalizeDate(raw?.endDate ?? raw?.finishedAt ?? raw?.readEndDate ?? source?.endDate ?? original?.endDate),
+    description: source?.bookIntro ?? source?.book_intro ?? source?.description ?? raw?.bookIntro ?? raw?.book_intro ?? raw?.description ?? original?.bookIntro ?? original?.book_intro ?? original?.description ?? '',
+    publisher: source?.publisher ?? raw?.publisher ?? original?.publisher ?? '',
+    publishYear: source?.publishYear ?? source?.pubDate ?? raw?.publishYear ?? raw?.pubDate ?? original?.publishYear ?? original?.pubDate ?? '',
+    isbn13: source?.isbn13 ?? raw?.isbn13 ?? original?.isbn13,
+    pages: source?.pageCount ?? source?.page_count ?? source?.pages ?? source?.page ?? raw?.pageCount ?? raw?.page_count ?? raw?.pages ?? raw?.page ?? original?.pageCount ?? original?.page_count ?? original?.pages ?? original?.page ?? '',
     currentPage: raw?.currentPage ?? source?.currentPage,
     inMyStudy: raw?.inMyStudy ?? source?.inMyStudy ?? Boolean(raw?.mainId ?? raw?.mainStudyId ?? raw?.main_id),
     memos: source?.memos ?? raw?.memos ?? [],
@@ -285,8 +288,65 @@ function sameBookRoute(item, routeId) {
   return [item?.mainId, item?.bookId, item?.id, item?.isbn].some((value) => String(value ?? '') === id)
 }
 
+function normalizeMatchText(value) {
+  return String(value || '').replace(/\s+/g, '').toLowerCase()
+}
+
+function sameBookTitle(a, b) {
+  const aTitle = normalizeMatchText(a?.title)
+  const bTitle = normalizeMatchText(b?.title)
+  return Boolean(aTitle && bTitle && aTitle === bTitle)
+}
+
+function compactTitle(title) {
+  return String(title || '')
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s*\[[^\]]*\]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function getTitleSearchQueries(book) {
+  const title = compactTitle(book?.title || book?.raw?.title)
+  if (!title) return []
+
+  const shortTitle = title.split(/\s[-–—]\s|[:：]/)[0]?.trim()
+  return [...new Set([shortTitle, title].filter(Boolean))]
+}
+
 function hasDetailFields(book) {
-  return Boolean(book?.isbn && (book?.publisher || book?.description || book?.pages || book?.publishYear))
+  const hasIntro = Boolean(String(book?.description ?? '').trim())
+  const hasPages = Boolean(parsePageCount(book?.pages))
+  const hasPublishYear = Boolean(String(book?.publishYear ?? '').trim())
+
+  return Boolean(book?.isbn && (hasIntro || hasPages || hasPublishYear))
+}
+
+function mergeBookDetail(baseBook, detailBook) {
+  const cover = detailBook.cover && detailBook.cover !== FALLBACK_COVER ? detailBook.cover : baseBook.cover
+
+  return normalizeBook({
+    ...baseBook,
+    ...detailBook,
+    id: baseBook.id ?? detailBook.id,
+    mainId: baseBook.mainId ?? detailBook.mainId,
+    bookId: baseBook.bookId ?? detailBook.bookId,
+    isbn: detailBook.isbn ?? baseBook.isbn,
+    title: detailBook.title || baseBook.title,
+    author: detailBook.author || baseBook.author,
+    publisher: detailBook.publisher || baseBook.publisher,
+    cover,
+    coverUrl: cover,
+    description: detailBook.description || baseBook.description,
+    bookIntro: detailBook.description || baseBook.description,
+    pages: detailBook.pages || baseBook.pages,
+    pageCount: detailBook.pages || baseBook.pages,
+    publishYear: detailBook.publishYear || baseBook.publishYear,
+    readingStatus: baseBook.raw?.readingStatus ?? baseBook.raw?.reading_status ?? baseBook.status,
+    status: baseBook.status ?? detailBook.status,
+    startDate: baseBook.startDate ?? detailBook.startDate,
+    endDate: baseBook.endDate ?? detailBook.endDate,
+  })
 }
 
 function mergeSavedBookDetail(detailBook, savedBook) {
@@ -303,16 +363,52 @@ function mergeSavedBookDetail(detailBook, savedBook) {
   })
 }
 
+async function findExternalBookDetail(book, userId) {
+  const queries = getTitleSearchQueries(book)
+  if (queries.length === 0) return null
+
+  for (const query of queries) {
+    try {
+      const results = toArray(await searchBooks(query, { userId, queryType: 'Title', size: 10 })).map(normalizeBook)
+      const matchedBook = results.find((item) => sameBook(item, book)) ??
+        results.find((item) => sameBookTitle(item, book)) ??
+        results[0] ??
+        null
+
+      if (matchedBook) return matchedBook
+    } catch {
+      // Try a shorter or normalized title candidate.
+    }
+  }
+
+  return null
+}
+
 async function getSavedBookDetail(savedBook, userId) {
   const directIds = [savedBook?.isbn].filter(isIsbnLike)
+  let fallbackDetail = null
+
+  try {
+    const externalDetail = await findExternalBookDetail(savedBook, userId)
+    if (externalDetail) {
+      fallbackDetail = mergeBookDetail(savedBook, externalDetail)
+      if (hasDetailFields(fallbackDetail)) return fallbackDetail
+    }
+  } catch {
+    // Fall back to the book detail endpoint below.
+  }
 
   for (const detailId of directIds) {
     try {
-      return normalizeBook(await getBookDetail(detailId, userId))
+      const detailBook = normalizeBook(await getBookDetail(detailId, userId))
+      fallbackDetail = fallbackDetail ? mergeBookDetail(fallbackDetail, detailBook) : detailBook
+      if (hasDetailFields(fallbackDetail)) return fallbackDetail
     } catch {
       // Try the next available ISBN.
     }
   }
+
+  if (fallbackDetail) return fallbackDetail
 
   throw new Error('책 정보를 불러오지 못했습니다.')
 }
@@ -324,9 +420,22 @@ function normalizeMemos(data) {
 
   return list.map((memo) => ({
     id: memo.memoId ?? memo.id,
+    title: memo.title ?? '',
     content: memo.content ?? memo.text ?? '',
     date: normalizeDate(memo.date ?? memo.createdAt ?? memo.updatedAt),
   }))
+}
+
+function getMemoPreview(memo) {
+  if (memo?.title) return memo.title
+
+  const content = memo?.content
+  if (!content) return ''
+
+  const doc = new DOMParser().parseFromString(content, 'text/html')
+  const text = doc.body.textContent || content
+
+  return String(text).split(/\r?\n/).find((line) => line.trim())?.trim() ?? ''
 }
 
 function DateField({ label, value, onChange, min }) {
@@ -365,6 +474,12 @@ export default function BookDetailPage() {
     ? normalizeBook(location.state.book)
     : mockBooks.find((item) => item.id === Number(id))
   const detailLookupId = [initialBook?.isbn, id].find(isIsbnLike)
+  const fromSearch = Boolean(location.state?.fromSearch)
+  const shouldFetchBookDetail = Boolean(
+    userId &&
+    detailLookupId &&
+    !(fromSearch && initialBook && hasDetailFields(initialBook))
+  )
   const [book, setBook] = useState(initialBook ?? null)
   const [loading, setLoading] = useState(Boolean(userId && id))
   const [error, setError] = useState('')
@@ -394,7 +509,7 @@ export default function BookDetailPage() {
     setError('')
 
     Promise.all([
-      detailLookupId
+      shouldFetchBookDetail
         ? getBookDetail(detailLookupId, userId).then((data) => ({ data, detailId: detailLookupId })).catch(() => null)
         : Promise.resolve(null),
       getMyBooks(userId).then((data) => toArray(data).map(normalizeBook)).catch(() => []),
@@ -402,7 +517,7 @@ export default function BookDetailPage() {
       .then(async ([detailResult, myBooks]) => {
         if (cancelled) return
         let savedBook = null
-        let nextBook = detailResult ? normalizeBook(detailResult.data) : null
+        let nextBook = detailResult ? normalizeBook(detailResult.data) : initialBook ?? null
 
         if (nextBook) {
           savedBook = myBooks.find((item) => sameBook(item, nextBook) || sameBookRoute(item, id))
@@ -411,7 +526,7 @@ export default function BookDetailPage() {
         }
 
         if (savedBook) {
-          if (!nextBook || !hasDetailFields(nextBook)) {
+          if (!nextBook || (!fromSearch && !hasDetailFields(nextBook))) {
             try {
               nextBook = await getSavedBookDetail(savedBook, userId)
             } catch {
@@ -451,7 +566,7 @@ export default function BookDetailPage() {
     return () => {
       cancelled = true
     }
-  }, [detailLookupId, id, userId])
+  }, [detailLookupId, fromSearch, id, shouldFetchBookDetail, userId])
 
   useEffect(() => {
     if (!userId || !book?.mainId) return undefined
@@ -531,6 +646,8 @@ export default function BookDetailPage() {
         setIsSaved(true)
       }
     } else {
+      const apiStartDate = updated.status === BOOK_STATUS.favorite ? null : toApiDate(updated.startDate)
+      const apiEndDate = updated.status === BOOK_STATUS.finished ? toApiDate(updated.endDate) : null
       const payload = {
         isbn: book.isbn ?? id,
         title: book.title,
@@ -540,13 +657,15 @@ export default function BookDetailPage() {
         bookIntro: book.description,
         pageCount: parsePageCount(book.pages) || null,
         readingStatus: toApiStatus(updated.status),
-        startDate: updated.status === BOOK_STATUS.favorite ? null : toApiDate(updated.startDate),
-        endDate: updated.status === BOOK_STATUS.finished ? toApiDate(updated.endDate) : null,
+        startDate: apiStartDate,
+        endDate: apiEndDate,
+        start_date: apiStartDate,
+        end_date: apiEndDate,
       }
       const updatePayload = {
         readingStatus: payload.readingStatus,
-        start_date: payload.startDate,
-        end_date: payload.endDate,
+        start_date: apiStartDate,
+        end_date: apiEndDate,
       }
       const targetMainId = book.mainId ?? (isSaved ? toNumberId(id) : null)
 
@@ -562,18 +681,18 @@ export default function BookDetailPage() {
           inMyStudy: true,
           readingStatus: payload.readingStatus,
           status: updated.status,
-          startDate: payload.startDate,
-          endDate: payload.endDate,
+          startDate: apiStartDate,
+          endDate: apiEndDate,
         })
         setBook(nextBook)
         setBookInfo({
           status: updated.status,
-          startDate: normalizeDate(payload.startDate),
-          endDate: normalizeDate(payload.endDate),
+          startDate: normalizeDate(apiStartDate),
+          endDate: normalizeDate(apiEndDate),
         })
         setEditStatus(updated.status)
-        setEditStart(toInputDate(payload.startDate))
-        setEditEnd(toInputDate(payload.endDate))
+        setEditStart(toInputDate(apiStartDate))
+        setEditEnd(toInputDate(apiEndDate))
         setIsSaved(true)
       } catch (err) {
         setError(err?.message ?? '책 정보를 저장하지 못했습니다.')
@@ -626,6 +745,8 @@ export default function BookDetailPage() {
   }
 
   const chatBookId = toNumberId(book.bookId) ?? toNumberId(book.raw?.bookId) ?? toNumberId(book.raw?.book_id) ?? toNumberId(book.id)
+  const memoRouteId = id
+  const memoStorageId = book.id ?? id
 
   const handleStartBookChat = () => {
     if (!userId || !chatBookId || creatingChatRoom) return
@@ -788,7 +909,7 @@ export default function BookDetailPage() {
         style={{ '--book-hero-rgb': heroRgb }}
       >
         <div className="book-detail__topbar">
-          <button className="book-detail__round-btn" type="button" onClick={() => navigate(-1)} aria-label="이전">
+          <button className="book-detail__round-btn" type="button" onClick={() => navigate('/home')} aria-label="이전">
             <ChevronLeftIcon size={24} color="#141B34" />
           </button>
 
@@ -935,10 +1056,16 @@ export default function BookDetailPage() {
               <button
                 className="book-memo__write-btn"
                 type="button"
-                onClick={() => navigate(ROUTES.MEMO_EDIT, { state: { bookId: book.isbn || book.id, mainId: book.mainId } })}
+                onClick={() => navigate(ROUTES.MEMO_EDIT, {
+                  state: {
+                    bookId: memoStorageId,
+                    routeBookId: memoRouteId,
+                    mainId: book.mainId,
+                  },
+                })}
                 aria-label="메모 작성하기"
               >
-                <PencilIcon size={24} color="#42403A" />
+                <img src={MEMO_WRITE_ICON_SRC} alt="" aria-hidden="true" />
               </button>
             </header>
 
@@ -947,22 +1074,41 @@ export default function BookDetailPage() {
             ) : (
               <div className="book-memo__list">
                 {memos.map((memo) => (
-                  <button
+                  <article
                     key={memo.id}
                     className="memo-card"
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigate(ROUTES.MEMO_EDIT, {
                       state: {
-                        bookId: book.isbn || book.id,
+                        bookId: memoStorageId,
+                        routeBookId: memoRouteId,
                         mainId: book.mainId,
                         memo,
                         mode: 'view',
                       },
                     })}
+                    onKeyDown={(event) => {
+                      if (event.key !== 'Enter' && event.key !== ' ') return
+                      event.preventDefault()
+                      navigate(ROUTES.MEMO_EDIT, {
+                        state: {
+                          bookId: memoStorageId,
+                          routeBookId: memoRouteId,
+                          mainId: book.mainId,
+                          memo,
+                          mode: 'view',
+                        },
+                      })
+                    }}
                   >
-                    <PencilIcon size={26} color="#42403A" />
-                    <span>{memo.content}</span>
-                  </button>
+                    <span className="memo-card__edit" aria-hidden="true">
+                      <img src={MEMO_CARD_ICON_SRC} alt="" aria-hidden="true" />
+                    </span>
+                    <span className="memo-card__preview">
+                      <span>{getMemoPreview(memo)}</span>
+                    </span>
+                  </article>
                 ))}
               </div>
             )}
