@@ -302,3 +302,20 @@ export const ShareIcon = ({ size = 24, color = 'currentColor', ...p }) => (
     <path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49" stroke={color} strokeWidth="1.5" />
   </svg>
 )
+
+// 내 서재
+export const LibraryExcIcon = ({ size = 13, ...p }) => (
+  <svg width={size} height={size} viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg" {...p}>
+    <circle cx="5.415" cy="5.415" r="5.415" fill="#A5A298"/>
+    <path d="M5.41504 3.24805V5.6848" stroke="#FEFEFE" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5.41504 7.57422V7.57963" stroke="#FEFEFE" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+
+export const LibraryCheckIcon = ({ size = 13, ...p }) => (
+  <svg width={size} height={size} viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg" {...p}>
+    <path d="M10.8333 5.41732C10.8333 2.42578 8.40821 0.000651836 5.41667 0.000651836C2.42512 0.000651836 0 2.42578 0 5.41732C0 8.40886 2.42512 10.834 5.41667 10.834C8.40821 10.834 10.8333 8.40886 10.8333 5.41732Z" fill="#A5A298"/>
+    <path d="M3.25 5.6888L4.60417 7.04297L7.58333 3.79297" stroke="#FEFEFE" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+
