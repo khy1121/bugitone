@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '../../components/common/BottomNav/BottomNav'
+import ChatLoadingDots from '../../components/common/ChatLoadingDots/ChatLoadingDots'
 import Loading from '../../components/common/LoadingSpinner/LoadingSpinner'
 import { ArrowUpIcon } from '../../assets/icons'
+import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import {
   getRoomList,
   searchRoomList,
@@ -15,7 +17,8 @@ import {
 import { ROUTES } from '../../constants/routes'
 import './ChatPage.scss'
 
-const CHAR_IMG = '/assets/character/character.svg'
+const LANDING_CHAR_IMG = '/assets/character/character.svg'
+const CHAT_CHAR_IMG = '/assets/chatPage/chat_char.svg'
 const MAX_INPUT_HEIGHT = 380
 
 // 로그인 안 된 경우 null 반환 (1 폴백 제거 — 존재하지 않는 userId로 API 호출 방지)
@@ -104,6 +107,8 @@ function HighlightedText({ text, query }) {
 ============================== */
 
 function ChatList({ open, onClose, onSelectChat }) {
+  const panelRef = useRef(null)
+  const searchRef = useRef(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [rooms, setRooms] = useState([])
   const [listLoading, setListLoading] = useState(false)
@@ -111,6 +116,10 @@ function ChatList({ open, onClose, onSelectChat }) {
 
   const userId = getUserId()
   const normalizedQuery = searchQuery.trim()
+  const keyboard = useKeyboardAwareInput({
+    scrollRef: panelRef,
+    targetRef: searchRef,
+  })
 
   // 드로어가 열릴 때 목록 로드 (userId 없으면 빈 목록)
   useEffect(() => {
@@ -174,7 +183,8 @@ function ChatList({ open, onClose, onSelectChat }) {
         <div className="chat-list__dim" aria-hidden="true" />
 
         <div
-          className="chat-list__panel"
+          ref={panelRef}
+          className={`chat-list__panel${keyboard.isKeyboardFocused ? ' chat-list__panel--keyboard' : ''}`}
           role="dialog"
           aria-modal="true"
           aria-label="최근 대화 목록"
@@ -193,12 +203,17 @@ function ChatList({ open, onClose, onSelectChat }) {
             </button>
           </header>
 
-          <label className={`chat-list__search${normalizedQuery ? ' chat-list__search--active' : ''}`}>
+          <label
+            ref={searchRef}
+            className={`chat-list__search${normalizedQuery ? ' chat-list__search--active' : ''}`}
+          >
             <span className="sr-only">채팅 검색</span>
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={keyboard.handleFocus}
+              onBlur={keyboard.handleBlur}
               placeholder="채팅 검색"
             />
             <SearchIcon />
@@ -264,8 +279,10 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
   const [pageLoading, setPageLoading] = useState(false)
   const [sendError, setSendError] = useState('')
 
+  const roomRef = useRef(null)
+  const inputWrapRef = useRef(null)
   const inputRef = useRef(null)
-  const messagesEndRef = useRef(null)
+  const messagesRef = useRef(null)
   const quickActionsRef = useRef(null)
   const quickDragRef = useRef({
     pointerId: null,
@@ -276,6 +293,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
 
   const userId = getUserId()
   const bookId = toNumberId(propBookId ?? initialChat?.bookId)
+  const keyboard = useKeyboardAwareInput({ scrollOnFocus: false })
 
   const isTyping = input.length > 0
   const canSend = input.trim().length > 0
@@ -293,13 +311,42 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
       .finally(() => setPageLoading(false))
   }, [initialChat?.id, userId])
 
+  const syncInputHeight = () => {
+    const room = roomRef.current
+    const inputWrap = inputWrapRef.current
+    if (!room || !inputWrap) return
+
+    // Keep the message area reserved space matched to the real textarea height.
+    const height = Math.ceil(inputWrap.getBoundingClientRect().height)
+    room.style.setProperty('--chat-input-height', `${height}px`)
+  }
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    syncInputHeight()
+
+    const inputWrap = inputWrapRef.current
+    if (!inputWrap || typeof ResizeObserver === 'undefined') return undefined
+
+    const observer = new ResizeObserver(syncInputHeight)
+    observer.observe(inputWrap)
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const messagesEl = messagesRef.current
+    if (!messagesEl) return
+
+    messagesEl.scrollTo({
+      top: messagesEl.scrollHeight,
+      behavior: 'smooth',
+    })
   }, [messages, loading])
 
   const resetInputHeight = () => {
     if (!inputRef.current) return
     inputRef.current.style.height = 'auto'
+    requestAnimationFrame(syncInputHeight)
   }
 
   const resizeInput = () => {
@@ -311,7 +358,10 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
-    requestAnimationFrame(resizeInput)
+    requestAnimationFrame(() => {
+      resizeInput()
+      syncInputHeight()
+    })
   }
 
   const handleSend = async () => {
@@ -414,7 +464,10 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
   }
 
   return (
-    <section className={`chat-room${isLanding ? ' chat-room--landing' : ' chat-room--conversation'}`}>
+    <section
+      ref={roomRef}
+      className={`chat-room${isLanding ? ' chat-room--landing' : ' chat-room--conversation'}${keyboard.isKeyboardFocused ? ' chat-room--keyboard' : ''}`}
+    >
       <div className="chat-room__inner">
         <div className="chat-room__decor" aria-hidden="true">
           <span className="chat-room__orb chat-room__orb--top-left" />
@@ -425,13 +478,15 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
         </div>
 
         <header className="chat-room__header">
-          <button
-            className="chat-room__back-btn"
-            type="button"
-            onClick={onBack}
-          >
-            ← 나가기
-          </button>
+          {!isLanding && (
+            <button
+              className="chat-room__back-btn"
+              type="button"
+              onClick={onBack}
+            >
+              ← 나가기
+            </button>
+          )}
           <h1 className="chat-room__title">가독이 chat</h1>
           <button
             className="chat-room__menu-btn"
@@ -446,7 +501,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
         {isLanding && (
           <div className="chat-room__landing" onClick={handleAreaTap}>
             <div className="chat-room__landing-character" aria-hidden="true">
-              <img src={CHAR_IMG} alt="" />
+              <img src={LANDING_CHAR_IMG} alt="" />
             </div>
             <p className="chat-room__welcome">
               안녕, 난 가독이야 👋{'\n'}오늘은 무슨 이야기를 나눠볼까?
@@ -485,7 +540,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
         )}
 
         {!isLanding && !pageLoading && (
-          <div className="chat-room__messages" onClick={handleAreaTap}>
+          <div ref={messagesRef} className="chat-room__messages" onClick={handleAreaTap}>
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -493,7 +548,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
               >
                 {message.role === 'ai' && (
                   <span className="chat-room__avatar" aria-hidden="true">
-                    <img src={CHAR_IMG} alt="" />
+                    <img src={CHAT_CHAR_IMG} alt="" />
                   </span>
                 )}
                 <div className={`chat-room__bubble chat-room__bubble--${message.role}`}>
@@ -505,15 +560,13 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
             {loading && (
               <div className="chat-room__message chat-room__message--ai">
                 <span className="chat-room__avatar" aria-hidden="true">
-                  <img src={CHAR_IMG} alt="" />
+                  <img src={CHAT_CHAR_IMG} alt="" />
                 </span>
-                <div className="chat-room__bubble chat-room__bubble--ai">
-                  <Loading size={36} bg="#f2f1ec" />
+                <div className="chat-room__bubble chat-room__bubble--ai chat-room__bubble--loading">
+                  <ChatLoadingDots />
                 </div>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
         )}
 
@@ -521,12 +574,17 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
           <p className="chat-room__send-error">{sendError}</p>
         )}
 
-        <div className={`chat-room__input-wrap${isTyping ? ' chat-room__input-wrap--typing' : ''}`}>
+        <div
+          ref={inputWrapRef}
+          className={`chat-room__input-wrap${isTyping ? ' chat-room__input-wrap--typing' : ''}`}
+        >
           <textarea
             ref={inputRef}
             className="chat-room__input"
             value={input}
             onChange={handleInputChange}
+            onFocus={keyboard.handleFocus}
+            onBlur={keyboard.handleBlur}
             onKeyDown={handleKeyDown}
             placeholder="가독이와 대화하기"
             rows={1}

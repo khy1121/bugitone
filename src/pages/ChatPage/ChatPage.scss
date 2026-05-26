@@ -102,6 +102,13 @@
     transition: transform 0.28s cubic-bezier(0.32, 0, 0.15, 1);
   }
 
+  &__panel--keyboard {
+    height: var(--visual-height);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
   &--open &__panel {
     transform: translateX(0);
   }
@@ -355,14 +362,27 @@
 ============================== */
 
 .chat-room {
-  position: relative;
-  --chat-status-height: var(--app-status-height, max(var(--safe-top, 0px), 60px));
+  // iOS focuses textarea by panning the layout viewport. Keep ChatRoom fixed to
+  // the visual viewport so Safari cannot drag the whole page upward.
+  position: fixed;
+  top: max(0px, var(--visual-offset-top, 0px));
+  left: 0;
+  right: 0;
+  --chat-status-height: max(env(safe-area-inset-top, 0px), 60px);
   --chat-header-height: var(--page-header-height, 60px);
   --chat-content-top: calc(var(--chat-status-height) + var(--chat-header-height));
+  --chat-input-height: 60px;
+  --chat-input-bottom: calc(54px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+  --chat-messages-input-gap: 24px;
+  --chat-send-error-gap: 20px;
+  --chat-keyboard-transition: 0.08s ease;
 
   width: 100%;
-  height: var(--visual-height);
+  max-width: var(--design-width, 393px);
+  margin: 0 auto;
+  height: var(--visual-height, 100dvh);
   min-height: 0;
+  z-index: 1;
 
   overflow: hidden;
 
@@ -523,7 +543,17 @@
       #fefefe;
   }
 
+  &--conversation &__inner {
+    background:
+      url('/assets/chatPage/chat_bg2.svg') center top / 100% auto no-repeat,
+      #fefefe;
+  }
+
   &--landing &__decor {
+    display: none;
+  }
+
+  &--conversation &__decor {
     display: none;
   }
 
@@ -531,6 +561,7 @@
     position: absolute;
     left: 6px;
     top: 0;
+    --chat-landing-character-scale: 1;
 
     width: 151px;
     height: 151px;
@@ -542,12 +573,19 @@
     border-radius: $radius-pill;
     background: rgba(255, 235, 177, 0.62);
     filter: drop-shadow(0 0 24px rgba(248, 188, 10, 0.34));
+    transform: scale(var(--chat-landing-character-scale));
+    animation: chat-landing-character-float 2.6s ease-in-out infinite;
+    will-change: transform;
+    transition:
+      opacity var(--chat-keyboard-transition),
+      transform var(--chat-keyboard-transition),
+      visibility 0s linear 0s;
 
     img {
       width: 84px;
       height: 92px;
       object-fit: contain;
-      transform: rotate(6deg);
+      filter: drop-shadow(0 6px 10px rgba(180, 130, 0, 0.18));
     }
   }
 
@@ -568,6 +606,10 @@
     letter-spacing: $letter-spacing-base;
 
     white-space: pre-line;
+    transition:
+      top var(--chat-keyboard-transition),
+      font-size var(--chat-keyboard-transition),
+      line-height var(--chat-keyboard-transition);
   }
 
   &__desc {
@@ -587,6 +629,7 @@
     letter-spacing: $letter-spacing-base;
 
     white-space: pre-line;
+    transition: top var(--chat-keyboard-transition);
   }
 
   &__quick-actions {
@@ -611,6 +654,10 @@
     pointer-events: auto;
     cursor: grab;
     user-select: none;
+    transition:
+      opacity var(--chat-keyboard-transition),
+      transform var(--chat-keyboard-transition),
+      visibility 0s linear 0s;
   }
 
   &__quick-actions::-webkit-scrollbar {
@@ -662,7 +709,7 @@
     position: absolute;
     left: 20px;
     right: 20px;
-    bottom: calc(167px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+    bottom: calc(var(--chat-input-bottom) + var(--chat-input-height) + var(--chat-send-error-gap));
 
     margin: 0;
     padding: 10px 16px;
@@ -679,17 +726,13 @@
     text-align: center;
   }
 
-  &--conversation &__send-error {
-    bottom: calc(120px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
-  }
-
   // Messages — same top as landing
   &__messages {
     position: absolute;
     top: var(--chat-content-top);
     left: 0;
     right: 0;
-    bottom: calc(114px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+    bottom: calc(var(--chat-input-bottom) + var(--chat-input-height) + var(--chat-messages-input-gap));
 
     display: flex;
     flex-direction: column;
@@ -717,7 +760,6 @@
 
   &__message--ai {
     justify-content: flex-start;
-    min-height: 213px;
     padding-top: 79px;
   }
 
@@ -775,21 +817,35 @@
   }
 
   &__bubble--ai {
-    width: 220px;
-    min-height: 134px;
+    width: fit-content;
+    max-width: 220px;
+    min-height: 0;
 
-    align-items: stretch;
+    align-items: flex-start;
 
-    padding: 14px 32px;
+    padding: 22px;
 
     background: $gray-50;
     color: $gray-900;
+    text-align: left;
 
     border-radius: 0 26px 26px 26px;
 
     > span {
       font-weight: $font-weight-button;
     }
+  }
+
+  &__bubble--loading {
+    width: auto;
+    max-width: none;
+    min-width: 102px;
+    min-height: 64px;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 26px 28px;
   }
 
   &__reply-actions {
@@ -826,7 +882,7 @@
     position: absolute;
     left: 20px;
     right: 20px;
-    bottom: calc(54px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+    bottom: var(--chat-input-bottom);
 
     width: auto;
     min-height: 60px;
@@ -839,14 +895,15 @@
 
     border-radius: 15px;
     background: $gray-100;
+    transition: bottom var(--chat-keyboard-transition);
   }
 
-  &--landing .chat-room__input-wrap {
-    bottom: calc(96px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+  &--landing {
+    --chat-input-bottom: calc(96px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
   }
 
-  &--conversation .chat-room__input-wrap {
-    bottom: calc(54px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
+  &--conversation {
+    --chat-input-bottom: calc(54px + var(--app-home-indicator-height, var(--safe-bottom, 0px)));
   }
 
   &__input-wrap--typing {
@@ -928,10 +985,28 @@
   }
 
   .bottom-nav--chat-room {
+    bottom: 0;
     z-index: 4;
+    height: calc(var(--bottom-nav-height, 68px) + var(--app-home-indicator-height, 33px));
+    padding-bottom: var(--app-home-indicator-height, 33px);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    align-items: flex-start;
+    transform: translateX(-50%) translateY(0);
     background: #fefefe;
     border-radius: 20px 20px 0 0;
     filter: drop-shadow(0 0 4.05px rgba(40, 40, 40, 0.23));
+    transition:
+      opacity var(--chat-keyboard-transition),
+      transform var(--chat-keyboard-transition),
+      visibility 0s linear 0s;
+
+    // Keep the white safe-area fill inside the nav box so it does not
+    // recalculate separately during iOS keyboard/browser-bar settling.
+    &::after {
+      display: none;
+    }
 
     .bottom-nav__item--active .bottom-nav__label {
       color: $gray-900;
@@ -940,33 +1015,74 @@
   }
 }
 
-/* ==============================
-   Keyboard open (mobile)
-   setVh.js가 html.keyboard-open 클래스를 토글
-============================== */
-
-html.keyboard-open {
-  .chat-room--landing {
-    .bottom-nav--chat-room {
-      display: none;
-    }
-
-    .chat-room__input-wrap {
-      bottom: 20px;
-    }
-
-    .chat-room__send-error {
-      bottom: 80px;
-    }
+@keyframes chat-landing-character-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(var(--chat-landing-character-scale, 1));
   }
 
-  .chat-room--conversation {
-    .chat-room__input-wrap {
-      bottom: 20px;
+  50% {
+    transform: translateY(-14px) scale(var(--chat-landing-character-scale, 1));
+  }
+}
+
+/* ==============================
+   Keyboard open (mobile)
+   Chat input focus uses the same visualViewport pattern as AnalyzePage.
+============================== */
+
+.chat-room--keyboard {
+  height: var(--visual-height, 100dvh);
+  min-height: unset;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+html.keyboard-open .chat-room {
+  --chat-input-bottom: 20px;
+  --chat-send-error-gap: 16px;
+
+  .chat-room__quick-actions {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition:
+      opacity var(--chat-keyboard-transition),
+      transform var(--chat-keyboard-transition),
+      visibility 0s linear 0.08s;
+  }
+
+  .bottom-nav--chat-room {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(10px);
+    transition:
+      opacity var(--chat-keyboard-transition),
+      transform var(--chat-keyboard-transition),
+      visibility 0s linear 0.08s;
+  }
+
+  &.chat-room--landing {
+    .chat-room__landing-character {
+      --chat-landing-character-scale: 0.96;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--chat-keyboard-transition),
+        transform var(--chat-keyboard-transition),
+        visibility 0s linear 0.08s;
     }
 
-    .chat-room__send-error {
-      bottom: 80px;
+    .chat-room__welcome {
+      top: 24px;
+      font-size: 20px;
+      line-height: 28px;
+    }
+
+    .chat-room__desc {
+      top: 94px;
     }
   }
 }
@@ -1010,6 +1126,14 @@ html.keyboard-open {
 
 @media (min-width: 768px) {
   .chat-room {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    z-index: auto;
+    transform: none;
+    max-width: none;
+    margin: 0;
     height: 100%;
     min-height: 100%;
   }
@@ -1025,7 +1149,7 @@ html.keyboard-open {
   }
 
   .chat-room__messages {
-    bottom: 114px;
+    bottom: calc(114px + var(--chat-messages-input-gap));
   }
 
   .chat-room--conversation .chat-room__input-wrap {
