@@ -4,9 +4,20 @@ import BottomNav from "../../components/common/BottomNav/BottomNav";
 import Chip from "../../components/common/Chip/Chip";
 import DuplicateCheckButton from "../../components/common/DuplicateCheckButton/DuplicateCheckButton";
 import { mockBooks } from "../../data/mockBooks";
-import { ChevronRightIcon, ChevronLeftIcon } from "../../assets/icons";
+import {
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  LibraryCheckIcon,
+  LibraryExcIcon,
+} from "../../assets/icons";
+import libraryBannerImage from "../../assets/banner.svg";
 import { ROUTES } from "../../constants/routes";
 import { updateUser, checkNickname } from "../../api/userApi";
+import { getMyBooks } from "../../api/bookApi";
+import {
+  getMonthlyCharacters,
+  getMonthlyEmotions,
+} from "../../api/emotionApi";
 import useKeyboardAwareInput from "../../hooks/useKeyboardAwareInput";
 import {
   NICKNAME_RULE_MESSAGE,
@@ -15,15 +26,13 @@ import {
 import "./MyPage.scss";
 
 const CURRENT_MONTH = new Date().getMonth() + 1;
-const EMOTIONS = ["#뿌듯함", "#지침", "#설렘"];
-const ACTIVE_EMOTIONS = new Set(["#뿌듯함", "#지침"]);
 const LIBRARY_CATEGORIES = ["다 읽은 책", "읽고 있는 책", "찜한 책"];
 
 const CAT_TABS = [
   { id: "all", label: "전체", status: null },
-  { id: "read", label: "읽은 책", status: "다 읽은 책" },
+  { id: "read", label: "다 읽은 책", status: "다 읽은 책" },
   { id: "reading", label: "읽고 있는 책", status: "읽고 있는 책" },
-  { id: "wishlist", label: "읽고 싶은 책", status: "찜한 책" },
+  { id: "wishlist", label: "찜한 책", status: "찜한 책" },
 ];
 
 const CATEGORY_TO_TAB = {
@@ -32,7 +41,9 @@ const CATEGORY_TO_TAB = {
   "찜한 책": "wishlist",
 };
 
+const FALLBACK_BOOK_COVER = "/assets/library/book.svg";
 const ALERT_CIRCLE_SRC = "/assets/character/alert-circle.svg";
+const DEFAULT_CHARACTER_IMAGE = "/assets/character/LittlePrince.svg";
 const DEFAULT_BIRTHDAY = "2002.03.21";
 const GENDER_OPTIONS = [
   { value: "Male", label: "남자", display: "남" },
@@ -103,6 +114,148 @@ function getBooksWithInfo() {
   });
 }
 
+function normalizeLibraryStatus(status) {
+  const text = `${status ?? ""}`;
+  const upperText = text.toUpperCase();
+
+  if (
+    text.includes("찜") ||
+    ["WISHLIST", "WISH", "FAVORITE"].includes(upperText)
+  ) {
+    return "찜한 책";
+  }
+
+  if (text.includes("읽고") || upperText === "READING") {
+    return "읽고 있는 책";
+  }
+
+  if (
+    ["DONE", "COMPLETED", "FINISHED"].includes(upperText) ||
+    text.includes("다 읽")
+  ) {
+    return "다 읽은 책";
+  }
+
+  return text || "읽고 있는 책";
+}
+
+function normalizeLibraryDate(value) {
+  if (!value) return "";
+  return `${value}`.slice(0, 10).replace(/-/g, ".");
+}
+
+function toLibraryBookArray(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.books)) return data.books;
+  if (Array.isArray(data?.bookList)) return data.bookList;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.mainStudies)) return data.mainStudies;
+  return [];
+}
+
+function parseBookPageCount(value) {
+  return Number.parseInt(`${value || ""}`.replace(/[^0-9]/g, ""), 10) || 0;
+}
+
+function normalizeLibraryBook(raw) {
+  const book = raw?.book ?? raw;
+  const original = raw?.raw?.book ?? raw?.raw ?? {};
+  const isbn =
+    book?.isbn13 ?? book?.isbn ?? raw?.isbn13 ?? raw?.isbn ?? original?.isbn13 ?? original?.isbn;
+  const id =
+    raw?.mainId ??
+    raw?.mainStudyId ??
+    raw?.main_id ??
+    raw?.bookId ??
+    raw?.book_id ??
+    raw?.id ??
+    book?.id ??
+    isbn;
+  const pages =
+    book?.pageCount ??
+    book?.page_count ??
+    book?.pages ??
+    book?.page ??
+    raw?.pageCount ??
+    raw?.page_count ??
+    raw?.pages ??
+    raw?.page ??
+    original?.pageCount ??
+    original?.page_count ??
+    original?.pages ??
+    original?.page ??
+    "";
+
+  return {
+    id,
+    mainId: raw?.mainId ?? raw?.mainStudyId ?? raw?.main_id ?? book?.mainId ?? null,
+    bookId: raw?.bookId ?? raw?.book_id ?? book?.bookId ?? book?.book_id ?? null,
+    isbn,
+    title: book?.title ?? raw?.title ?? original?.title ?? "제목 없음",
+    author: book?.author ?? raw?.author ?? original?.author ?? "",
+    publisher: book?.publisher ?? raw?.publisher ?? original?.publisher ?? "",
+    category:
+      book?.categoryName ??
+      book?.category ??
+      raw?.categoryName ??
+      raw?.category ??
+      original?.categoryName ??
+      original?.category ??
+      "",
+    cover:
+      book?.coverUrl ??
+      book?.cover_url ??
+      book?.cover ??
+      book?.coverImage ??
+      book?.thumbnail ??
+      raw?.coverUrl ??
+      raw?.cover_url ??
+      raw?.cover ??
+      raw?.coverImage ??
+      raw?.thumbnail ??
+      original?.coverUrl ??
+      original?.cover_url ??
+      original?.cover ??
+      original?.coverImage ??
+      original?.thumbnail ??
+      FALLBACK_BOOK_COVER,
+    status: normalizeLibraryStatus(
+      raw?.readingStatus ??
+        raw?.reading_status ??
+        raw?.status ??
+        book?.readingStatus ??
+        book?.status ??
+        original?.readingStatus ??
+        original?.status,
+    ),
+    startDate: normalizeLibraryDate(
+      raw?.startDate ??
+        raw?.startedAt ??
+        raw?.readStartDate ??
+        book?.startDate ??
+        original?.startDate,
+    ),
+    endDate: normalizeLibraryDate(
+      raw?.endDate ??
+        raw?.finishedAt ??
+        raw?.readEndDate ??
+        book?.endDate ??
+        original?.endDate,
+    ),
+    pages,
+    currentPage:
+      raw?.currentPage ??
+      raw?.current_page ??
+      raw?.readPage ??
+      raw?.read_page ??
+      book?.currentPage ??
+      book?.current_page ??
+      0,
+    raw,
+  };
+}
+
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, "") : "";
 }
@@ -129,6 +282,50 @@ function getBooksWithMemos() {
       }
     })
     .filter((book) => book.memos.length > 0);
+}
+
+function getCurrentUserId() {
+  const userId = Number(localStorage.getItem("userId"));
+  return Number.isFinite(userId) && userId > 0 ? userId : null;
+}
+
+function normalizeMonthlyCharacters(value) {
+  const rawCharacters = Array.isArray(value)
+    ? value
+    : Array.isArray(value?.characters)
+      ? value.characters
+      : [];
+
+  return rawCharacters
+    .filter(Boolean)
+    .map((character, index) => ({
+      characterId:
+        character.characterId ??
+        character.id ??
+        `${character.characterName ?? "character"}-${index}`,
+      characterName: character.characterName || character.name || "이름 없는 캐릭터",
+      author: character.author || "",
+      characterImgUrl:
+        character.characterImgUrl ||
+        character.imageUrl ||
+        character.image ||
+        DEFAULT_CHARACTER_IMAGE,
+      bookQuote: character.bookQuote || "",
+      methodReason: character.methodReason || "",
+    }));
+}
+
+function normalizeMonthlyEmotions(value) {
+  const rawEmotions = Array.isArray(value)
+    ? value
+    : Array.isArray(value?.emotions)
+      ? value.emotions
+      : [];
+
+  return rawEmotions
+    .map((emotion) => `${emotion ?? ""}`.trim())
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 // ── 계정 뷰 아이콘 (SVG 파일 참조) ─────────────────────────────────────────
@@ -273,43 +470,18 @@ function BackButton({ onClick }) {
   );
 }
 
-function StarRating({ rating }) {
-  return (
-    <div className="mypage__stars">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span
-          key={i}
-          className={`mypage__star${i <= rating ? " mypage__star--on" : ""}`}
-        >
-          {i <= rating ? "★" : "☆"}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function ProgressBar({ currentPage, totalPages }) {
-  const total = totalPages || 1;
-  const pct = Math.min(100, Math.round((currentPage / total) * 100));
-  return (
-    <div className="mypage__progress">
-      <div className="mypage__progress__track">
-        <div className="mypage__progress__fill" style={{ width: `${pct}%` }} />
-      </div>
-      <div className="mypage__progress__labels">
-        <span>{pct}%</span>
-        <span>
-          {currentPage} / {totalPages}p
-        </span>
-      </div>
-    </div>
-  );
-}
-
 // ── 메인뷰 ──────────────────────────────────────────────────────────────────
 
-function MainView({ onReport, onAccount, onLibrary, onMemo }) {
-  const books = getBooksWithInfo();
+function MainView({
+  libraryBooks = [],
+  libraryLoading,
+  libraryError,
+  onReport,
+  onAccount,
+  onLibrary,
+  onMemo,
+}) {
+  const books = libraryBooks;
   const countByStatus = (status) =>
     books.filter((b) => b.status === status).length;
   const nickname = localStorage.getItem("nickname") ?? "";
@@ -394,7 +566,7 @@ function MainView({ onReport, onAccount, onLibrary, onMemo }) {
                 </span>
                 <span className="mypage__library-label">{status}</span>
                 <span className="mypage__library-count">
-                  {countByStatus(status)}권
+                  {libraryLoading ? "..." : `${countByStatus(status)}권`}
                 </span>
                 <span className="mypage__arrow">
                   <ChevronRightIcon size={20} color="#8e8b7e" />
@@ -403,6 +575,9 @@ function MainView({ onReport, onAccount, onLibrary, onMemo }) {
             </React.Fragment>
           ))}
         </div>
+        {libraryError && (
+          <p className="mypage__api-error">{libraryError}</p>
+        )}
       </div>
 
       <BottomNav active="my" />
@@ -412,7 +587,104 @@ function MainView({ onReport, onAccount, onLibrary, onMemo }) {
 
 // ── 월 리포트 뷰 ─────────────────────────────────────────────────────────────
 
+function ReportCharacterCard({ character, index, onOpen }) {
+  const handleImageError = (event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = DEFAULT_CHARACTER_IMAGE;
+  };
+
+  return (
+    <article
+      className={`mypage__report-character mypage__report-character--${(index % 3) + 1}`}
+    >
+      <div className="mypage__report-character-media">
+        <img
+          src={character.characterImgUrl}
+          alt=""
+          aria-hidden="true"
+          onError={handleImageError}
+        />
+      </div>
+      <div className="mypage__report-character-body">
+        <h2>{character.characterName}
+          {character.author ? <p>{character.author}</p> : <p>루이스 캐럴</p>}
+        </h2>
+        <button type="button" onClick={() => onOpen(character)}>
+          보러가기
+        </button>
+      </div>
+    </article>
+  );
+}
+
 function ReportView({ onBack }) {
+  const navigate = useNavigate();
+  const displayName = localStorage.getItem("nickname") || "김수현";
+  const [characters, setCharacters] = useState([]);
+  const [emotions, setEmotions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
+
+  useEffect(() => {
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+      setLoading(false);
+      setApiError("로그인 후 리포트를 확인할 수 있어요.");
+      return undefined;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setApiError("");
+
+    Promise.allSettled([
+      getMonthlyCharacters(userId),
+      getMonthlyEmotions(userId),
+    ])
+      .then(([characterResult, emotionResult]) => {
+        if (cancelled) return;
+
+        if (characterResult.status === "fulfilled") {
+          setCharacters(normalizeMonthlyCharacters(characterResult.value));
+        }
+
+        if (emotionResult.status === "fulfilled") {
+          setEmotions(normalizeMonthlyEmotions(emotionResult.value));
+        }
+
+        if (
+          characterResult.status === "rejected" &&
+          emotionResult.status === "rejected"
+        ) {
+          setApiError(
+            characterResult.reason?.message ||
+              emotionResult.reason?.message ||
+              "이번 달 리포트를 불러오지 못했어요.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleOpenCharacter = (character) => {
+    navigate(ROUTES.RESULT, {
+      state: {
+        loading: false,
+        userName: displayName,
+        emotions,
+        returnTo: ROUTES.MYPAGE,
+        analysis: { character },
+      },
+    });
+  };
+
   return (
     <div className="mypage mypage--report">
       <div className="mypage__header">
@@ -421,27 +693,54 @@ function ReportView({ onBack }) {
       </div>
 
       <div className="mypage__report-content">
-        <p className="mypage__section-label">이 달 만난 캐릭터</p>
-        <div className="mypage__char-area">
-          <div className="mypage__char-row">
-            <div className="mypage__char-bubble" />
-            <div className="mypage__char-bubble" />
-            <div className="mypage__char-bubble" />
-          </div>
-          <div className="mypage__char-row">
-            <div className="mypage__char-bubble" />
-            <div className="mypage__char-bubble" />
-          </div>
-        </div>
+        <section className="mypage__report-section">
+          <h2 className="mypage__report-section-title">이 달 만난 캐릭터</h2>
+          {loading ? (
+            <p className="mypage__report-empty">캐릭터를 불러오는 중이에요.</p>
+          ) : characters.length > 0 ? (
+            <div className="mypage__report-character-list">
+              {characters.map((character, index) => (
+                <ReportCharacterCard
+                  key={character.characterId}
+                  character={character}
+                  index={index}
+                  onOpen={handleOpenCharacter}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="mypage__report-empty">
+              이번 달 만난 캐릭터가 아직 없어요.
+            </p>
+          )}
+        </section>
 
-        <p className="mypage__section-label">자주 느낀 감정</p>
-        <div className="mypage__emotion-row">
-          {EMOTIONS.map((e) => (
-            <Chip key={e} active={ACTIVE_EMOTIONS.has(e)}>
-              {e}
-            </Chip>
-          ))}
-        </div>
+        <section className="mypage__report-emotion-card">
+          <h2>{displayName}님이 자주 느낀 감정</h2>
+          {loading ? (
+            <p className="mypage__report-empty mypage__report-empty--in-card">
+              감정을 불러오는 중이에요.
+            </p>
+          ) : emotions.length > 0 ? (
+            <div className="mypage__report-emotions">
+              {emotions.map((emotion) => (
+                <span key={emotion} className="mypage__report-emotion">
+                  # {emotion}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mypage__report-empty mypage__report-empty--in-card">
+              아직 기록된 감정이 없어요.
+            </p>
+          )}
+        </section>
+
+        {apiError && (
+          <p className="mypage__api-error mypage__api-error--report">
+            {apiError}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -1092,12 +1391,21 @@ function AccountView({ onBack }) {
 
 // ── 서재 카테고리 뷰 ──────────────────────────────────────────────────────────
 
-function LibraryCategoryView({ initialCategory, onBack }) {
+function LibraryCategoryView({
+  books: allBooks = [],
+  loading,
+  error,
+  initialCategory,
+  onBack,
+}) {
   const navigate = useNavigate();
-  const allBooks = getBooksWithInfo();
   const [activeTab, setActiveTab] = useState(
     CATEGORY_TO_TAB[initialCategory] ?? "all",
   );
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const countOf = (status) =>
     allBooks.filter((b) => b.status === status).length;
@@ -1108,7 +1416,10 @@ function LibraryCategoryView({ initialCategory, onBack }) {
     wishlist: countOf("찜한 책"),
   };
 
-  const activeStatus = CAT_TABS.find((t) => t.id === activeTab)?.status;
+  const activeTabConfig =
+    CAT_TABS.find((t) => t.id === activeTab) ?? CAT_TABS[0];
+  const activeStatus = activeTabConfig.status;
+  const selectedCount = counts[activeTab] ?? 0;
   const books =
     activeTab === "all"
       ? allBooks
@@ -1118,39 +1429,72 @@ function LibraryCategoryView({ initialCategory, onBack }) {
     <div className="mypage mypage--library">
       <div className="mypage__header">
         <BackButton onClick={onBack} />
-        <h1 className="mypage__header-title">내 서재</h1>
+        <h1 className="mypage__header-title mypage__header-title__library">
+          내 서재
+        </h1>
       </div>
 
-      <div className="mypage__cat-tabs">
-        {CAT_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            className={`mypage__cat-tab${activeTab === tab.id ? " mypage__cat-tab--active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label} ({counts[tab.id]})
-          </button>
-        ))}
-      </div>
+      <div className="mypage__library-scroll">
+        <div
+          className="mypage__cat-tabs"
+          role="tablist"
+          aria-label="서재 카테고리"
+        >
+          {CAT_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={`mypage__cat-tab${activeTab === tab.id ? " mypage__cat-tab--active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      <div className="mypage__book-list">
-        {books.length === 0 ? (
-          <p className="mypage__empty">아직 책이 없어요.</p>
-        ) : (
-          books.map((book, idx) => {
-            const pagesNum = parseInt(book.pages, 10) || 0;
-            const dateText = book.startDate
-              ? book.endDate
-                ? `${book.startDate} ~ ${book.endDate}`
-                : `${book.startDate} ~`
-              : null;
+        <p className="mypage__library-count">
+          <span>{activeTabConfig.label}</span>
+          <strong>{selectedCount}</strong>
+        </p>
 
-            return (
-              <React.Fragment key={book.id}>
+        <div className="mypage__library-banner">
+          <img src={libraryBannerImage} alt="이번달 인기 신작 BEST 3" />
+        </div>
+
+        <div className="mypage__book-list" role="tabpanel">
+          {loading ? (
+            <p className="mypage__empty">서재를 불러오는 중이에요.</p>
+          ) : error ? (
+            <p className="mypage__empty">{error}</p>
+          ) : books.length === 0 ? (
+            <p className="mypage__empty">아직 책이 없어요.</p>
+          ) : (
+            books.map((book) => {
+              const dateText = book.endDate || book.startDate || "";
+              const metaText = [book.category, book.publisher]
+                .filter(Boolean)
+                .join(" ㅣ ");
+              const isWishlist = book.status === "찜한 책";
+              const isReading = book.status === "읽고 있는 책";
+              const isRead = book.status === "다 읽은 책";
+              const totalPages = parseBookPageCount(book.pages);
+              const currentPage = Number(book.currentPage) || 0;
+              const readingPercent = totalPages
+                ? Math.min(100, Math.round((currentPage / totalPages) * 100))
+                : 0;
+
+              return (
                 <button
+                  key={book.id}
                   type="button"
                   className="mypage__book-item"
-                  onClick={() => navigate(`/book/${book.id}`)}
+                  onClick={() =>
+                    navigate(`/book/${book.isbn || book.bookId || book.id}`, {
+                      state: { book },
+                    })
+                  }
                 >
                   <img
                     className="mypage__book-cover"
@@ -1159,27 +1503,50 @@ function LibraryCategoryView({ initialCategory, onBack }) {
                   />
                   <div className="mypage__book-info">
                     <p className="mypage__book-title">{book.title}</p>
-                    {book.status === "다 읽은 책" && (
-                      <StarRating rating={book.rating} />
+                    <p className="mypage__book-author">{book.author}</p>
+                    {metaText && (
+                      <p className="mypage__book-meta">{metaText}</p>
                     )}
-                    {book.status === "읽고 있는 책" && (
-                      <ProgressBar
-                        currentPage={book.currentPage}
-                        totalPages={pagesNum}
-                      />
-                    )}
-                    {dateText && (
-                      <p className="mypage__book-date">{dateText}</p>
-                    )}
+                    <div className="mypage__book-chips">
+                      <span className="mypage__book-status-chip">
+                        <span
+                          className="mypage__book-chip-icon"
+                          aria-hidden="true"
+                        >
+                          {isWishlist ? (
+                            "♥"
+                          ) : isReading ? (
+                            <LibraryExcIcon />
+                          ) : isRead ? (
+                            <LibraryCheckIcon />
+                          ) : (
+                            null
+                          )}
+                        </span>
+                        {book.status}
+                      </span>
+
+                      {isReading ? (
+                        <span className="mypage__book-progress-chip">
+                          정독까지 {readingPercent}%
+                        </span>
+                      ) : dateText ? (
+                        <span className="mypage__book-date-chip">
+                          <img
+                            src="/assets/library/calendar-01.svg"
+                            alt=""
+                            aria-hidden="true"
+                          />
+                          {dateText}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </button>
-                {idx < books.length - 1 && (
-                  <div className="mypage__book-divider" />
-                )}
-              </React.Fragment>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1282,6 +1649,46 @@ function MemoView({ onBack }) {
 export default function MyPage() {
   const [view, setView] = useState("main");
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [libraryBooks, setLibraryBooks] = useState(() =>
+    getCurrentUserId() ? [] : getBooksWithInfo(),
+  );
+  const [libraryLoading, setLibraryLoading] = useState(() =>
+    Boolean(getCurrentUserId()),
+  );
+  const [libraryError, setLibraryError] = useState("");
+
+  useEffect(() => {
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+      setLibraryBooks(getBooksWithInfo());
+      setLibraryLoading(false);
+      setLibraryError("");
+      return undefined;
+    }
+
+    let cancelled = false;
+    setLibraryLoading(true);
+    setLibraryError("");
+
+    getMyBooks(userId)
+      .then((data) => {
+        if (cancelled) return;
+        setLibraryBooks(toLibraryBookArray(data).map(normalizeLibraryBook));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setLibraryBooks([]);
+        setLibraryError(error?.message ?? "서재를 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (!cancelled) setLibraryLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (view === "report") return <ReportView onBack={() => setView("main")} />;
   if (view === "account") return <AccountView onBack={() => setView("main")} />;
@@ -1289,12 +1696,18 @@ export default function MyPage() {
   if (view === "library")
     return (
       <LibraryCategoryView
+        books={libraryBooks}
+        loading={libraryLoading}
+        error={libraryError}
         initialCategory={selectedCategory}
         onBack={() => setView("main")}
       />
     );
   return (
     <MainView
+      libraryBooks={libraryBooks}
+      libraryLoading={libraryLoading}
+      libraryError={libraryError}
       onReport={() => setView("report")}
       onAccount={() => setView("account")}
       onLibrary={(category) => {
