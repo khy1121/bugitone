@@ -2,9 +2,6 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles/global.scss'
-import setVh from './utils/setVh'
-
-setVh()
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

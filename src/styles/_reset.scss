@@ -16,7 +16,7 @@ body,
 }
 
 html {
-  // setVh.js 실행 전 순간에도 흰 틈이 보이지 않도록 앱 배경색을 html에도 적용
+  // visualViewport hook 실행 전 순간에도 흰 틈이 보이지 않도록 앱 배경색을 html에도 적용
   background: $color-surface;
 }
 
@@ -31,7 +31,7 @@ body {
   --design-width: #{$design-width};
   --design-height: #{$design-height};
 
-  // setVh.js가 window.innerHeight 기준으로 갱신
+  // useVisualViewportHeight가 window.innerHeight 기준으로 갱신
   --vh: 1vh;
   --visual-vh: 1vh;
   --app-height: calc(var(--vh, 1vh) * 100);
@@ -70,9 +70,11 @@ body {
 }
 
 // ── 키보드 오픈 상태 ──────────────────────────────────────────────────
-// setVh.js가 visualViewport 기반으로 html.keyboard-open 클래스 토글
+// useVisualViewportHeight가 visualViewport 기반으로 html.keyboard-open 클래스 토글
 .keyboard-open {
+  body,
   #root,
+  .viewport-wrapper,
   .app-frame {
     height: var(--visual-height);
     min-height: var(--visual-height);
@@ -82,6 +84,21 @@ body {
 // ── Viewport Wrapper ──────────────────────────────────────────────────
 // 모바일: 투명 패스스루, app-frame이 전체 높이를 채움
 // 데스크탑: 회색 배경 + 앱 프레임 중앙 정렬
+@media (max-width: 767px) {
+  .keyboard-input-lock,
+  .keyboard-input-lock body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .keyboard-input-lock body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: var(--visual-height, 100dvh);
+  }
+}
+
 .viewport-wrapper {
   width: 100%;
   height: 100%;
@@ -91,7 +108,7 @@ body {
 }
 
 // ── App Frame ─────────────────────────────────────────────────────────
-// setVh.js가 window.innerHeight(iOS standalone 포함 전체 화면)를 기준으로
+// useVisualViewportHeight가 window.innerHeight(iOS standalone 포함 전체 화면)를 기준으로
 // --app-height를 계산. 100dvh는 iOS standalone에서 safe-area-inset-bottom을
 // 제외한 높이를 반환해 하단 흰 여백이 생기므로 사용하지 않음.
 .app-frame {
