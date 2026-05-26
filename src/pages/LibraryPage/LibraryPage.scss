@@ -40,10 +40,10 @@
 
 .library--searching {
   .library__header {
-    top: var(--library-header-top);
-    height: 144px;
-    padding: 78px 20px 0;
-    align-items: flex-start;
+    top: var(--library-safe-top);
+    height: 84px;
+    padding: 0 20px;
+    align-items: center;
     justify-content: center;
   }
 
@@ -52,8 +52,9 @@
   }
 
   .library__search {
-    width: 353px;
-    min-width: 353px;
+    width: min(353px, calc(100vw - 40px));
+    min-width: 0;
+    flex: 0 0 auto;
     justify-content: flex-start;
     gap: 18px;
     padding: 0 20px;
@@ -68,6 +69,20 @@
 
   .library__search img {
     order: 1;
+  }
+
+  .library__search-results {
+    top: calc(var(--library-safe-top) + 84px);
+  }
+}
+
+.library--keyboard {
+  height: var(--visual-height);
+  min-height: unset;
+  overscroll-behavior: contain;
+
+  .library__search-results {
+    bottom: calc(var(--safe-bottom, 0px) + 24px);
   }
 }
 
@@ -322,33 +337,31 @@
 }
 
 .library__search-scrollbar {
-  position: absolute;
-  top: calc(var(--library-header-top) + 275px);
-  right: 6px;
-  z-index: 12;
-
-  width: 5px;
-  height: 125px;
-
-  border-radius: 16px;
-  background: #d2d1cb;
+  display: none;
 }
 
 .library__search-results {
   position: absolute;
-  top: calc(var(--library-header-top) + 171px);
+  top: var(--library-content-top);
   left: 0;
   right: 0;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 102px);
   z-index: 11;
 
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px 20px 24px;
   box-sizing: border-box;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .library__search-empty {
@@ -362,12 +375,14 @@
 
 .library__search-item {
   width: 100%;
+  max-width: 100%;
   min-height: 124px;
   padding: 0;
 
   display: flex;
   align-items: flex-start;
   gap: 24px;
+  overflow: hidden;
 
   border: 0;
   background: transparent;
@@ -392,7 +407,11 @@
 
 .library__search-info {
   min-width: 0;
+  width: 0;
+  max-width: 100%;
+  flex: 1 1 0;
   padding-top: 11px;
+  overflow: hidden;
 
   display: flex;
   flex-direction: column;
@@ -409,6 +428,8 @@
   letter-spacing: -0.4px;
   word-break: keep-all;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .library__search-author,
@@ -422,14 +443,18 @@
   line-height: 23px;
   letter-spacing: -0.35px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .library__search-chips {
   margin-top: 7px;
+  max-width: 100%;
 
   display: flex;
   align-items: center;
   gap: 6px;
+  overflow: hidden;
 }
 
 .library__search-chip {

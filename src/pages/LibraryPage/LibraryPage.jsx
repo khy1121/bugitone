@@ -4,6 +4,7 @@ import BottomNav from '../../components/common/BottomNav/BottomNav'
 import { CheckIcon } from '../../assets/icons'
 import { mockBooks } from '../../data/mockBooks'
 import { getMyBooks, searchBooks as searchApiBooks } from '../../api/bookApi'
+import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import './LibraryPage.scss'
 
 const CHOSUNG = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
@@ -112,8 +113,10 @@ function normalizeBook(raw) {
 
 export default function LibraryPage() {
   const navigate = useNavigate()
+  const pageRef = useRef(null)
   const contentRef = useRef(null)
   const searchInputRef = useRef(null)
+  const searchWrapRef = useRef(null)
   const userId = getUserId()
 
   const [savedBooks, setSavedBooks] = useState(() => (userId ? [] : mockBooks))
@@ -125,6 +128,10 @@ export default function LibraryPage() {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [isInputFocused, setIsInputFocused] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const keyboard = useKeyboardAwareInput({
+    scrollRef: pageRef,
+    targetRef: searchWrapRef,
+  })
 
   useEffect(() => {
     if (!userId) return
@@ -233,31 +240,40 @@ export default function LibraryPage() {
     requestAnimationFrame(() => searchInputRef.current?.focus())
   }
 
+  const handleSearchFocus = (event) => {
+    openSearchMode()
+    keyboard.handleFocus(event)
+  }
+
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value)
     if (!isSearchMode) setIsSearchMode(true)
   }
 
-  const handleSearchBlur = () => {
+  const handleSearchBlur = (event) => {
+    keyboard.handleBlur(event)
     setIsInputFocused(false)
     if (!searchQuery.trim()) setIsSearchMode(false)
   }
 
   return (
-    <div className={`library${isSearchMode ? ' library--searching' : ''}`}>
+    <div
+      ref={pageRef}
+      className={`library${isSearchMode ? ' library--searching' : ''}${keyboard.isKeyboardFocused ? ' library--keyboard' : ''}`}
+    >
       <header className="library__header">
         <div className="library__brand">
           <h1 className="library__logo">DOK</h1>
           <p className="library__tagline">펼치는 순간, 나를 다독이다</p>
         </div>
 
-        <label className="library__search" aria-label="책 검색">
+        <label ref={searchWrapRef} className="library__search" aria-label="책 검색">
           <input
             ref={searchInputRef}
             className="library__search-input"
             type="search"
             value={searchQuery}
-            onFocus={openSearchMode}
+            onFocus={handleSearchFocus}
             onBlur={handleSearchBlur}
             onChange={handleSearchChange}
             enterKeyHint="search"
