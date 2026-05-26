@@ -3,10 +3,10 @@
 .memo-toolbar {
   position: fixed;
   left: 50%;
-  bottom: env(safe-area-inset-bottom, 0px);
+  bottom: max(env(safe-area-inset-bottom, 0px), 0px);
   z-index: 120;
 
-  width: 393px;
+  width: min(100%, #{$design-width});
   height: 68px;
 
   display: flex;
@@ -16,12 +16,14 @@
 
   background: $color-white;
   border-radius: 20px 20px 0 0;
-  filter: drop-shadow(0 0 4.05px rgba(40, 40, 40, 0.23));
+  filter: drop-shadow(0 -4px 4.05px rgba(40, 39, 35, 0.04));
 }
 
 .memo-toolbar__item {
-  width: 78.6px;
+  width: calc(100% / 7);
   height: 68px;
+  min-width: 0;
+  padding: 12px 0;
 
   display: flex;
   flex-direction: column;
@@ -29,40 +31,74 @@
   justify-content: center;
   gap: 4px;
 
-  padding: 12px 26px;
   border: 0;
   background: transparent;
-
+  color: #141b34;
+  font-family: $font-family-base;
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
 }
 
 .memo-toolbar__icon {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
 
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
-  color: $gray-900;
+  color: currentColor;
 
   svg {
     display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }
 
+.memo-toolbar__text-icon {
+  color: currentColor;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.memo-toolbar__text-icon--H1,
+.memo-toolbar__text-icon--H2 {
+  font-size: 21px;
+}
+
+.memo-toolbar__text-icon--U {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.memo-toolbar__text-icon--가 {
+  font-weight: 700;
+}
+
 .memo-toolbar__label {
+  color: $gray-900;
   font-family: $font-family-base;
   font-size: $font-size-caption;
   font-weight: $font-weight-caption;
   line-height: 18px;
-  letter-spacing: $letter-spacing-base;
+  letter-spacing: -0.3px;
   text-align: center;
   white-space: nowrap;
 }
 
 .memo-toolbar__item--active {
+  color: $main-500;
+
   .memo-toolbar__label {
     color: $main-500;
   }
@@ -73,4 +109,9 @@
   left: auto;
   bottom: auto;
   transform: none;
+}
+
+.memo-toolbar--keyboard,
+html.keyboard-open .memo-edit .memo-toolbar {
+  bottom: max(var(--keyboard-height, 0px), env(safe-area-inset-bottom, 0px));
 }

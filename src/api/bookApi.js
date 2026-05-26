@@ -47,9 +47,11 @@ export const getBookMemos = (mainId) =>
   axiosInstance.get(`/main-study/${mainId}/memos`).then(unwrap)
 
 export const createMemo = (body) =>
+  // 백엔드가 인증 토큰 외에 user_id를 요구하면 여기 params에 추가해야 합니다.
   axiosInstance.post('/memos', body).then(unwrap)
 
 export const updateMemo = (memoId, body) =>
+  // PATCH 스펙은 title/content 중심입니다. 백엔드가 mainId를 요구하면 body에 추가해야 합니다.
   axiosInstance.patch(`/memos/${memoId}`, body).then(unwrap)
 
 export const deleteMemo = (memoId) =>
