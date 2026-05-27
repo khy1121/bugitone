@@ -291,6 +291,7 @@ export default function useKeyboardAwareInput({
     isKeyboardFocused,
     handleFocus,
     handleBlur,
+    releaseVisualViewport,
     scrollTargetIntoView,
     scheduleScrollTargetIntoView,
   }

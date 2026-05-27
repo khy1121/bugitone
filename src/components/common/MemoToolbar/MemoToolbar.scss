@@ -110,8 +110,3 @@
   bottom: auto;
   transform: none;
 }
-
-.memo-toolbar--keyboard,
-html.keyboard-open .memo-edit .memo-toolbar {
-  bottom: max(var(--keyboard-height, 0px), env(safe-area-inset-bottom, 0px));
-}

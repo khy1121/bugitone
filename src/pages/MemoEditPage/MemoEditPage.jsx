@@ -121,12 +121,6 @@ function getLocalMemoDate() {
 function MemoTitleSheet({ initialTitle, initialError = false, onClose, onSave }) {
   const [draft, setDraft] = useState(initialTitle)
   const [error, setError] = useState(initialError)
-  const inputRef = useRef(null)
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => inputRef.current?.focus())
-    return () => cancelAnimationFrame(frame)
-  }, [])
 
   const handleSubmit = () => {
     const nextTitle = draft.trim()
@@ -142,7 +136,6 @@ function MemoTitleSheet({ initialTitle, initialError = false, onClose, onSave })
     <section className="memo-title-sheet" role="dialog" aria-modal="true" aria-label="메모 제목">
       <h2 className="memo-title-sheet__title">제목</h2>
       <input
-        ref={inputRef}
         className={`memo-title-sheet__input${draft.trim() ? ' memo-title-sheet__input--filled' : ''}`}
         type="text"
         value={draft}
@@ -206,6 +199,7 @@ export default function MemoEditPage() {
   const keyboard = useKeyboardAwareInput({
     scrollRef: pageRef,
     targetRef: bodyRef,
+    resetScrollOnFocus: true,
   })
 
   const editor = useEditor({
@@ -332,6 +326,57 @@ export default function MemoEditPage() {
     prepareFutureBlock()?.toggleBulletList().run()
   }
 
+  const resetInputViewport = async () => {
+    if (typeof window === 'undefined') return
+
+    const root = document.documentElement
+    const viewport = window.visualViewport
+    const shouldWaitForViewport =
+      keyboard.isKeyboardFocused ||
+      root.classList.contains('keyboard-open') ||
+      (viewport?.scale ?? 1) > 1.01
+
+    editor?.commands.blur()
+
+    const activeElement = document.activeElement
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur()
+    }
+
+    keyboard.releaseVisualViewport()
+
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      pageRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      bodyRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+
+    resetScroll()
+
+    if (!shouldWaitForViewport) return
+
+    await new Promise((resolve) => {
+      const startedAt = Date.now()
+
+      const waitForSettle = () => {
+        const scale = window.visualViewport?.scale ?? 1
+        const keyboardClosed = !root.classList.contains('keyboard-open')
+        const timedOut = Date.now() - startedAt >= 420
+
+        if ((keyboardClosed && scale <= 1.01) || timedOut) {
+          resolve()
+          return
+        }
+
+        window.setTimeout(waitForSettle, 32)
+      }
+
+      window.requestAnimationFrame(waitForSettle)
+    })
+
+    resetScroll()
+  }
+
   const goBackToMemoTab = () => {
     if (routeBookId) {
       navigate(`/book/${routeBookId}`, { state: { tab: 'memo' } })
@@ -443,6 +488,8 @@ export default function MemoEditPage() {
   }
 
   const handleSave = async () => {
+    await resetInputViewport()
+
     const saved = await persistMemo({ requireTitle: true })
     if (saved) {
       setPageMode('view')
@@ -450,6 +497,8 @@ export default function MemoEditPage() {
   }
 
   const handleExit = async () => {
+    await resetInputViewport()
+
     if (isViewMode) {
       goBackToMemoTab()
       return
@@ -458,10 +507,17 @@ export default function MemoEditPage() {
     const hasContent = editor ? Boolean(stripHtml(editor.getHTML())) || Boolean(memoId) : false
 
     if (hasContent) {
-      await persistMemo({ requireTitle: false })
+      const saved = await persistMemo({ requireTitle: true })
+      if (!saved) return
     }
 
+    await resetInputViewport()
     goBackToMemoTab()
+  }
+
+  const handleOpenTitleSheet = async () => {
+    await resetInputViewport()
+    openTitleSheet()
   }
 
   const handleDelete = async () => {
@@ -578,7 +634,7 @@ export default function MemoEditPage() {
         <button
           className={`memo-edit__title-button${!currentTitle ? ' memo-edit__title-button--placeholder' : ''}`}
           type="button"
-          onClick={() => openTitleSheet()}
+          onClick={handleOpenTitleSheet}
         >
           {resolvedTitle}
         </button>
