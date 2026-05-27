@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../../components/common/BottomNav/BottomNav'
 import { CheckIcon } from '../../assets/icons'
@@ -12,6 +12,9 @@ const CHOSUNG_SET = new Set(CHOSUNG)
 const FALLBACK_COVER = '/assets/library/book.svg'
 const LIBRARY_SCROLL_KEY = 'libraryScrollTop'
 const LIBRARY_VISIBLE_ROWS_KEY = 'libraryVisibleRows'
+const RECENT_SEARCHES_KEY = 'libraryRecentSearches'
+const RECENT_SEARCH_LIMIT = 10
+const RECENT_SEARCH_LABEL_LIMIT = 10
 
 const norm = (str) => String(str || '').replace(/\s/g, '')
 
@@ -59,6 +62,24 @@ function getDateLabel(book) {
   if (book.startDate) return `${book.startDate}~`
   if (book.endDate) return `~${book.endDate}`
   return ''
+}
+
+function loadRecentSearches() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]')
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .filter((item) => typeof item === 'string' && item.trim())
+      .slice(0, RECENT_SEARCH_LIMIT)
+  } catch {
+    return []
+  }
+}
+
+function getRecentSearchLabel(query) {
+  const chars = [...query]
+  if (chars.length <= RECENT_SEARCH_LABEL_LIMIT) return query
+  return `${chars.slice(0, RECENT_SEARCH_LABEL_LIMIT).join('')}...`
 }
 
 function normalizeStatus(status) {
@@ -117,6 +138,13 @@ export default function LibraryPage() {
   const contentRef = useRef(null)
   const searchInputRef = useRef(null)
   const searchWrapRef = useRef(null)
+  const recentSearchesRef = useRef(null)
+  const recentDragRef = useRef({
+    pointerId: null,
+    startX: 0,
+    scrollLeft: 0,
+    dragged: false,
+  })
   const userId = getUserId()
 
   const [savedBooks, setSavedBooks] = useState(() => (userId ? [] : mockBooks))
@@ -128,10 +156,22 @@ export default function LibraryPage() {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [isInputFocused, setIsInputFocused] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [recentSearches, setRecentSearches] = useState(loadRecentSearches)
   const keyboard = useKeyboardAwareInput({
     scrollRef: pageRef,
     targetRef: searchWrapRef,
   })
+
+  const saveRecentSearch = useCallback((value) => {
+    const query = value.trim()
+    if (!query) return
+
+    setRecentSearches((prev) => {
+      const next = [query, ...prev.filter((item) => item !== query)].slice(0, RECENT_SEARCH_LIMIT)
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next))
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     if (!userId) return
@@ -186,6 +226,17 @@ export default function LibraryPage() {
       window.clearTimeout(timer)
     }
   }, [isSearchMode, searchQuery, userId])
+
+  useEffect(() => {
+    const query = searchQuery.trim()
+    if (!isSearchMode || !query) return undefined
+
+    const timer = window.setTimeout(() => {
+      saveRecentSearch(query)
+    }, 700)
+
+    return () => window.clearTimeout(timer)
+  }, [isSearchMode, saveRecentSearch, searchQuery])
 
   useEffect(() => {
     const savedVisibleRows = Number(sessionStorage.getItem(LIBRARY_VISIBLE_ROWS_KEY))
@@ -250,11 +301,83 @@ export default function LibraryPage() {
     if (!isSearchMode) setIsSearchMode(true)
   }
 
+  const handleSearchKeyDown = (event) => {
+    if (event.key !== 'Enter') return
+    saveRecentSearch(searchQuery)
+  }
+
   const handleSearchBlur = (event) => {
     keyboard.handleBlur(event)
     setIsInputFocused(false)
+    if (event.relatedTarget?.closest?.('.library__recent-searches')) return
     if (!searchQuery.trim()) setIsSearchMode(false)
   }
+
+  const handleRecentSearchClick = (query) => {
+    setSearchQuery(query)
+    setIsSearchMode(true)
+    saveRecentSearch(query)
+    requestAnimationFrame(() => searchInputRef.current?.focus())
+  }
+
+  const handleRecentPointerDown = (event) => {
+    const scroller = recentSearchesRef.current
+    const isRecentButton =
+      event.target instanceof Element &&
+      event.target.closest('.library__recent-search-btn')
+
+    if (!scroller || event.pointerType === 'touch' || isRecentButton) return
+
+    recentDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: scroller.scrollLeft,
+      dragged: false,
+    }
+
+    scroller.setPointerCapture?.(event.pointerId)
+    scroller.classList.add('library__recent-searches--dragging')
+  }
+
+  const handleRecentPointerMove = (event) => {
+    const scroller = recentSearchesRef.current
+    const drag = recentDragRef.current
+
+    if (!scroller || drag.pointerId !== event.pointerId) return
+
+    const deltaX = event.clientX - drag.startX
+    if (Math.abs(deltaX) > 3) {
+      drag.dragged = true
+    }
+
+    scroller.scrollLeft = drag.scrollLeft - deltaX
+  }
+
+  const endRecentDrag = (event) => {
+    const scroller = recentSearchesRef.current
+    const drag = recentDragRef.current
+
+    if (!scroller || drag.pointerId !== event.pointerId) return
+
+    scroller.releasePointerCapture?.(event.pointerId)
+    scroller.classList.remove('library__recent-searches--dragging')
+    recentDragRef.current = {
+      pointerId: null,
+      startX: 0,
+      scrollLeft: scroller.scrollLeft,
+      dragged: drag.dragged,
+    }
+  }
+
+  const handleRecentClickCapture = (event) => {
+    if (!recentDragRef.current.dragged) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    recentDragRef.current.dragged = false
+  }
+
+  const showRecentSearches = isSearchMode && !searchQuery.trim() && recentSearches.length > 0
 
   return (
     <div
@@ -276,6 +399,7 @@ export default function LibraryPage() {
             onFocus={handleSearchFocus}
             onBlur={handleSearchBlur}
             onChange={handleSearchChange}
+            onKeyDown={handleSearchKeyDown}
             enterKeyHint="search"
           />
           <img src="/assets/library/search.svg" alt="" aria-hidden="true" />
@@ -330,6 +454,31 @@ export default function LibraryPage() {
       {isSearchMode && (
         <>
           <div className="library__search-scrollbar" aria-hidden="true" />
+          {showRecentSearches && (
+            <div
+              ref={recentSearchesRef}
+              className="library__recent-searches"
+              aria-label="최근 검색 기록"
+              onPointerDown={handleRecentPointerDown}
+              onPointerMove={handleRecentPointerMove}
+              onPointerUp={endRecentDrag}
+              onPointerCancel={endRecentDrag}
+              onClickCapture={handleRecentClickCapture}
+            >
+              {recentSearches.map((query) => (
+                <button
+                  key={query}
+                  className="library__recent-search-btn"
+                  type="button"
+                  title={query}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleRecentSearchClick(query)}
+                >
+                  {getRecentSearchLabel(query)}
+                </button>
+              ))}
+            </div>
+          )}
           <section className="library__search-results" aria-label="검색 결과">
             {!searchResults ? null : searchResults.length === 0 ? (
               <p className="library__search-empty">검색 결과가 없습니다.</p>
@@ -344,7 +493,10 @@ export default function LibraryPage() {
                     className={`library__search-item${index === searchResults.length - 1 ? ' library__search-item--last' : ''}`}
                     type="button"
                     onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => openBookDetail(book, { fromSearch: true })}
+                    onClick={() => {
+                      saveRecentSearch(searchQuery)
+                      openBookDetail(book, { fromSearch: true })
+                    }}
                   >
                     <img className="library__search-cover" src={book.cover} alt={book.title} />
                     <div className="library__search-info">
