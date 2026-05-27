@@ -385,6 +385,26 @@ const getCurrentDate = () => {
   return `${year}.${month}.${date}`;
 };
 
+const LOADING_QUOTES = [
+  "모든 게 낯설게 느껴지는 오늘, 앨리스도 처음엔 아무것도 이해하지 못한 채 그 세계에 뛰어들었어요.",
+  "뿌듯함과 지침이 동시에 느껴지는 오늘, 어린 왕자처럼 작은 것들의 소중함을 알면서도 그 무게에 지쳐있는 당신과 닮았어요.",
+  "내 단점이 자꾸 눈에 밟히는 오늘, 앤은 누구보다 자신의 다름을 사랑하는 법을 알고 있어요.",
+  "책임과 현실이 무겁게 느껴지는 오늘, 피터팬은 어른이 되지 않아도 괜찮다고 말해줄 수 있는 유일한 캐릭터예요.",
+  "내 직관을 무시하고 흔들렸거나, 누군가의 말에 경계를 잃은 날. 빨간 모자는 그 경험에서 가장 단단해지는 법을 알고 있어요.",
+];
+
+const getRandomLoadingQuoteIndex = (currentIndex = -1) => {
+  if (LOADING_QUOTES.length <= 1) return 0;
+
+  let nextIndex = Math.floor(Math.random() * LOADING_QUOTES.length);
+
+  while (nextIndex === currentIndex) {
+    nextIndex = Math.floor(Math.random() * LOADING_QUOTES.length);
+  }
+
+  return nextIndex;
+};
+
 const FALLBACK_ANALYSIS = {
   inputId: null,
   resultId: null,
@@ -419,6 +439,9 @@ export default function ResultPage() {
   const [apiError, setApiError] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
   const [savingImage, setSavingImage] = useState(false);
+  const [loadingQuoteIndex, setLoadingQuoteIndex] = useState(() =>
+    getRandomLoadingQuoteIndex(),
+  );
 
   const displayName = useMemo(() => {
     const savedNickname = window.localStorage.getItem("nickname") || "";
@@ -469,6 +492,16 @@ export default function ResultPage() {
 
     return () => window.clearTimeout(timer);
   }, [comfort, emotions, loading, prompt]);
+
+  useEffect(() => {
+    if (!loading) return undefined;
+
+    const timer = window.setInterval(() => {
+      setLoadingQuoteIndex((currentIndex) => getRandomLoadingQuoteIndex(currentIndex));
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, [loading]);
 
   const moodTags = useMemo(() => {
     const normalized =
@@ -607,6 +640,8 @@ export default function ResultPage() {
     navigate(ROUTES.SHOP);
   };
 
+  const loadingQuote = LOADING_QUOTES[loadingQuoteIndex] ?? LOADING_QUOTES[0];
+
   if (loading) {
     return (
       <main className="result-loading">
@@ -644,9 +679,7 @@ export default function ResultPage() {
           </div>
 
           <p className="result-loading__quote">
-            모든 게 낯설게 느껴지는 오늘, 앨리스도 처음엔
-            <br />
-            아무것도 이해하지 못한 채 그 세계에 뛰어들었어요.
+            {loadingQuote}
           </p>
         </div>
       </main>
