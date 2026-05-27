@@ -375,6 +375,335 @@
     font-weight: $font-weight-body2;
     color: $gray-400;
   }
+
+  .mypage__install-entry {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 76px;
+    margin-top: 24px;
+    padding: 13px 18px;
+    gap: 12px;
+    border: 0;
+    border-radius: 20px;
+    background: #fdfdfd;
+    color: $gray-900;
+    font-family: $font-family-base;
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  .mypage__install-entry-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+    background: $main-0;
+    color: $main-700;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    letter-spacing: 0;
+  }
+
+  .mypage__install-entry-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mypage__install-entry-title {
+    color: $gray-900;
+    font-size: $font-size-body1;
+    font-weight: 600;
+    line-height: $line-height-body1;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mypage__install-entry-sub {
+    color: $gray-500;
+    font-size: $font-size-body2;
+    font-weight: $font-weight-body2;
+    line-height: $line-height-body2;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── 앱 설치 방법 뷰 ───────────────────────────────────────────────────────────
+
+.mypage--install {
+  display: flex;
+  flex-direction: column;
+  background: #f5f4f3;
+
+  .mypage__install-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 20px calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mypage__install-hero {
+    padding: 22px 20px 20px;
+    border-radius: 20px;
+    background: #fdfdfd;
+
+    h2 {
+      margin: 12px 0 8px;
+      color: $gray-900;
+      font-size: $font-size-h2;
+      font-weight: 700;
+      line-height: $line-height-h2;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: $gray-600;
+      font-size: $font-size-body2;
+      font-weight: $font-weight-body2;
+      line-height: $line-height-body2;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+  }
+
+  .mypage__install-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 15px;
+    background: $main-0;
+    color: $main-700;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    letter-spacing: 0;
+  }
+
+  .mypage__install-guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .mypage__install-guide-card {
+    padding: 18px;
+    border-radius: 20px;
+    background: #fdfdfd;
+  }
+
+  .mypage__install-guide-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $gray-100;
+
+    h2 {
+      margin: 0 0 4px;
+      color: $gray-900;
+      font-size: $font-size-h3;
+      font-weight: 700;
+      line-height: $line-height-h3;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: $gray-600;
+      font-size: $font-size-body2;
+      font-weight: $font-weight-body2;
+      line-height: $line-height-body2;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+  }
+
+  .mypage__install-guide-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: $main-50;
+    color: $main-800;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    letter-spacing: 0;
+  }
+
+  .mypage__install-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mypage__install-step {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mypage__install-step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: $main-300;
+    color: $gray-900;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0;
+  }
+
+  .mypage__install-step-text {
+    min-width: 0;
+    padding-top: 2px;
+    color: $gray-800;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 23px;
+    letter-spacing: 0;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .mypage__install-tip {
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: $gray-50;
+    color: $gray-600;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0;
+    word-break: keep-all;
+  }
+
+  .mypage__install-action {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+    background: #f5f4f3;
+    border-top: 1px solid rgba(230, 229, 223, 0.9);
+  }
+
+  .mypage__install-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 60px;
+    border: 0;
+    border-radius: 15px;
+    background: $main-300;
+    color: $gray-900;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: 700;
+    line-height: $line-height-body1;
+    letter-spacing: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
+
+  .mypage__install-modal {
+    width: 310px;
+    padding: 24px 20px 20px;
+    border-radius: 16px;
+    background: #fdfdfd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    h2 {
+      margin: 12px 0 8px;
+      color: $gray-900;
+      font-size: $font-size-body1;
+      font-weight: 700;
+      line-height: $line-height-body1;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: $gray-600;
+      font-size: $font-size-body2;
+      font-weight: $font-weight-body2;
+      line-height: $line-height-body2;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+  }
+
+  .mypage__install-modal-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    background: $main-0;
+    color: $main-700;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 22px;
+    letter-spacing: 0;
+  }
+
+  .mypage__install-modal-btn {
+    width: 100%;
+    height: 52px;
+    margin-top: 20px;
+    border: 0;
+    border-radius: 12px;
+    background: $main-500;
+    color: $gray-900;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: 600;
+    line-height: $line-height-body1;
+    letter-spacing: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active { opacity: 0.85; }
+  }
 }
 
 // ── 월 리포트 뷰 ──────────────────────────────────────────────────────────────
