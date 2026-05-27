@@ -371,6 +371,13 @@
   cursor: grabbing;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .library__recent-searches {
+    overflow-x: hidden;
+    touch-action: none;
+  }
+}
+
 .library__recent-search-btn {
   width: fit-content;
   max-width: 170px;

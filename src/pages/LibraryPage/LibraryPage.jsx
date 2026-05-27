@@ -144,6 +144,8 @@ export default function LibraryPage() {
     startX: 0,
     scrollLeft: 0,
     dragged: false,
+    suppressClick: false,
+    activeQuery: '',
   })
   const userId = getUserId()
 
@@ -322,21 +324,32 @@ export default function LibraryPage() {
 
   const handleRecentPointerDown = (event) => {
     const scroller = recentSearchesRef.current
-    const isRecentButton =
-      event.target instanceof Element &&
-      event.target.closest('.library__recent-search-btn')
+    const targetButton =
+      event.target instanceof Element
+        ? event.target.closest('.library__recent-search-btn')
+        : null
+    const activeQuery = targetButton?.getAttribute('data-query') || ''
 
-    if (!scroller || event.pointerType === 'touch' || isRecentButton) return
+    if (!scroller || event.pointerType === 'touch' || event.button !== 0) return
+    if (activeQuery) event.preventDefault()
 
     recentDragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       scrollLeft: scroller.scrollLeft,
       dragged: false,
+      suppressClick: false,
+      activeQuery,
     }
 
     scroller.setPointerCapture?.(event.pointerId)
     scroller.classList.add('library__recent-searches--dragging')
+  }
+
+  const handleRecentWheel = (event) => {
+    if (event.deltaX !== 0 || event.shiftKey) {
+      event.preventDefault()
+    }
   }
 
   const handleRecentPointerMove = (event) => {
@@ -361,20 +374,30 @@ export default function LibraryPage() {
 
     scroller.releasePointerCapture?.(event.pointerId)
     scroller.classList.remove('library__recent-searches--dragging')
+
+    const shouldApplyQuery = Boolean(drag.activeQuery) && !drag.dragged
     recentDragRef.current = {
       pointerId: null,
       startX: 0,
       scrollLeft: scroller.scrollLeft,
       dragged: drag.dragged,
+      suppressClick: shouldApplyQuery || drag.suppressClick,
+      activeQuery: '',
+    }
+
+    if (shouldApplyQuery) {
+      handleRecentSearchClick(drag.activeQuery)
     }
   }
 
   const handleRecentClickCapture = (event) => {
-    if (!recentDragRef.current.dragged) return
+    const drag = recentDragRef.current
+    if (!drag.dragged && !drag.suppressClick) return
 
     event.preventDefault()
     event.stopPropagation()
     recentDragRef.current.dragged = false
+    recentDragRef.current.suppressClick = false
   }
 
   const showRecentSearches = isSearchMode && !searchQuery.trim() && recentSearches.length > 0
@@ -464,6 +487,7 @@ export default function LibraryPage() {
               onPointerUp={endRecentDrag}
               onPointerCancel={endRecentDrag}
               onClickCapture={handleRecentClickCapture}
+              onWheel={handleRecentWheel}
             >
               {recentSearches.map((query) => (
                 <button
@@ -471,7 +495,7 @@ export default function LibraryPage() {
                   className="library__recent-search-btn"
                   type="button"
                   title={query}
-                  onMouseDown={(event) => event.preventDefault()}
+                  data-query={query}
                   onClick={() => handleRecentSearchClick(query)}
                 >
                   {getRecentSearchLabel(query)}
