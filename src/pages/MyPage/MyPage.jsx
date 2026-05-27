@@ -332,6 +332,24 @@ function getCurrentUserId() {
   return Number.isFinite(userId) && userId > 0 ? userId : null;
 }
 
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+}
+
 function normalizeMonthlyCharacters(value) {
   const rawCharacters = Array.isArray(value)
     ? value
@@ -1246,6 +1264,7 @@ function AccountView({ onBack }) {
   const [profileImage, setProfileImage] = useState(
     localStorage.getItem("profileImage") ?? null,
   );
+  const [nicknameCopyMessage, setNicknameCopyMessage] = useState("");
   const fileInputRef = useRef(null);
 
   const handleLogout = () => {
@@ -1289,6 +1308,28 @@ function AccountView({ onBack }) {
       setShowGenderSheet(false);
     }
   };
+
+  const handleCopyNickname = async () => {
+    const text = (nickname || "닉네임").trim();
+    if (!text) return;
+
+    try {
+      await copyTextToClipboard(text);
+      setNicknameCopyMessage("닉네임이 복사됐어요.");
+    } catch {
+      setNicknameCopyMessage("닉네임 복사에 실패했어요.");
+    }
+  };
+
+  useEffect(() => {
+    if (!nicknameCopyMessage) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setNicknameCopyMessage("");
+    }, 1500);
+
+    return () => window.clearTimeout(timer);
+  }, [nicknameCopyMessage]);
 
   if (showBirthdayEditor) {
     return (
@@ -1371,7 +1412,19 @@ function AccountView({ onBack }) {
                 {nickname || "닉네임"}
               </button>
             ) : (
-              <p className="mypage__profile-name">{nickname || "닉네임"}</p>
+              <button
+                type="button"
+                className="mypage__profile-name mypage__profile-name-copy"
+                onClick={handleCopyNickname}
+                aria-label="닉네임 복사"
+              >
+                {nickname || "닉네임"}
+              </button>
+            )}
+            {nicknameCopyMessage && (
+              <p className="mypage__profile-copy-message" role="status">
+                {nicknameCopyMessage}
+              </p>
             )}
             <button
               type="button"
