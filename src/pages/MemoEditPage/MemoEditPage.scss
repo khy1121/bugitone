@@ -265,11 +265,6 @@
   }
 }
 
-.memo-edit--keyboard {
-  height: var(--visual-height, 100dvh);
-  min-height: var(--visual-height, 100dvh);
-}
-
 .memo-edit .memo-toolbar,
 .memo-edit .memo-toolbar--keyboard,
 html.keyboard-open .memo-edit .memo-toolbar {
