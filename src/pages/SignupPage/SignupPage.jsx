@@ -3,10 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
+import { checkEmail } from '../../api/userApi'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import './SignupPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const SIGNUP_EMAIL_ERROR_MESSAGES = {
+  400: '이메일을 다시 확인해주세요.',
+  409: '이미 사용 중인 이메일입니다.',
+}
+
+function getSignupEmailErrorMessage(error) {
+  return SIGNUP_EMAIL_ERROR_MESSAGES[error?.status]
+    || error?.message
+    || '이메일 중복 확인에 실패했어요. 잠시 후 다시 시도해주세요.'
+}
 
 export default function SignupPage() {
   const navigate = useNavigate()
@@ -36,24 +48,38 @@ export default function SignupPage() {
   })
 
   const msgText = emailError
-    ? '이메일 형식이 올바르지 않습니다.'
+    ? '이메일 형식으로 입력해주세요. 예: abc123@gmail.com'
     : passwordError
-    ? '비밀번호 형식이 올바르지 않습니다.'
+    ? '비밀번호는 6~8자로 입력해주세요.'
     : passwordTouched && !passwordBlurred
-    ? '6~8자 이내로 입력해주세요.'
+    ? '비밀번호는 6~8자 이내로 입력해주세요.'
     : confirmError
-    ? '비밀번호가 일치하지 않습니다.'
+    ? '비밀번호가 서로 일치하지 않아요.'
     : apiError || ''
 
   const msgIsError = emailError || passwordError || confirmError || !!apiError
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!canSubmit) return
     setLoading(true)
     setApiError('')
-    window.setTimeout(() => {
-      navigate(ROUTES.NICKNAME, { state: { email, password } })
-    }, 900)
+
+    try {
+      const result = await checkEmail(email.trim())
+
+      if (result?.available === false) {
+        setEmailBlurred(true)
+        setApiError('이미 사용 중인 이메일입니다.')
+        setLoading(false)
+        return
+      }
+
+      navigate(ROUTES.NICKNAME, { state: { email: email.trim(), password } })
+    } catch (error) {
+      setEmailBlurred(true)
+      setApiError(getSignupEmailErrorMessage(error))
+      setLoading(false)
+    }
   }
 
   return (
@@ -70,13 +96,16 @@ export default function SignupPage() {
             type="email"
             placeholder="이메일을 입력해주세요."
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setApiError('')
+            }}
             onFocus={keyboard.handleFocus}
             onBlur={(event) => {
               setEmailBlurred(true)
               keyboard.handleBlur(event)
             }}
-            error={emailError}
+            error={emailError || !!apiError}
             autoComplete="email"
           />
           <Input
@@ -84,7 +113,10 @@ export default function SignupPage() {
             type="password"
             placeholder="비밀번호를 입력해주세요."
             value={password}
-            onChange={(e) => { setPassword(e.target.value); setPasswordTouched(true) }}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              setPasswordTouched(true)
+            }}
             onFocus={keyboard.handleFocus}
             onBlur={(event) => {
               setPasswordBlurred(true)

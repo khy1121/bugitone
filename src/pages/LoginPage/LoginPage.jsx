@@ -9,6 +9,17 @@ import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const LOGIN_ERROR_MESSAGES = {
+  401: '이메일 또는 비밀번호가 맞지 않아요.',
+  404: '가입된 계정을 찾을 수 없어요.',
+}
+
+function getLoginErrorMessage(error) {
+  return LOGIN_ERROR_MESSAGES[error?.status]
+    || error?.message
+    || '로그인에 실패했어요. 잠시 후 다시 시도해주세요.'
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const pageRef = useRef(null)
@@ -47,7 +58,7 @@ export default function LoginPage() {
       localStorage.setItem('email', profile.email ?? email)
       navigate(ROUTES.HOME)
     } catch (err) {
-      setApiError(err?.message ?? '로그인에 실패했습니다.')
+      setApiError(getLoginErrorMessage(err))
     } finally {
       setSubmitting(false)
     }
@@ -55,11 +66,11 @@ export default function LoginPage() {
 
   // 메시지 우선순위: 이메일 에러 > 비밀번호 에러 > 비밀번호 입력 힌트 > API 에러
   const msgText = emailError
-    ? '이메일 형식이 올바르지 않습니다.'
+    ? '이메일 형식으로 입력해주세요. 예: abc123@gmail.com'
     : passwordError
-    ? '비밀번호가 올바르지 않습니다.'
+    ? '비밀번호는 6~8자로 입력해주세요.'
     : passwordTouched && !passwordBlurred
-    ? '6~8자 이내로 입력해주세요.'
+    ? '비밀번호는 6~8자 이내로 입력해주세요.'
     : apiError || ''
 
   const msgIsError = emailError || passwordError || !!apiError
@@ -77,15 +88,18 @@ export default function LoginPage() {
           <Input
             className="onboard-login__input"
             type="email"
-            placeholder="이메일을  입력해주세요."
+            placeholder="이메일을 입력해주세요."
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setApiError('')
+            }}
             onFocus={keyboard.handleFocus}
             onBlur={(event) => {
               setEmailBlurred(true)
               keyboard.handleBlur(event)
             }}
-            error={emailError}
+            error={emailError || !!apiError}
             autoComplete="email"
           />
           <Input
@@ -96,13 +110,14 @@ export default function LoginPage() {
             onChange={e => {
               setPassword(e.target.value)
               setPasswordTouched(true)
+              setApiError('')
             }}
             onFocus={keyboard.handleFocus}
             onBlur={(event) => {
               setPasswordBlurred(true)
               keyboard.handleBlur(event)
             }}
-            error={passwordError}
+            error={passwordError || !!apiError}
             autoComplete="current-password"
           />
 

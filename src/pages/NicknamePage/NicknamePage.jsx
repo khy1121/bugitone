@@ -10,6 +10,34 @@ import {
 } from '../../utils/nicknameValidation'
 import './NicknamePage.scss'
 
+const DUPLICATE_NICKNAME_CHECK_STATUSES = new Set([400, 409])
+
+function isDuplicateNicknameCheckError(error) {
+  return DUPLICATE_NICKNAME_CHECK_STATUSES.has(error?.status)
+}
+
+function isSignupDuplicateNicknameError(error) {
+  return error?.status === 409 || error?.data?.code === 'USER_409_1'
+}
+
+function getSignupErrorMessage(error) {
+  if (isSignupDuplicateNicknameError(error)) {
+    return '이미 사용 중인 닉네임입니다.'
+  }
+
+  if (error?.status === 400 && typeof error?.message === 'string') {
+    if (error.message.includes('비밀번호')) {
+      return '비밀번호는 6~8자로 입력해주세요.'
+    }
+    if (error.message.includes('닉네임') && error.message.includes('필수')) {
+      return '닉네임을 입력해주세요.'
+    }
+    return error.message
+  }
+
+  return error?.message || '회원가입에 실패했어요. 잠시 후 다시 시도해주세요.'
+}
+
 export default function NicknamePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -58,8 +86,13 @@ export default function NicknamePage() {
         return
       }
       setNicknameStatus('available')
-    } catch {
-      setNicknameStatus('taken')
+    } catch (error) {
+      if (isDuplicateNicknameCheckError(error)) {
+        setNicknameStatus('taken')
+        return
+      }
+      setNicknameStatus('idle')
+      setApiError(error?.message || '닉네임 중복 확인에 실패했어요. 잠시 후 다시 시도해주세요.')
     }
   }
 
@@ -78,7 +111,10 @@ export default function NicknamePage() {
       localStorage.setItem('email', profile.email ?? email)
       navigate(ROUTES.HOME, { replace: true })
     } catch (err) {
-      setApiError(err?.message ?? '회원가입에 실패했습니다.')
+      if (isSignupDuplicateNicknameError(err)) {
+        setNicknameStatus('taken')
+      }
+      setApiError(getSignupErrorMessage(err))
     } finally {
       setSubmitting(false)
     }
@@ -88,11 +124,11 @@ export default function NicknamePage() {
     || (isInvalidFormat
       ? NICKNAME_RULE_MESSAGE
       : isDuplicate
-      ? '사용할 수 없는 닉네임입니다.'
+      ? '이미 사용 중인 닉네임입니다.'
       : isAvailable
       ? '사용할 수 있는 닉네임입니다.'
       : isChecking
-      ? '중복 확인 중입니다.'
+      ? '닉네임 중복 확인 중입니다.'
       : NICKNAME_RULE_MESSAGE)
 
   return (

@@ -31,6 +31,9 @@ export const signup = ({ email, password, nickname }) =>
 export const checkNickname = (nickname) =>
   axiosInstance.get('/user/check', { params: { nickname } }).then(unwrap)
 
+export const checkEmail = (email) =>
+  axiosInstance.get('/user/check/email', { params: { email } }).then(unwrap)
+
 export const deleteAccount = (userId) =>
   axiosInstance.delete(`/user/${userId}`).then(unwrap)
 
