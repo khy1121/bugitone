@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { mockBooks } from '../../data/mockBooks'
 import { ROUTES } from '../../constants/routes'
@@ -20,7 +20,6 @@ import {
 import './BookDetailPage.scss'
 
 const ALERT_ICON_SRC = '/assets/alert-02.svg'
-const PROGRESS_CHARACTER_SRC = '/assets/shop/character.svg'
 const BOOK_STATE_ICON_SRC = '/assets/library/bookState.svg'
 const BOOK_DATE_ICON_SRC = '/assets/library/bookDate.svg'
 const CALENDAR_ICON_SRC = '/assets/library/calendar-01.svg'
@@ -473,8 +472,18 @@ export default function BookDetailPage() {
   const initialBook = location.state?.book
     ? normalizeBook(location.state.book)
     : mockBooks.find((item) => item.id === Number(id))
-  const detailLookupId = [initialBook?.isbn, id].find(isIsbnLike)
   const fromSearch = Boolean(location.state?.fromSearch)
+  const fromSavedLibrary = Boolean(location.state?.fromLibrary && !fromSearch)
+  const initiallySaved = Boolean(
+    initialBook &&
+    (
+      fromSavedLibrary ||
+      initialBook.inMyStudy ||
+      initialBook.mainId ||
+      (!fromSearch && getSavedIds().has(initialBook.id))
+    )
+  )
+  const detailLookupId = [initialBook?.isbn, id].find(isIsbnLike)
   const shouldFetchBookDetail = Boolean(
     userId &&
     detailLookupId &&
@@ -484,7 +493,8 @@ export default function BookDetailPage() {
   const [loading, setLoading] = useState(Boolean(userId && id))
   const [error, setError] = useState('')
 
-  const [isSaved, setIsSaved] = useState(() => (book ? getSavedIds().has(book.id) : false))
+  const [isSaved, setIsSaved] = useState(initiallySaved)
+  const isSavedView = isSaved || initiallySaved
   const [bookInfo, setBookInfo] = useState(() => loadBookInfo(Number(id), book ?? {}))
   const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'info')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -497,6 +507,20 @@ export default function BookDetailPage() {
   const [editStatus, setEditStatus] = useState(bookInfo.status)
   const [editStart, setEditStart] = useState(toInputDate(bookInfo.startDate))
   const [editEnd, setEditEnd] = useState(toInputDate(bookInfo.endDate))
+
+  useLayoutEffect(() => {
+    const nextBookInfo = loadBookInfo(Number(id), initialBook ?? {})
+
+    setBook(initialBook ?? null)
+    setLoading(Boolean(userId && id))
+    setIsSaved(initiallySaved)
+    setBookInfo(nextBookInfo)
+    setActiveTab(location.state?.tab ?? 'info')
+    setMemos(loadMemos(Number(id), initialBook?.memos ?? []))
+    setEditStatus(nextBookInfo.status)
+    setEditStart(toInputDate(nextBookInfo.startDate))
+    setEditEnd(toInputDate(nextBookInfo.endDate))
+  }, [id, location.key])
 
   useEffect(() => {
     if (!userId || !id) {
@@ -600,18 +624,6 @@ export default function BookDetailPage() {
     }
   }, [book?.cover])
 
-  const pageInfo = useMemo(() => {
-    const total = parsePageCount(book?.pages) || 204
-    const current = Math.min(book?.currentPage || (bookInfo.status === BOOK_STATUS.finished ? 86 : 0) || 86, total)
-    const progressStep = total > 0 ? total / 10 : 0
-    const progress = progressStep > 0 ? Math.ceil(current / progressStep) * 10 : 0
-    return {
-      total,
-      current,
-      progress: Math.max(0, Math.min(progress, 100)),
-    }
-  }, [book?.currentPage, book?.pages, bookInfo.status])
-
   if (!book) {
     return (
       <main className="book-detail book-detail--empty">
@@ -641,7 +653,7 @@ export default function BookDetailPage() {
     setBookInfo(updated)
     if (!userId) {
       saveBookInfo(book.id, updated)
-      if (!isSaved) {
+      if (!isSavedView) {
         addSavedId(book.id)
         setIsSaved(true)
       }
@@ -667,7 +679,7 @@ export default function BookDetailPage() {
         start_date: apiStartDate,
         end_date: apiEndDate,
       }
-      const targetMainId = book.mainId ?? (isSaved ? toNumberId(id) : null)
+      const targetMainId = book.mainId ?? (isSavedView ? toNumberId(id) : null)
 
       try {
         const saved = targetMainId
@@ -905,7 +917,7 @@ export default function BookDetailPage() {
       )}
 
       <section
-        className={`book-detail__hero${!isSaved ? ' book-detail__hero--unsaved' : ''}`}
+        className={`book-detail__hero${!isSavedView ? ' book-detail__hero--unsaved' : ''}`}
         style={{ '--book-hero-rgb': heroRgb }}
       >
         <div className="book-detail__topbar">
@@ -913,7 +925,7 @@ export default function BookDetailPage() {
             <ChevronLeftIcon size={24} color="#141B34" />
           </button>
 
-          {isSaved ? (
+          {isSavedView ? (
             <div className="book-detail__top-actions">
               <button className="book-detail__round-btn" type="button" onClick={openEditSheet} aria-label="수정">
                 <img src={EDIT_ICON_SRC} alt="" aria-hidden="true" />
@@ -947,7 +959,7 @@ export default function BookDetailPage() {
             <p>{book.author}</p>
           </div>
 
-          {isSaved && (
+          {isSavedView && (
             <div className={`book-detail__meta-cards${bookInfo.status === BOOK_STATUS.favorite ? ' book-detail__meta-cards--single' : ''}`}>
               <button
                 className={`book-detail__status-card${
@@ -1012,20 +1024,6 @@ export default function BookDetailPage() {
               <p>{book.isbn}</p>
             </article>
 
-            <article className="book-info__section book-info__section--pages">
-              <h2>페이지 수</h2>
-              <div className="book-progress" style={{ '--book-progress': `${pageInfo.progress}%` }}>
-                <div className="book-progress__track" />
-                <span className="book-progress__current">
-                  <img src={PROGRESS_CHARACTER_SRC} alt="" aria-hidden="true" />
-                  <b>{pageInfo.current}P</b>
-                </span>
-                <span className="book-progress__total">
-                  <img src={BOOK_DATE_ICON_SRC} alt="" aria-hidden="true" />
-                  <b>{pageInfo.total}P</b>
-                </span>
-              </div>
-            </article>
           </div>
         )}
 
