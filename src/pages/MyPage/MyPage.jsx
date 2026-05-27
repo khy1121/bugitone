@@ -982,7 +982,6 @@ function NicknameSheet({ onClose, onSaved }) {
             onClick={handleSave}
             disabled={saving}
           >
-            <span>{saving ? "저장 중..." : "저장하기"}</span>
             <img
               src="/assets/library/edit.svg"
               width="24"
@@ -990,6 +989,7 @@ function NicknameSheet({ onClose, onSaved }) {
               alt=""
               aria-hidden="true"
             />
+            <span>{saving ? "저장 중..." : "저장하기"}</span>
           </button>
         </div>
       </div>
@@ -1459,7 +1459,6 @@ function AccountView({ onBack }) {
             className="mypage__acct-logout-btn"
             onClick={() => setShowLogout(true)}
           >
-            <span>로그아웃</span>
             <img
               src="/assets/My/logout.svg"
               width="24"
@@ -1467,6 +1466,7 @@ function AccountView({ onBack }) {
               alt=""
               aria-hidden="true"
             />
+            <span>로그아웃</span>
           </button>
         </div>
       </div>

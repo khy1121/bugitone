@@ -1010,6 +1010,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
+html.keyboard-open .mypage__overlay {
+  top: max(0px, var(--visual-offset-top, 0px));
+  height: var(--visual-height, 100dvh);
+}
+
 .mypage__sheet-title-row {
   height: 59px;
   padding: 0 20px;
