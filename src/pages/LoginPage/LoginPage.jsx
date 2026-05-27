@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { login } from '../../api/userApi'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
+import { isAuthenticated } from '../../utils/authStorage'
 import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -44,6 +45,12 @@ export default function LoginPage() {
     resetScrollOnFocus: true,
   })
 
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate(ROUTES.HOME, { replace: true })
+    }
+  }, [navigate])
+
   const handleLogin = async () => {
     if (!canSubmit) return
     setSubmitting(true)
@@ -56,7 +63,7 @@ export default function LoginPage() {
       localStorage.setItem('userId', String(profile.userId))
       localStorage.setItem('nickname', profile.nickname ?? '')
       localStorage.setItem('email', profile.email ?? email)
-      navigate(ROUTES.HOME)
+      navigate(ROUTES.HOME, { replace: true })
     } catch (err) {
       setApiError(getLoginErrorMessage(err))
     } finally {
@@ -150,6 +157,14 @@ export default function LoginPage() {
               회원가입
             </button>
           </p>
+
+          <button
+            className="onboard-login__install-link"
+            type="button"
+            onClick={() => navigate(ROUTES.INSTALL_GUIDE)}
+          >
+            앱 설치 방법
+          </button>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ export const ROUTES = {
   CHARACTER_ERROR: '/character/error',
   ANALYZE: '/analyze',
   RESULT: '/result',
+  INSTALL_GUIDE: '/install-guide',
   MYPAGE: '/mypage',
   LOGIN: '/login',
   SIGNUP: '/signup',

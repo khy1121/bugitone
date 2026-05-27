@@ -39,7 +39,7 @@
     top: 273px;
     left: 20px;
     right: 20px;
-    height: 274px;
+    height: 330px;
   }
 
   &__form .onboard-login__input {
@@ -207,6 +207,32 @@
     text-underline-position: from-font;
   }
 
+  &__install-link {
+    position: absolute;
+    top: 292px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 112px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid $gray-100;
+    border-radius: 18px;
+    background: $gray-50;
+    color: $gray-700;
+    font-family: $font-family-base;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      opacity: 0.85;
+    }
+  }
+
   &--keyboard {
     height: var(--visual-height);
     min-height: unset;
@@ -216,6 +242,10 @@
       height: auto;
       min-height: max(var(--design-height, 852px), var(--app-height, 100%));
       overflow: visible;
+    }
+
+    .onboard-login__install-link {
+      display: none;
     }
   }
 }
