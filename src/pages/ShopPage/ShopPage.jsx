@@ -33,7 +33,7 @@ export default function ShopPage() {
         <span className="shop-page__glow" aria-hidden="true" />
 
         <header className="shop-header">
-          <button className="shop-header__back" type="button" onClick={() => navigate('/home')}>
+          <button className="shop-header__back" type="button" onClick={() => navigate('/character')}>
             ← 나가기
           </button>
           <h1 className="shop-header__title">다독코인샵</h1>
