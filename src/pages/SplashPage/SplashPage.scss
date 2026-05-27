@@ -34,8 +34,10 @@
   }
 
   &__title {
+    position: relative;
+    display: block;
+    width: max-content;
     margin: 0;
-    color: #fefefe;
     font-family: 'Tropi Land', fantasy;
     font-size: 67.2px;
     font-weight: 400;
@@ -43,7 +45,44 @@
     letter-spacing: 2.016px;
   }
 
+  &__title-base {
+    display: block;
+    color: #fefefe;
+    filter: drop-shadow(0 3px 5px rgba(255, 255, 255, 0.12));
+  }
+
+  &__title-shine {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: max-content;
+    color: transparent;
+    opacity: 0;
+    background-image: linear-gradient(
+      105deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0) 36%,
+      rgba(255, 255, 255, 0.92) 47%,
+      rgba(255, 245, 187, 0.98) 52%,
+      rgba(255, 255, 255, 0.28) 59%,
+      rgba(255, 255, 255, 0) 70%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 260% 100%;
+    background-position: 130% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(255, 246, 196, 0.28));
+    pointer-events: none;
+    animation: splash-logo-shine 1.15s ease-out 1.38s forwards;
+  }
+
   &__subtitle {
+    --char-duration: 0.08s;
+
+    position: relative;
+    display: block;
+    width: max-content;
     margin: 11px 0 0;
     color: #fef8e7;
     font-family: 'tvN EnjoystoriesOTF', 'Pretendard', sans-serif;
@@ -51,6 +90,13 @@
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.672px;
+  }
+
+  &__write-char {
+    display: inline-block;
+    opacity: 0;
+    white-space: pre;
+    animation: splash-type-char var(--char-duration) ease-out var(--char-delay, 0s) forwards;
   }
 
   &__btn {
@@ -101,5 +147,32 @@ body.splash-page-active {
   .app-frame,
   .viewport-wrapper {
     background: transparent;
+  }
+}
+
+@keyframes splash-logo-shine {
+  0% {
+    opacity: 0;
+    background-position: 130% 0;
+  }
+
+  18%,
+  72% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    background-position: -130% 0;
+  }
+}
+
+@keyframes splash-type-char {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }

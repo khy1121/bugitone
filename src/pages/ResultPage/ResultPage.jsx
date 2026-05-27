@@ -105,7 +105,7 @@ export default function ResultPage() {
 
     const timer = window.setTimeout(() => {
       setLoading(false);
-    }, 1800);
+    }, 30000);
 
     return () => window.clearTimeout(timer);
   }, [comfort, emotions, loading, prompt]);
