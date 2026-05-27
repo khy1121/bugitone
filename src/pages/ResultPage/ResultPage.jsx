@@ -12,6 +12,11 @@ const PRINCE_SHADOW_SRC = "/assets/character/PrinceShadow.svg";
 const RESULT_PIECE_CHAR_SRC = "/assets/character/resultChar.svg";
 const COIN_SRC = "/assets/shop/coin.png";
 const REGENERATE_COIN_COST = 2;
+const RESULT_IMAGE_WIDTH = 393;
+const RESULT_IMAGE_PADDING_X = 20;
+const RESULT_IMAGE_CARD_WIDTH = RESULT_IMAGE_WIDTH - RESULT_IMAGE_PADDING_X * 2;
+const RESULT_IMAGE_BACKGROUND = "#f5f4f3";
+const RESULT_IMAGE_FONT = "Pretendard, Arial, sans-serif";
 
 async function copyTextToClipboard(text) {
   if (navigator.clipboard?.writeText) {
@@ -29,6 +34,340 @@ async function copyTextToClipboard(text) {
   textarea.select();
   document.execCommand("copy");
   document.body.removeChild(textarea);
+}
+
+function getCanvasScale() {
+  return Math.min(Math.max(window.devicePixelRatio || 2, 2), 3);
+}
+
+function createImageFileName(characterName) {
+  const safeName = `${characterName || "result"}`
+    .trim()
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 30);
+
+  return `nadok-${safeName || "result"}.png`;
+}
+
+function isExternalHttpUrl(source) {
+  try {
+    const url = new URL(source, window.location.href);
+    return /^https?:$/i.test(url.protocol) && url.origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+async function getCanvasSafeImageSource(source) {
+  if (!isExternalHttpUrl(source)) return { source, cleanup: () => {} };
+
+  const response = await fetch(source, { mode: "cors" });
+  if (!response.ok) {
+    throw new Error("이미지를 불러오지 못했습니다.");
+  }
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  return {
+    source: objectUrl,
+    cleanup: () => URL.revokeObjectURL(objectUrl),
+  };
+}
+
+function loadImageElement(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.decoding = "async";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("이미지를 불러오지 못했습니다."));
+    image.src = source;
+  });
+}
+
+async function loadCanvasImage(source, fallbackSource) {
+  const candidates = [source, fallbackSource].filter(Boolean);
+
+  for (const candidate of candidates) {
+    let cleanup = () => {};
+
+    try {
+      const safeSource = await getCanvasSafeImageSource(candidate);
+      cleanup = safeSource.cleanup;
+      const image = await loadImageElement(safeSource.source);
+      return { image, cleanup };
+    } catch {
+      cleanup();
+    }
+  }
+
+  return { image: null, cleanup: () => {} };
+}
+
+function drawRoundRect(ctx, x, y, width, height, radius, fillStyle) {
+  const radii = typeof radius === "number"
+    ? { tl: radius, tr: radius, br: radius, bl: radius }
+    : { tl: 0, tr: 0, br: 0, bl: 0, ...radius };
+
+  ctx.beginPath();
+  ctx.moveTo(x + radii.tl, y);
+  ctx.lineTo(x + width - radii.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radii.tr);
+  ctx.lineTo(x + width, y + height - radii.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radii.br, y + height);
+  ctx.lineTo(x + radii.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radii.bl);
+  ctx.lineTo(x, y + radii.tl);
+  ctx.quadraticCurveTo(x, y, x + radii.tl, y);
+  ctx.closePath();
+  ctx.fillStyle = fillStyle;
+  ctx.fill();
+}
+
+function fitFontSize(ctx, text, maxWidth, fontWeight, startSize, minSize = 18) {
+  let size = startSize;
+
+  while (size > minSize) {
+    ctx.font = `${fontWeight} ${size}px ${RESULT_IMAGE_FONT}`;
+    if (ctx.measureText(text).width <= maxWidth) return size;
+    size -= 1;
+  }
+
+  return minSize;
+}
+
+function splitTextLines(ctx, text, maxWidth, maxLines = Infinity) {
+  const paragraphs = `${text || ""}`.replace(/\r\n/g, "\n").split("\n");
+  const lines = [];
+
+  for (const paragraph of paragraphs) {
+    const chars = Array.from(paragraph);
+    let line = "";
+
+    for (const char of chars) {
+      const nextLine = line + char;
+
+      if (line && ctx.measureText(nextLine).width > maxWidth) {
+        lines.push(line.trimEnd());
+        line = char.trimStart();
+
+        if (lines.length >= maxLines) return lines;
+      } else {
+        line = nextLine;
+      }
+    }
+
+    if (line || paragraph === "") {
+      lines.push(line);
+      if (lines.length >= maxLines) return lines;
+    }
+  }
+
+  return lines;
+}
+
+function drawTextLines(ctx, lines, x, y, lineHeight, options = {}) {
+  ctx.fillStyle = options.color || "#282723";
+  ctx.font = `${options.weight || 400} ${options.size || 16}px ${RESULT_IMAGE_FONT}`;
+  ctx.textAlign = options.align || "left";
+  ctx.textBaseline = "top";
+
+  lines.forEach((line, index) => {
+    ctx.fillText(line, x, y + index * lineHeight);
+  });
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+        return;
+      }
+
+      reject(new Error("이미지 생성에 실패했습니다."));
+    }, "image/png");
+  });
+}
+
+async function createResultImageBlob({
+  displayName,
+  characterName,
+  characterAuthor,
+  characterImage,
+  bookQuote,
+  moodTags,
+  methodReason,
+}) {
+  await document.fonts?.ready;
+
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+
+  tempCtx.font = `400 16px ${RESULT_IMAGE_FONT}`;
+  const reasonLines = splitTextLines(tempCtx, methodReason, 313);
+  tempCtx.font = `600 16px ${RESULT_IMAGE_FONT}`;
+  const quoteLines = splitTextLines(tempCtx, `“ ${bookQuote} ”`, 235, 3);
+
+  const pieceCardHeight = Math.max(104, 32 + reasonLines.length * 26);
+  const imageHeight =
+    48 +
+    36 + 8 + 26 + 48 +
+    348 +
+    54 + 132 +
+    54 + 48 + 16 + pieceCardHeight +
+    40;
+  const scale = getCanvasScale();
+  const canvas = document.createElement("canvas");
+  canvas.width = RESULT_IMAGE_WIDTH * scale;
+  canvas.height = imageHeight * scale;
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+  ctx.fillStyle = RESULT_IMAGE_BACKGROUND;
+  ctx.fillRect(0, 0, RESULT_IMAGE_WIDTH, imageHeight);
+
+  const characterAsset = await loadCanvasImage(characterImage, LITTLE_PRINCE_SRC);
+  const shadowAsset = await loadCanvasImage(PRINCE_SHADOW_SRC);
+  const pieceAsset = await loadCanvasImage(RESULT_PIECE_CHAR_SRC);
+
+  const x = RESULT_IMAGE_PADDING_X;
+  let y = 48;
+
+  drawTextLines(ctx, [`${displayName}님은...`], x, y, 36, {
+    color: "#282723",
+    size: 28,
+    weight: 700,
+  });
+  y += 44;
+
+  drawTextLines(ctx, [`${displayName}님의 상태를 정독한 결과에요.`], x, y, 26, {
+    color: "#5c5950",
+    size: 16,
+    weight: 400,
+  });
+  y += 74;
+
+  const bookY = y;
+  const gradient = ctx.createRadialGradient(
+    RESULT_IMAGE_WIDTH / 2,
+    bookY + 174,
+    0,
+    RESULT_IMAGE_WIDTH / 2,
+    bookY + 174,
+    190,
+  );
+  gradient.addColorStop(0, "rgba(255, 239, 192, 0.98)");
+  gradient.addColorStop(0.24, "rgba(255, 239, 192, 0.76)");
+  gradient.addColorStop(0.56, "rgba(255, 247, 223, 0.46)");
+  gradient.addColorStop(0.95, "rgba(254, 254, 254, 0.98)");
+  gradient.addColorStop(1, "#fefefe");
+  drawRoundRect(ctx, x, bookY, RESULT_IMAGE_CARD_WIDTH, 348, 20, gradient);
+
+  const titleSize = fitFontSize(ctx, characterName, 313, 700, 28, 20);
+  drawTextLines(ctx, [characterName], RESULT_IMAGE_WIDTH / 2, bookY + 30, 36, {
+    color: "#282723",
+    size: titleSize,
+    weight: 700,
+    align: "center",
+  });
+  drawTextLines(ctx, [`저자 ㅣ ${characterAuthor}`], RESULT_IMAGE_WIDTH / 2, bookY + 70, 18, {
+    color: "#5c5950",
+    size: 12,
+    weight: 400,
+    align: "center",
+  });
+
+  if (shadowAsset.image) {
+    ctx.drawImage(shadowAsset.image, RESULT_IMAGE_WIDTH / 2 - 65, bookY + 202, 130, 22);
+  }
+  if (characterAsset.image) {
+    ctx.drawImage(characterAsset.image, RESULT_IMAGE_WIDTH / 2 - 46, bookY + 98, 92, 140);
+  }
+
+  drawTextLines(
+    ctx,
+    quoteLines,
+    RESULT_IMAGE_WIDTH / 2,
+    bookY + 252 - ((quoteLines.length - 1) * 13),
+    26,
+    {
+      color: "#42403a",
+      size: 16,
+      weight: 600,
+      align: "center",
+    },
+  );
+  y += 348;
+
+  y += 54;
+  drawRoundRect(ctx, x, y, RESULT_IMAGE_CARD_WIDTH, 132, 20, "#fefefe");
+  drawTextLines(ctx, [`${displayName}님의 기분 상태`], x + 20, y + 20, 30, {
+    color: "#282723",
+    size: 22,
+    weight: 600,
+  });
+
+  let chipX = x + 20;
+  moodTags.slice(0, 3).forEach((tag) => {
+    const label = `# ${tag}`;
+    ctx.font = `400 16px ${RESULT_IMAGE_FONT}`;
+    const chipWidth = Math.ceil(ctx.measureText(label).width) + 40;
+    drawRoundRect(ctx, chipX, y + 76, chipWidth, 44, 20, "#f2f1ec");
+    drawTextLines(ctx, [label], chipX + 20, y + 88, 20, {
+      color: "#5c5950",
+      size: 16,
+      weight: 400,
+    });
+    chipX += chipWidth + 8;
+  });
+  y += 132;
+
+  y += 54;
+  if (pieceAsset.image) {
+    ctx.drawImage(pieceAsset.image, x, y, 43, 48);
+  }
+  drawTextLines(ctx, ["오늘의 조각"], x + 59, y + 9, 30, {
+    color: "#282723",
+    size: 22,
+    weight: 600,
+  });
+
+  y += 64;
+  drawRoundRect(
+    ctx,
+    x,
+    y,
+    RESULT_IMAGE_CARD_WIDTH,
+    pieceCardHeight,
+    { tl: 0, tr: 26, br: 26, bl: 26 },
+    "#fefefe",
+  );
+  drawTextLines(ctx, reasonLines, x + 20, y + 16, 26, {
+    color: "#42403a",
+    size: 16,
+    weight: 400,
+  });
+
+  try {
+    return await canvasToBlob(canvas);
+  } finally {
+    characterAsset.cleanup();
+    shadowAsset.cleanup();
+    pieceAsset.cleanup();
+  }
+}
+
+function downloadBlob(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const getUserId = () => {
@@ -79,6 +418,7 @@ export default function ResultPage() {
   const [analysis, setAnalysis] = useState(initialAnalysis);
   const [apiError, setApiError] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
+  const [savingImage, setSavingImage] = useState(false);
 
   const displayName = useMemo(() => {
     const savedNickname = window.localStorage.getItem("nickname") || "";
@@ -170,8 +510,30 @@ export default function ResultPage() {
     setCoinBanner("confirm");
   };
 
-  const handleSaveImage = () => {
-    console.log("이미지 저장하기");
+  const handleSaveImage = async () => {
+    if (savingImage) return;
+
+    setSavingImage(true);
+    setShareFeedback("");
+
+    try {
+      const blob = await createResultImageBlob({
+        displayName,
+        characterName,
+        characterAuthor,
+        characterImage,
+        bookQuote,
+        moodTags,
+        methodReason: apiError || methodReason,
+      });
+
+      downloadBlob(blob, createImageFileName(characterName));
+      setShareFeedback("이미지가 저장됐어요.");
+    } catch {
+      setShareFeedback("이미지 저장에 실패했어요.");
+    } finally {
+      setSavingImage(false);
+    }
   };
 
   const handleShare = async () => {
@@ -407,8 +769,10 @@ export default function ResultPage() {
             className="result__save"
             type="button"
             onClick={handleSaveImage}
+            disabled={savingImage}
+            aria-busy={savingImage}
           >
-            이미지 저장하기
+            {savingImage ? "저장 중..." : "이미지 저장하기"}
           </button>
         </div>
       </div>

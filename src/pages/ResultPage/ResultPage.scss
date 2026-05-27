@@ -546,6 +546,11 @@
     letter-spacing: -0.4px;
 
     cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.72;
+    }
   }
 
   &__retry {
