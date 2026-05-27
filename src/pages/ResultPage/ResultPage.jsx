@@ -9,8 +9,27 @@ import "./ResultPage.scss";
 const LOAD_CHAR_SRC = "/assets/character/LoadChar.svg";
 const LITTLE_PRINCE_SRC = "/assets/character/LittlePrince.svg";
 const PRINCE_SHADOW_SRC = "/assets/character/PrinceShadow.svg";
+const RESULT_PIECE_CHAR_SRC = "/assets/character/resultChar.svg";
 const COIN_SRC = "/assets/shop/coin.png";
 const REGENERATE_COIN_COST = 2;
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+}
 
 const getUserId = () => {
   const stored = window.localStorage.getItem("userId");
@@ -59,6 +78,7 @@ export default function ResultPage() {
   const [coinBanner, setCoinBanner] = useState(null);
   const [analysis, setAnalysis] = useState(initialAnalysis);
   const [apiError, setApiError] = useState("");
+  const [shareFeedback, setShareFeedback] = useState("");
 
   const displayName = useMemo(() => {
     const savedNickname = window.localStorage.getItem("nickname") || "";
@@ -132,6 +152,16 @@ export default function ResultPage() {
     displayAnalysis.methodReason ||
     FALLBACK_ANALYSIS.character.methodReason;
 
+  useEffect(() => {
+    if (!shareFeedback) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setShareFeedback("");
+    }, 1600);
+
+    return () => window.clearTimeout(timer);
+  }, [shareFeedback]);
+
   const handleBack = () => {
     navigate(returnTo);
   };
@@ -142,6 +172,58 @@ export default function ResultPage() {
 
   const handleSaveImage = () => {
     console.log("이미지 저장하기");
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = `NADOK - ${characterName}`;
+    const text = [
+      `${displayName}님의 정독 결과`,
+      `${characterName} | ${characterAuthor}`,
+      `“ ${bookQuote} ”`,
+      methodReason,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const sharePayloads = [
+      { title, text, url },
+      { title, text },
+    ];
+
+    if (typeof navigator.share === "function") {
+      for (const payload of sharePayloads) {
+        try {
+          if (typeof navigator.canShare === "function" && !navigator.canShare(payload)) {
+            continue;
+          }
+
+          await navigator.share(payload);
+          return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+        }
+      }
+
+      setShareFeedback("공유할 수 없어요.");
+      return;
+    }
+
+    if (window.matchMedia?.("(hover: none) and (pointer: coarse)")?.matches) {
+      setShareFeedback("이 환경에서는 공유를 지원하지 않아요.");
+      return;
+    }
+
+    try {
+      await copyTextToClipboard(`${title}\n${text}\n${url}`);
+      setShareFeedback("공유 내용이 복사됐어요.");
+    } catch {
+      setShareFeedback("공유할 수 없어요.");
+    }
+  };
+
+  const handleCharacterImageError = (event) => {
+    if (event.currentTarget.src.endsWith(LITTLE_PRINCE_SRC)) return;
+    event.currentTarget.src = LITTLE_PRINCE_SRC;
   };
 
   const handleRegenerate = (event) => {
@@ -221,7 +303,12 @@ export default function ResultPage() {
             ← 나가기
           </button>
 
-          <button className="result__share" type="button" aria-label="공유하기">
+          <button
+            className="result__share"
+            type="button"
+            aria-label="공유하기"
+            onClick={handleShare}
+          >
             <svg
               width="24"
               height="24"
@@ -252,6 +339,12 @@ export default function ResultPage() {
           </button>
         </header>
 
+        {shareFeedback && (
+          <p className="result__share-feedback" role="status">
+            {shareFeedback}
+          </p>
+        )}
+
         <section className="result__intro">
           <h1>{displayName}님은...</h1>
           <p>{displayName}님의 상태를 정독한 결과에요.</p>
@@ -273,15 +366,14 @@ export default function ResultPage() {
               className="result__book-image"
               src={characterImage}
               alt={characterName}
+              onError={handleCharacterImageError}
             />
           </div>
 
           <div className="result__quote-box">
-            <span className="result__quote-side result__quote-side--left" />
             <p>
-              “ {bookQuote}”
+              “ {bookQuote} ”
             </p>
-            <span className="result__quote-side result__quote-side--right" />
           </div>
         </section>
 
@@ -297,7 +389,7 @@ export default function ResultPage() {
 
         <section className="result__piece">
           <div className="result__piece-heading">
-            <img src={LOAD_CHAR_SRC} alt="" aria-hidden="true" />
+            <img src={RESULT_PIECE_CHAR_SRC} alt="" aria-hidden="true" />
             <h2>오늘의 조각</h2>
           </div>
 

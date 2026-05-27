@@ -263,6 +263,26 @@
     cursor: pointer;
   }
 
+  &__share-feedback {
+    position: absolute;
+    top: calc(var(--result-header-y) + 42px);
+    right: 20px;
+    z-index: 20;
+
+    margin: 0;
+    padding: 8px 12px;
+
+    border-radius: 14px;
+    background: rgba(40, 39, 35, 0.86);
+
+    color: #fefefe;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: -0.3px;
+    pointer-events: none;
+  }
+
   &__intro {
     margin-bottom: 48px;
 
@@ -288,15 +308,25 @@
   }
 
   &__book-card {
-    width: 100%;
-    height: 385px;
+    position: relative;
 
-    padding: 32px 20px 30px;
+    width: 100%;
+    height: 348px;
+
+    padding: 30px 20px;
 
     overflow: hidden;
 
     border-radius: 20px;
-    background: #fefefe;
+    background:
+      radial-gradient(
+        ellipse 185px 178px at 49.5% 50.2%,
+        rgba(255, 239, 192, 0.98) 0%,
+        rgba(255, 239, 192, 0.76) 24%,
+        rgba(255, 247, 223, 0.46) 56%,
+        rgba(254, 254, 254, 0.98) 95%,
+        #fefefe 100%
+      );
     box-sizing: border-box;
     text-align: center;
 
@@ -313,7 +343,7 @@
   }
 
   &__book-meta {
-    margin: 2px 0 0;
+    margin: 4px 0 0;
 
     color: #5c5950;
     font-size: 12px;
@@ -324,22 +354,23 @@
   }
 
   &__book-visual {
-    position: relative;
+    position: absolute;
+    top: 100px;
+    left: 0;
+    right: 0;
 
     width: 100%;
-    height: 150px;
-
-    margin-top: 22px;
+    height: 139px;
   }
 
   &__book-image {
     position: absolute;
-    top: 0;
+    top: -2px;
     left: 50%;
     z-index: 2;
 
-    width: 89.49px;
-    height: 135.78px;
+    width: 92px;
+    height: 140px;
 
     display: block;
     object-fit: contain;
@@ -350,12 +381,12 @@
 
   &__book-shadow {
     position: absolute;
-    top: 124px;
+    top: 102px;
     left: 50%;
     z-index: 1;
 
-    width: 121.45px;
-    height: 20.24px;
+    width: 130px;
+    height: 22px;
 
     display: block;
     object-fit: contain;
@@ -366,25 +397,21 @@
   }
 
   &__quote-box {
-    position: relative;
+    position: absolute;
+    top: 237px;
+    left: 20px;
+    right: 20px;
 
-    width: 100%;
-    height: 66px;
-    margin-top: 20px;
+    min-height: 66px;
+    padding: 0 26px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    overflow: hidden;
-
-    border-radius: 16px;
-    background: #fdebb5;
+    box-sizing: border-box;
 
     p {
-      position: relative;
-      z-index: 2;
-
       width: 235px;
       margin: 0;
 
@@ -394,25 +421,7 @@
       line-height: 26px;
       letter-spacing: -0.4px;
       text-align: center;
-    }
-  }
-
-  &__quote-side {
-    position: absolute;
-    top: 0;
-
-    width: 24px;
-    height: 100%;
-    background: #fbd76c;
-
-    &--left {
-      left: 0;
-      border-radius: 16px 0 0 16px;
-    }
-
-    &--right {
-      right: 0;
-      border-radius: 0 16px 16px 0;
+      word-break: keep-all;
     }
   }
 
@@ -477,7 +486,6 @@
       width: 43px;
       height: 48px;
       object-fit: contain;
-      transform: rotate(180deg) scaleY(-1);
     }
 
     h2 {
