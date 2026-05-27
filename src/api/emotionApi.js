@@ -1,5 +1,7 @@
 import axiosInstance from './axiosInstance'
 
+const EMOTION_ANALYSIS_TIMEOUT_MS = 30000
+
 const unwrap = (response) => {
   const body = response.data
 
@@ -19,12 +21,18 @@ export const validateEmotionInput = (inputText) =>
 
 export const createEmotionAnalysis = ({ userId, inputText, emotionTag, comfortMethod }) =>
   axiosInstance
-    .post('/emotion-inputs', {
-      userId,
-      inputText,
-      emotionTag,
-      comfortMethod,
-    })
+    .post(
+      '/emotion-inputs',
+      {
+        userId,
+        inputText,
+        emotionTag,
+        comfortMethod,
+      },
+      {
+        timeout: EMOTION_ANALYSIS_TIMEOUT_MS,
+      },
+    )
     .then(unwrap)
 
 export const getMonthlyCharacters = (userId) =>
