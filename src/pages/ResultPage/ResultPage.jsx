@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { createEmotionAnalysis } from "../../api/emotionApi";
 import Loading from "../../components/common/LoadingSpinner/LoadingSpinner";
+import { resolveRemoteAssetUrl } from "../../utils/resolveAssetUrl";
 import "./ResultPage.scss";
 
 const LOAD_CHAR_SRC = "/assets/character/LoadChar.svg";
@@ -120,7 +121,10 @@ export default function ResultPage() {
   const character = displayAnalysis.character ?? {};
   const characterName = character.characterName || FALLBACK_ANALYSIS.character.characterName;
   const bookQuote = character.bookQuote || FALLBACK_ANALYSIS.character.bookQuote;
-  const characterImage = character.characterImgUrl || FALLBACK_ANALYSIS.character.characterImgUrl;
+  const characterImage = resolveRemoteAssetUrl(
+    character.characterImgUrl,
+    FALLBACK_ANALYSIS.character.characterImgUrl,
+  );
   const characterAuthor =
     character.author || FALLBACK_ANALYSIS.character.author;
   const methodReason =

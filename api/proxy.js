@@ -22,9 +22,36 @@ function getTargetBase() {
   return targetBase
 }
 
+function getAllowedAbsoluteTarget(proxyUrl, targetBase) {
+  const targetBaseUrl = new URL(`${targetBase}/`)
+  let targetUrl
+
+  try {
+    targetUrl = new URL(proxyUrl)
+  } catch {
+    throw new Error('Invalid proxy URL')
+  }
+
+  if (!['http:', 'https:'].includes(targetUrl.protocol)) {
+    throw new Error('Invalid proxy URL protocol')
+  }
+
+  if (targetUrl.origin !== targetBaseUrl.origin) {
+    throw new Error('Proxy URL is not allowed')
+  }
+
+  return targetUrl.toString()
+}
+
 function getProxyTarget(request) {
   const targetBase = getTargetBase()
   const incomingUrl = new URL(request.url)
+  const proxyUrl = incomingUrl.searchParams.get('__proxy_url')
+
+  if (proxyUrl) {
+    return getAllowedAbsoluteTarget(proxyUrl, targetBase)
+  }
+
   const proxyPath = incomingUrl.searchParams.get('__proxy_path') || ''
 
   incomingUrl.searchParams.delete('__proxy_path')

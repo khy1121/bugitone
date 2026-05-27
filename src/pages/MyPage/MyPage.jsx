@@ -23,6 +23,7 @@ import {
   NICKNAME_RULE_MESSAGE,
   isValidNickname,
 } from "../../utils/nicknameValidation";
+import { resolveRemoteAssetUrl } from "../../utils/resolveAssetUrl";
 import "./MyPage.scss";
 
 const CURRENT_MONTH = new Date().getMonth() + 1;
@@ -347,26 +348,54 @@ function normalizeMonthlyCharacters(value) {
         `${character.characterName ?? "character"}-${index}`,
       characterName: character.characterName || character.name || "이름 없는 캐릭터",
       author: character.author || "",
-      characterImgUrl:
-        character.characterImgUrl ||
-        character.imageUrl ||
-        character.image ||
+      characterImgUrl: resolveRemoteAssetUrl(
+        character.characterImgUrl || character.imageUrl || character.image,
         DEFAULT_CHARACTER_IMAGE,
+      ),
       bookQuote: character.bookQuote || "",
       methodReason: character.methodReason || "",
     }));
 }
 
-function normalizeMonthlyEmotions(value) {
-  const rawEmotions = Array.isArray(value)
-    ? value
-    : Array.isArray(value?.emotions)
-      ? value.emotions
-      : [];
+function extractMonthlyEmotionValues(value) {
+  if (Array.isArray(value)) {
+    return value.flatMap(extractMonthlyEmotionValues);
+  }
 
-  return rawEmotions
-    .map((emotion) => `${emotion ?? ""}`.trim())
-    .filter(Boolean)
+  if (value && typeof value === "object") {
+    return extractMonthlyEmotionValues(
+      value.emotions ??
+        value.emotionTags ??
+        value.emotionTag ??
+        value.emotion ??
+        value.name ??
+        value.tag ??
+        "",
+    );
+  }
+
+  return `${value ?? ""}`
+    .split(/[,，]/)
+    .map((emotion) => emotion.replace(/^#+\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function normalizeMonthlyEmotions(value) {
+  const emotions = extractMonthlyEmotionValues(value);
+  const emotionCounts = new Map();
+
+  emotions.forEach((emotion, index) => {
+    const previous = emotionCounts.get(emotion);
+
+    emotionCounts.set(emotion, {
+      count: (previous?.count ?? 0) + 1,
+      firstIndex: previous?.firstIndex ?? index,
+    });
+  });
+
+  return [...emotionCounts.entries()]
+    .sort(([, a], [, b]) => b.count - a.count || a.firstIndex - b.firstIndex)
+    .map(([emotion]) => emotion)
     .slice(0, 3);
 }
 
@@ -530,6 +559,41 @@ function MainView({
   const userId = localStorage.getItem("userId") ?? "";
   const email = localStorage.getItem("email") ?? "";
   const profileImage = localStorage.getItem("profileImage") ?? null;
+  const [reportCharacters, setReportCharacters] = useState([]);
+  const previewCharacters = reportCharacters.slice(0, 2);
+  const extraCharacterCount = Math.max(
+    reportCharacters.length - previewCharacters.length,
+    0,
+  );
+
+  useEffect(() => {
+    const currentUserId = getCurrentUserId();
+
+    if (!currentUserId) {
+      setReportCharacters([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    getMonthlyCharacters(currentUserId)
+      .then((data) => {
+        if (cancelled) return;
+        setReportCharacters(normalizeMonthlyCharacters(data));
+      })
+      .catch(() => {
+        if (!cancelled) setReportCharacters([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleReportCharacterImageError = (event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = DEFAULT_CHARACTER_IMAGE;
+  };
 
   return (
     <div className="mypage mypage--main">
@@ -568,12 +632,27 @@ function MainView({
             <span className="mypage__report-title">이번 달 나의 이야기</span>
             <span className="mypage__report-sub">{CURRENT_MONTH}월 리포트</span>
           </div>
-          <div className="mypage__char-bubbles" aria-hidden="true">
-            <div className="mypage__char-bubble mypage__char-bubble--1" />
-            <div className="mypage__char-bubble mypage__char-bubble--2" />
-            <div className="mypage__char-bubble mypage__char-bubble--3" />
-            <span className="mypage__char-more">+2</span>
-          </div>
+          {previewCharacters.length > 0 && (
+            <div className="mypage__char-bubbles" aria-hidden="true">
+              {previewCharacters.map((character) => (
+                <span
+                  key={character.characterId}
+                  className="mypage__char-bubble"
+                >
+                  <img
+                    src={character.characterImgUrl}
+                    alt=""
+                    onError={handleReportCharacterImageError}
+                  />
+                </span>
+              ))}
+              {extraCharacterCount > 0 && (
+                <span className="mypage__char-more">
+                  +{extraCharacterCount}
+                </span>
+              )}
+            </div>
+          )}
           <span className="mypage__arrow">
             <ChevronRightIcon size={20} color="#8e8b7e" />
           </span>
