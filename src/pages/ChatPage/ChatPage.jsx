@@ -658,6 +658,7 @@ export default function ChatPage() {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeChat, setActiveChat] = useState(location.state?.selectedChat ?? null)
+  const [roomResetKey, setRoomResetKey] = useState(0)
 
   const userId = getUserId()
   const bookId = location.state?.bookId ?? null
@@ -671,14 +672,21 @@ export default function ChatPage() {
 
   if (!userId) return null
 
+  const handleBackToLanding = () => {
+    setActiveChat(null)
+    setDrawerOpen(false)
+    setRoomResetKey((prev) => prev + 1)
+    navigate(ROUTES.CHAT, { replace: true, state: { selectedChat: null } })
+  }
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <ChatRoom
-        key={activeChat?.id ?? 'landing'}
+        key={`${activeChat?.id ?? 'landing'}-${roomResetKey}`}
         initialChat={activeChat}
         bookId={bookId}
         onOpenDrawer={() => setDrawerOpen(true)}
-        onBack={() => navigate(-1)}
+        onBack={handleBackToLanding}
       />
       <ChatList
         open={drawerOpen}
