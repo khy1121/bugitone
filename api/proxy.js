@@ -12,11 +12,22 @@ const HOP_BY_HOP_RESPONSE_HEADERS = new Set([
   'transfer-encoding',
 ])
 
-function getTargetBase() {
-  const targetBase = process.env.API_PROXY_TARGET?.trim().replace(/\/+$/, '')
+const TARGET_ENV_NAMES = {
+  api: 'API_PROXY_TARGET',
+  uploads: 'UPLOADS_PROXY_TARGET',
+}
+
+function getTargetBase(proxyTarget = 'api') {
+  const envName = TARGET_ENV_NAMES[proxyTarget]
+
+  if (!envName) {
+    throw new Error('Invalid proxy target')
+  }
+
+  const targetBase = process.env[envName]?.trim().replace(/\/+$/, '')
 
   if (!targetBase) {
-    throw new Error('API_PROXY_TARGET is not configured')
+    throw new Error(`${envName} is not configured`)
   }
 
   return targetBase
@@ -44,8 +55,9 @@ function getAllowedAbsoluteTarget(proxyUrl, targetBase) {
 }
 
 function getProxyTarget(request) {
-  const targetBase = getTargetBase()
   const incomingUrl = new URL(request.url)
+  const proxyTarget = incomingUrl.searchParams.get('__proxy_target') || 'api'
+  const targetBase = getTargetBase(proxyTarget)
   const proxyUrl = incomingUrl.searchParams.get('__proxy_url')
 
   if (proxyUrl) {
@@ -55,6 +67,7 @@ function getProxyTarget(request) {
   const proxyPath = incomingUrl.searchParams.get('__proxy_path') || ''
 
   incomingUrl.searchParams.delete('__proxy_path')
+  incomingUrl.searchParams.delete('__proxy_target')
 
   const targetUrl = new URL(`${targetBase}/`)
   const basePath = targetUrl.pathname.replace(/\/+$/, '')

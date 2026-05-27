@@ -1,6 +1,7 @@
 const INSECURE_HTTP_URL = /^http:\/\//i;
 const ABSOLUTE_HTTP_URL = /^https?:\/\//i;
 const API_PROXY_URL = "/api/proxy";
+const UPLOADS_PATH_PREFIX = "/uploads/";
 
 function isHttpsPage() {
   return typeof window !== "undefined" && window.location.protocol === "https:";
@@ -33,6 +34,11 @@ export function resolveRemoteAssetUrl(value, fallback = "") {
   if (!isHttpsPage() || !INSECURE_HTTP_URL.test(source)) return source;
 
   const sourceUrl = toUrl(source);
+
+  if (sourceUrl?.pathname.startsWith(UPLOADS_PATH_PREFIX)) {
+    return `${sourceUrl.pathname}${sourceUrl.search}${sourceUrl.hash}`;
+  }
+
   const proxyOrigin = getConfiguredProxyOrigin();
 
   if (proxyOrigin && sourceUrl?.origin !== proxyOrigin) {
