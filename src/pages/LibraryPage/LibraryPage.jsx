@@ -311,6 +311,7 @@ export default function LibraryPage() {
   const handleSearchBlur = (event) => {
     keyboard.handleBlur(event)
     setIsInputFocused(false)
+    if (recentDragRef.current.pointerId !== null) return
     if (event.relatedTarget?.closest?.('.library__recent-searches')) return
     if (!searchQuery.trim()) setIsSearchMode(false)
   }
@@ -330,7 +331,7 @@ export default function LibraryPage() {
         : null
     const activeQuery = targetButton?.getAttribute('data-query') || ''
 
-    if (!scroller || event.pointerType === 'touch' || event.button !== 0) return
+    if (!scroller || event.button !== 0) return
     if (activeQuery) event.preventDefault()
 
     recentDragRef.current = {
@@ -375,7 +376,7 @@ export default function LibraryPage() {
     scroller.releasePointerCapture?.(event.pointerId)
     scroller.classList.remove('library__recent-searches--dragging')
 
-    const shouldApplyQuery = Boolean(drag.activeQuery) && !drag.dragged
+    const shouldApplyQuery = event.type === 'pointerup' && Boolean(drag.activeQuery) && !drag.dragged
     recentDragRef.current = {
       pointerId: null,
       startX: 0,
