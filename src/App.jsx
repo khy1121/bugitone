@@ -1,5 +1,6 @@
 import React from 'react'
 import Router from './routes/Router'
+import PwaUpdateNotice from './components/common/PwaUpdateNotice/PwaUpdateNotice'
 import useVisualViewportHeight from './hooks/useVisualViewportHeight'
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
       <div className="app-frame">
         <Router />
       </div>
+      <PwaUpdateNotice />
     </div>
   )
 }

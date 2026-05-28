@@ -1,33 +1,36 @@
 import { registerSW } from 'virtual:pwa-register'
 
+export const PWA_UPDATE_READY_EVENT = 'nadok:pwa-update-ready'
+export const PWA_UPDATED_FLAG = 'nadok:pwa-updated'
+
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000
-const UPDATE_NOTIFICATION_TITLE = 'NADOK 업데이트'
-const UPDATE_NOTIFICATION_OPTIONS = {
-  body: '새 버전이 적용됩니다.',
-  icon: '/icons/icon-192.png',
-  badge: '/icons/icon-192.png',
-  tag: 'nadok-app-update',
-  renotify: true,
+
+let pendingUpdateSW = null
+
+export function hasPendingPwaUpdate() {
+  return typeof pendingUpdateSW === 'function'
 }
 
-function notifyUpdateAvailable() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return
+export function applyPendingPwaUpdate() {
+  if (!hasPendingPwaUpdate()) return false
+
+  window.sessionStorage.setItem(PWA_UPDATED_FLAG, 'true')
+  pendingUpdateSW(true)
+  return true
+}
+
+export function consumePwaUpdatedFlag() {
+  if (window.sessionStorage.getItem(PWA_UPDATED_FLAG) !== 'true') {
+    return false
   }
 
-  navigator.serviceWorker
-    ?.getRegistration()
-    .then((registration) => {
-      if (registration?.showNotification) {
-        return registration.showNotification(
-          UPDATE_NOTIFICATION_TITLE,
-          UPDATE_NOTIFICATION_OPTIONS,
-        )
-      }
+  window.sessionStorage.removeItem(PWA_UPDATED_FLAG)
+  return true
+}
 
-      return new Notification(UPDATE_NOTIFICATION_TITLE, UPDATE_NOTIFICATION_OPTIONS)
-    })
-    .catch(() => {})
+function announceUpdateReady(updateSW) {
+  pendingUpdateSW = updateSW
+  window.dispatchEvent(new CustomEvent(PWA_UPDATE_READY_EVENT))
 }
 
 function checkForServiceWorkerUpdate() {
@@ -42,11 +45,12 @@ function checkForServiceWorkerUpdate() {
 export default function registerPwaUpdate() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
 
-  const updateSW = registerSW({
+  let updateSW = () => {}
+
+  updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
-      notifyUpdateAvailable()
-      updateSW(true)
+      announceUpdateReady(updateSW)
     },
     onRegisteredSW(_, registration) {
       if (!registration) return

@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       manifest: {
         name: 'NADOK',
         short_name: 'NADOK',
@@ -50,7 +50,6 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
-        skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
