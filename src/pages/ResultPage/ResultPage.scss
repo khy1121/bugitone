@@ -319,13 +319,16 @@
 
     border-radius: 20px;
     background:
-      radial-gradient(
-        ellipse 185px 178px at 49.5% 50.2%,
-        rgba(255, 239, 192, 0.98) 0%,
-        rgba(255, 239, 192, 0.76) 24%,
-        rgba(255, 247, 223, 0.46) 56%,
-        rgba(254, 254, 254, 0.98) 95%,
-        #fefefe 100%
+      var(
+        --result-character-bg,
+        radial-gradient(
+          ellipse 185px 178px at 49.5% 50.2%,
+          rgba(255, 239, 192, 0.98) 0%,
+          rgba(255, 239, 192, 0.76) 24%,
+          rgba(255, 247, 223, 0.46) 56%,
+          rgba(254, 254, 254, 0.98) 95%,
+          #fefefe 100%
+        )
       );
     box-sizing: border-box;
     text-align: center;
@@ -381,7 +384,7 @@
 
   &__book-shadow {
     position: absolute;
-    top: 102px;
+    top: 120px;
     left: 50%;
     z-index: 1;
 

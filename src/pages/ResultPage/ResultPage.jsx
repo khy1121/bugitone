@@ -17,6 +17,101 @@ const RESULT_IMAGE_PADDING_X = 20;
 const RESULT_IMAGE_CARD_WIDTH = RESULT_IMAGE_WIDTH - RESULT_IMAGE_PADDING_X * 2;
 const RESULT_IMAGE_BACKGROUND = "#f5f4f3";
 const RESULT_IMAGE_FONT = "Pretendard, Arial, sans-serif";
+const DEFAULT_CHARACTER_THEME_ID = "littlePrince";
+
+const RESULT_CHARACTER_THEMES = [
+  {
+    id: "alice",
+    aliases: [
+      "alice",
+      "\uc2e0\ub098\ub294 \uc568\ub9ac\uc2a4",
+      "\uc568\ub9ac\uc2a4",
+      "\uc774\uc0c1\ud55c \ub098\ub77c\uc758 \uc568\ub9ac\uc2a4",
+    ],
+    cssBackground:
+      "radial-gradient(ellipse 185px 178px at 49.5% 50.2%, rgba(207, 248, 255, 0.98) 0%, rgba(232, 252, 255, 0.62) 48%, rgba(254, 254, 254, 0.98) 95%, #fefefe 100%)",
+    canvasStops: [
+      [0, "rgba(207, 248, 255, 0.98)"],
+      [0.48, "rgba(232, 252, 255, 0.62)"],
+      [0.95, "rgba(254, 254, 254, 0.98)"],
+      [1, "#fefefe"],
+    ],
+  },
+  {
+    id: "anne",
+    aliases: [
+      "anne",
+      "anneshirley",
+      "\ucc28\ubd84\ud55c \uc564 \uc15c\ub9ac",
+      "\uc564 \uc15c\ub9ac",
+      "\ube68\uac04\uba38\ub9ac \uc564",
+    ],
+    cssBackground:
+      "radial-gradient(ellipse 185px 178px at 49.5% 50.2%, rgba(255, 200, 151, 0.98) 0%, rgba(255, 227, 203, 0.78) 48%, rgba(254, 254, 254, 0.98) 95%, #fefefe 100%)",
+    canvasStops: [
+      [0, "rgba(255, 200, 151, 0.98)"],
+      [0.48, "rgba(255, 227, 203, 0.78)"],
+      [0.95, "rgba(254, 254, 254, 0.98)"],
+      [1, "#fefefe"],
+    ],
+  },
+  {
+    id: DEFAULT_CHARACTER_THEME_ID,
+    aliases: [
+      "littleprince",
+      "prince",
+      "\uc5b4\ub978\uc774 \ub41c \uc5b4\ub9b0\uc655\uc790",
+      "\uc5b4\ub9b0\uc655\uc790",
+    ],
+    cssBackground:
+      "radial-gradient(ellipse 185px 178px at 49.5% 50.2%, rgba(255, 239, 192, 0.98) 0%, rgba(255, 239, 192, 0.76) 24%, rgba(255, 247, 223, 0.46) 56%, rgba(254, 254, 254, 0.98) 95%, #fefefe 100%)",
+    canvasStops: [
+      [0, "rgba(255, 239, 192, 0.98)"],
+      [0.24, "rgba(255, 239, 192, 0.76)"],
+      [0.56, "rgba(255, 247, 223, 0.46)"],
+      [0.95, "rgba(254, 254, 254, 0.98)"],
+      [1, "#fefefe"],
+    ],
+  },
+  {
+    id: "redRidingHood",
+    aliases: [
+      "redridinghood",
+      "redhood",
+      "red",
+      "\uac15\ud574\uc9c4 \ube68\uac04\ubaa8\uc790",
+      "\ube68\uac04\ubaa8\uc790",
+    ],
+    cssBackground:
+      "radial-gradient(ellipse 185px 178px at 49.5% 50.2%, rgba(255, 211, 192, 0.98) 0%, rgba(255, 231, 220, 0.62) 52%, rgba(254, 254, 254, 0.98) 95%, #fefefe 100%)",
+    canvasStops: [
+      [0, "rgba(255, 211, 192, 0.98)"],
+      [0.52, "rgba(255, 231, 220, 0.62)"],
+      [0.95, "rgba(254, 254, 254, 0.98)"],
+      [1, "#fefefe"],
+    ],
+  },
+  {
+    id: "peterPan",
+    aliases: [
+      "peterpan",
+      "\uacf5\ud5c8\ud55c \ud53c\ud130\ud32c",
+      "\ud53c\ud130\ud32c",
+    ],
+    cssBackground:
+      "radial-gradient(ellipse 185px 178px at 49.5% 50.2%, rgba(194, 215, 176, 0.98) 0%, rgba(224, 234, 215, 0.78) 48%, rgba(254, 254, 254, 0.98) 95%, #fefefe 100%)",
+    canvasStops: [
+      [0, "rgba(194, 215, 176, 0.98)"],
+      [0.48, "rgba(224, 234, 215, 0.78)"],
+      [0.95, "rgba(254, 254, 254, 0.98)"],
+      [1, "#fefefe"],
+    ],
+  },
+];
+
+const DEFAULT_CHARACTER_THEME =
+  RESULT_CHARACTER_THEMES.find((theme) => theme.id === DEFAULT_CHARACTER_THEME_ID) ||
+  RESULT_CHARACTER_THEMES[0];
 
 async function copyTextToClipboard(text) {
   if (navigator.clipboard?.writeText) {
@@ -48,6 +143,70 @@ function createImageFileName(characterName) {
     .slice(0, 30);
 
   return `nadok-${safeName || "result"}.png`;
+}
+
+function normalizeThemeText(value) {
+  return `${value ?? ""}`
+    .normalize("NFKC")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+}
+
+function hasThemeToken(candidate, token) {
+  if (!token) return false;
+  if (token.length <= 3) return candidate === token;
+  return candidate.includes(token);
+}
+
+function getResultCharacterTheme({
+  characterKey,
+  characterName,
+  characterAuthor,
+  characterImage,
+}) {
+  const candidates = [
+    characterKey,
+    characterName,
+    characterAuthor,
+    characterImage,
+  ]
+    .map(normalizeThemeText)
+    .filter(Boolean);
+
+  if (candidates.length === 0) return DEFAULT_CHARACTER_THEME;
+
+  return (
+    RESULT_CHARACTER_THEMES.find((theme) => {
+      const normalizedId = normalizeThemeText(theme.id);
+      const normalizedAliases = theme.aliases.map(normalizeThemeText);
+
+      return candidates.some(
+        (candidate) =>
+          candidate === normalizedId ||
+          hasThemeToken(candidate, normalizedId) ||
+          normalizedAliases.some((alias) => hasThemeToken(candidate, alias)),
+      );
+    }) || DEFAULT_CHARACTER_THEME
+  );
+}
+
+function createBookCardGradient(ctx, bookY, characterTheme) {
+  const gradient = ctx.createRadialGradient(
+    RESULT_IMAGE_WIDTH / 2,
+    bookY + 174,
+    0,
+    RESULT_IMAGE_WIDTH / 2,
+    bookY + 174,
+    190,
+  );
+
+  (characterTheme?.canvasStops || DEFAULT_CHARACTER_THEME.canvasStops).forEach(
+    ([offset, color]) => {
+      gradient.addColorStop(offset, color);
+    },
+  );
+
+  return gradient;
 }
 
 function isExternalHttpUrl(source) {
@@ -199,6 +358,7 @@ async function createResultImageBlob({
   bookQuote,
   moodTags,
   methodReason,
+  characterTheme,
 }) {
   await document.fonts?.ready;
 
@@ -250,19 +410,7 @@ async function createResultImageBlob({
   y += 74;
 
   const bookY = y;
-  const gradient = ctx.createRadialGradient(
-    RESULT_IMAGE_WIDTH / 2,
-    bookY + 174,
-    0,
-    RESULT_IMAGE_WIDTH / 2,
-    bookY + 174,
-    190,
-  );
-  gradient.addColorStop(0, "rgba(255, 239, 192, 0.98)");
-  gradient.addColorStop(0.24, "rgba(255, 239, 192, 0.76)");
-  gradient.addColorStop(0.56, "rgba(255, 247, 223, 0.46)");
-  gradient.addColorStop(0.95, "rgba(254, 254, 254, 0.98)");
-  gradient.addColorStop(1, "#fefefe");
+  const gradient = createBookCardGradient(ctx, bookY, characterTheme);
   drawRoundRect(ctx, x, bookY, RESULT_IMAGE_CARD_WIDTH, 348, 20, gradient);
 
   const titleSize = fitFontSize(ctx, characterName, 313, 700, 28, 20);
@@ -280,7 +428,7 @@ async function createResultImageBlob({
   });
 
   if (shadowAsset.image) {
-    ctx.drawImage(shadowAsset.image, RESULT_IMAGE_WIDTH / 2 - 65, bookY + 202, 130, 22);
+    ctx.drawImage(shadowAsset.image, RESULT_IMAGE_WIDTH / 2 - 65, bookY + 220, 130, 22);
   }
   if (characterAsset.image) {
     ctx.drawImage(characterAsset.image, RESULT_IMAGE_WIDTH / 2 - 46, bookY + 98, 92, 140);
@@ -524,6 +672,22 @@ export default function ResultPage() {
     character.methodReason ||
     displayAnalysis.methodReason ||
     FALLBACK_ANALYSIS.character.methodReason;
+  const characterTheme = useMemo(
+    () =>
+      getResultCharacterTheme({
+        characterKey:
+          character.characterKey ||
+          character.character_key ||
+          character.characterType ||
+          character.character_type ||
+          character.slug ||
+          character.type,
+        characterName,
+        characterAuthor,
+        characterImage,
+      }),
+    [character, characterAuthor, characterImage, characterName],
+  );
 
   useEffect(() => {
     if (!shareFeedback) return undefined;
@@ -558,6 +722,7 @@ export default function ResultPage() {
         bookQuote,
         moodTags,
         methodReason: apiError || methodReason,
+        characterTheme,
       });
 
       downloadBlob(blob, createImageFileName(characterName));
@@ -745,7 +910,10 @@ export default function ResultPage() {
           <p>{displayName}님의 상태를 정독한 결과에요.</p>
         </section>
 
-        <section className="result__book-card">
+        <section
+          className="result__book-card"
+          style={{ "--result-character-bg": characterTheme.cssBackground }}
+        >
           <h2>{characterName}</h2>
           <p className="result__book-meta">저자 ㅣ {characterAuthor}</p>
 
