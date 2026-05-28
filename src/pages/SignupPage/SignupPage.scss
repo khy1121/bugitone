@@ -79,6 +79,10 @@
       top: 144px;
     }
 
+    &--password {
+      padding-right: 58px;
+    }
+
     &::placeholder {
       color: $gray-300;
       opacity: 1;
@@ -133,6 +137,20 @@
       -webkit-text-fill-color: $gray-900;
       box-shadow: 0 0 0 1000px $gray-50 inset;
       transition: background-color 9999s ease-out;
+    }
+  }
+
+  &__password-toggle {
+    position: absolute;
+    right: 12px;
+    z-index: 2;
+
+    &--password {
+      top: 84px;
+    }
+
+    &--confirm {
+      top: 156px;
     }
   }
 

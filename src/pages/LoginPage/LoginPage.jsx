@@ -4,6 +4,7 @@ import { ROUTES } from '../../constants/routes'
 import { login } from '../../api/userApi'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
+import PasswordVisibilityButton from '../../components/common/PasswordVisibilityButton/PasswordVisibilityButton'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import { isAuthenticated, storeUserProfile } from '../../utils/authStorage'
 import './LoginPage.scss'
@@ -29,6 +30,7 @@ export default function LoginPage() {
   const [emailBlurred, setEmailBlurred] = useState(false)
   const [passwordBlurred, setPasswordBlurred] = useState(false)
   const [passwordTouched, setPasswordTouched] = useState(false)
+  const [passwordVisible, setPasswordVisible] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [apiError, setApiError] = useState('')
 
@@ -108,8 +110,8 @@ export default function LoginPage() {
             autoComplete="email"
           />
           <Input
-            className="onboard-login__input"
-            type="password"
+            className="onboard-login__input onboard-login__input--password"
+            type={passwordVisible ? 'text' : 'password'}
             placeholder="비밀번호를 입력해주세요."
             value={password}
             onChange={e => {
@@ -124,6 +126,12 @@ export default function LoginPage() {
             }}
             error={passwordError || !!apiError}
             autoComplete="current-password"
+          />
+          <PasswordVisibilityButton
+            className="onboard-login__password-toggle"
+            visible={passwordVisible}
+            onClick={() => setPasswordVisible((current) => !current)}
+            disabled={submitting}
           />
 
           {/* Figma: 고정 48px 메시지 영역 — 이메일 에러 > 비밀번호 힌트 */}

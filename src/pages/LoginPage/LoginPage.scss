@@ -132,6 +132,17 @@
     top: 72px;
   }
 
+  &__form .onboard-login__input--password {
+    padding-right: 58px;
+  }
+
+  &__password-toggle {
+    position: absolute;
+    top: 84px;
+    right: 12px;
+    z-index: 2;
+  }
+
   &__msg-area {
     position: absolute;
     top: 132px;

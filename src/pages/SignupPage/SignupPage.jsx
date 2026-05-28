@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
+import PasswordVisibilityButton from '../../components/common/PasswordVisibilityButton/PasswordVisibilityButton'
 import { checkEmail } from '../../api/userApi'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import './SignupPage.scss'
@@ -29,7 +30,9 @@ export default function SignupPage() {
   const [emailBlurred, setEmailBlurred] = useState(false)
   const [passwordBlurred, setPasswordBlurred] = useState(false)
   const [passwordTouched, setPasswordTouched] = useState(false)
+  const [passwordVisible, setPasswordVisible] = useState(false)
   const [confirmBlurred, setConfirmBlurred] = useState(false)
+  const [confirmVisible, setConfirmVisible] = useState(false)
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
 
@@ -109,8 +112,8 @@ export default function SignupPage() {
             autoComplete="email"
           />
           <Input
-            className="signup-onboard__input"
-            type="password"
+            className="signup-onboard__input signup-onboard__input--password"
+            type={passwordVisible ? 'text' : 'password'}
             placeholder="비밀번호를 입력해주세요."
             value={password}
             onChange={(e) => {
@@ -125,9 +128,15 @@ export default function SignupPage() {
             error={passwordError}
             autoComplete="new-password"
           />
+          <PasswordVisibilityButton
+            className="signup-onboard__password-toggle signup-onboard__password-toggle--password"
+            visible={passwordVisible}
+            onClick={() => setPasswordVisible((current) => !current)}
+            disabled={loading}
+          />
           <Input
-            className="signup-onboard__input"
-            type="password"
+            className="signup-onboard__input signup-onboard__input--password"
+            type={confirmVisible ? 'text' : 'password'}
             placeholder="비밀번호를 확인해주세요."
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
@@ -138,6 +147,12 @@ export default function SignupPage() {
             }}
             error={confirmError}
             autoComplete="new-password"
+          />
+          <PasswordVisibilityButton
+            className="signup-onboard__password-toggle signup-onboard__password-toggle--confirm"
+            visible={confirmVisible}
+            onClick={() => setConfirmVisible((current) => !current)}
+            disabled={loading}
           />
 
           <div className="signup-onboard__msg-area">
