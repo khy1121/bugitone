@@ -50,6 +50,9 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,woff2}'],
         globIgnores: ['**/assets/shop/event.svg', '**/icons/*.png'],
