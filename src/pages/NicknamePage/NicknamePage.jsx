@@ -4,6 +4,7 @@ import { ROUTES } from '../../constants/routes'
 import { signup, checkNickname } from '../../api/userApi'
 import DuplicateCheckButton from '../../components/common/DuplicateCheckButton/DuplicateCheckButton'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
+import { storeUserProfile } from '../../utils/authStorage'
 import {
   NICKNAME_RULE_MESSAGE,
   isValidNickname,
@@ -106,9 +107,7 @@ export default function NicknamePage() {
       if (!profile?.userId) {
         throw new Error('회원가입 응답에 사용자 정보가 없습니다.')
       }
-      localStorage.setItem('userId', String(profile.userId))
-      localStorage.setItem('nickname', profile.nickname ?? '')
-      localStorage.setItem('email', profile.email ?? email)
+      storeUserProfile(profile, { email, nickname })
       navigate(ROUTES.HOME, { replace: true })
     } catch (err) {
       if (isSignupDuplicateNicknameError(err)) {

@@ -12,7 +12,13 @@ import {
 } from "../../assets/icons";
 import libraryBannerImage from "../../assets/banner.svg";
 import { ROUTES } from "../../constants/routes";
-import { updateUser, checkNickname } from "../../api/userApi";
+import {
+  getUserProfile,
+  updateUser,
+  updateProfileImage,
+  checkNickname,
+  deleteAccount,
+} from "../../api/userApi";
 import { getAllMemos, getMyBooks } from "../../api/bookApi";
 import {
   getMonthlyCharacters,
@@ -48,10 +54,12 @@ const FALLBACK_BOOK_COVER = "/assets/library/book.svg";
 const ALERT_CIRCLE_SRC = "/assets/character/alert-circle.svg";
 const DEFAULT_CHARACTER_IMAGE = "/assets/character/LittlePrince.svg";
 const DEFAULT_BIRTHDAY = "2002.03.21";
+const PROFILE_IMAGE_MAX_DIMENSION = 1024;
+const PROFILE_IMAGE_QUALITY = 0.86;
+const PROFILE_IMAGE_CACHE_PREFIX = "profileImage:";
 const GENDER_OPTIONS = [
   { value: "Male", label: "남자", display: "남" },
   { value: "Female", label: "여자", display: "여" },
-  { value: "Other", label: "그외", display: "그외" },
 ];
 
 function normalizeGender(value) {
@@ -60,8 +68,7 @@ function normalizeGender(value) {
 
   if (["male", "m", "남", "남자"].includes(lower)) return "Male";
   if (["female", "f", "여", "여자"].includes(lower)) return "Female";
-  if (["other", "o", "그외", "기타"].includes(lower)) return "Other";
-  return text;
+  return "";
 }
 
 function getGenderOption(value) {
@@ -92,6 +99,11 @@ function parseBirthday(value) {
 function formatBirthday({ year, month, day }) {
   const pad = (num) => `${num}`.padStart(2, "0");
   return `${year}.${pad(month)}.${pad(day)}`;
+}
+
+function formatBirthdayForApi({ year, month, day }) {
+  const pad = (num) => `${num}`.padStart(2, "0");
+  return `${year}-${pad(month)}-${pad(day)}`;
 }
 
 function getDaysInMonth(year, month) {
@@ -145,6 +157,157 @@ function normalizeLibraryStatus(status) {
 function normalizeLibraryDate(value) {
   if (!value) return "";
   return `${value}`.slice(0, 10).replace(/-/g, ".");
+}
+
+function getExistingValue(source, keys) {
+  const existingKey = keys.find((key) =>
+    Object.prototype.hasOwnProperty.call(source, key),
+  );
+
+  return existingKey ? source[existingKey] : undefined;
+}
+
+function normalizeUserProfile(data, fallback = {}) {
+  const source = data?.user ?? data ?? {};
+  const sourceBirthday = getExistingValue(source, ["birthday", "birthDay", "birthdate"]);
+  const sourceGender = getExistingValue(source, ["gender", "Gender"]);
+  const sourceProfileImage = getExistingValue(source, [
+    "profileImgUrl",
+    "profileImageUrl",
+    "profileImage",
+  ]);
+  const shouldPreferSource = Boolean(fallback.preferSource);
+  const hasSourceBirthday =
+    sourceBirthday !== undefined && (shouldPreferSource || sourceBirthday != null);
+  const hasSourceGender =
+    sourceGender !== undefined && (shouldPreferSource || sourceGender != null);
+  const hasSourceProfileImage =
+    sourceProfileImage !== undefined &&
+    (shouldPreferSource || Boolean(sourceProfileImage));
+  const birthday = normalizeLibraryDate(
+    hasSourceBirthday
+      ? sourceBirthday
+      : fallback.birthday ?? localStorage.getItem("birthday"),
+  );
+  const gender = normalizeGender(
+    hasSourceGender
+      ? sourceGender
+      : fallback.gender ?? localStorage.getItem("gender"),
+  );
+  const profileImageSource = hasSourceProfileImage
+    ? sourceProfileImage
+    : fallback.profileImage ?? localStorage.getItem("profileImage");
+
+  return {
+    userId: source.userId ?? source.id ?? fallback.userId ?? getCurrentUserId(),
+    email: source.email ?? fallback.email ?? localStorage.getItem("email") ?? "",
+    nickname: source.nickname ?? fallback.nickname ?? localStorage.getItem("nickname") ?? "",
+    gender,
+    birthday,
+    profileImage: resolveRemoteAssetUrl(profileImageSource, ""),
+  };
+}
+
+function syncStoredUserProfile(data, fallback = {}) {
+  const profile = normalizeUserProfile(data, fallback);
+
+  if (profile.userId) localStorage.setItem("userId", String(profile.userId));
+  localStorage.setItem("email", profile.email || "");
+  localStorage.setItem("nickname", profile.nickname || "");
+  localStorage.setItem("gender", profile.gender || "");
+  localStorage.setItem("birthday", profile.birthday || "");
+  localStorage.setItem("profileImage", profile.profileImage || "");
+  if (profile.userId) {
+    const profileImageCacheKey = `${PROFILE_IMAGE_CACHE_PREFIX}${profile.userId}`;
+
+    if (profile.profileImage) {
+      localStorage.setItem(profileImageCacheKey, profile.profileImage);
+    } else if (fallback.preferSource) {
+      localStorage.removeItem(profileImageCacheKey);
+    }
+  }
+
+  return profile;
+}
+
+function getStoredProfileSnapshot() {
+  const userId = getCurrentUserId();
+  const cachedProfileImage = userId
+    ? localStorage.getItem(`${PROFILE_IMAGE_CACHE_PREFIX}${userId}`)
+    : "";
+
+  return {
+    userId,
+    email: localStorage.getItem("email") ?? "",
+    nickname: localStorage.getItem("nickname") ?? "",
+    birthday: localStorage.getItem("birthday") ?? "",
+    gender: normalizeGender(localStorage.getItem("gender")),
+    profileImage: localStorage.getItem("profileImage") || cachedProfileImage || null,
+  };
+}
+
+function loadImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const imageUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(imageUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(imageUrl);
+      reject(new Error("지원하지 않는 이미지 형식입니다."));
+    };
+    image.src = imageUrl;
+  });
+}
+
+async function prepareProfileImageFile(file) {
+  if (!file?.type?.startsWith("image/")) {
+    throw new Error("이미지 파일만 업로드할 수 있습니다.");
+  }
+
+  const image = await loadImageFile(file);
+  const scale = Math.min(
+    1,
+    PROFILE_IMAGE_MAX_DIMENSION / image.width,
+    PROFILE_IMAGE_MAX_DIMENSION / image.height,
+  );
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
+
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob(resolve, "image/jpeg", PROFILE_IMAGE_QUALITY);
+  });
+
+  if (!blob) {
+    throw new Error("이미지 파일을 처리하지 못했습니다.");
+  }
+
+  const baseName = file.name.replace(/\.[^.]+$/, "") || "profile";
+  return new File([blob], `${baseName}.jpg`, { type: "image/jpeg" });
+}
+
+async function updateStoredUserProfile(userId, patch) {
+  const data = await updateUser(userId, patch);
+  return syncStoredUserProfile(data, { userId, ...patch });
+}
+
+async function updateStoredProfileImage(userId, file) {
+  const data = await updateProfileImage(userId, file);
+  return syncStoredUserProfile(data, { userId });
+}
+
+async function fetchAndSyncUserProfile(userId) {
+  const data = await getUserProfile(userId);
+  return syncStoredUserProfile(data, { userId, preferSource: true });
 }
 
 function toLibraryBookArray(data) {
@@ -434,7 +597,8 @@ function ProfileAvatar({ image, size = "sm", editable = false }) {
   return (
     <span className={className}>
       <img
-        src={image ?? "/assets/prince-portrait.svg"}
+        src={image || "/assets/prince-portrait.svg"}
+        onError={handleProfileImageError}
         alt=""
         aria-hidden="true"
       />
@@ -563,7 +727,13 @@ function BackButton({ onClick }) {
 
 // ── 메인뷰 ──────────────────────────────────────────────────────────────────
 
+function handleProfileImageError(event) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = "/assets/prince-portrait.svg";
+}
+
 function MainView({
+  profile = getStoredProfileSnapshot(),
   libraryBooks = [],
   libraryLoading,
   libraryError,
@@ -576,10 +746,10 @@ function MainView({
   const books = libraryBooks;
   const countByStatus = (status) =>
     books.filter((b) => b.status === status).length;
-  const nickname = localStorage.getItem("nickname") ?? "";
-  const userId = localStorage.getItem("userId") ?? "";
-  const email = localStorage.getItem("email") ?? "";
-  const profileImage = localStorage.getItem("profileImage") ?? null;
+  const nickname = profile.nickname ?? "";
+  const userId = profile.userId ? String(profile.userId) : "";
+  const email = profile.email ?? "";
+  const profileImage = profile.profileImage || null;
   const [reportCharacters, setReportCharacters] = useState([]);
   const previewCharacters = reportCharacters.slice(0, 2);
   const extraCharacterCount = Math.max(
@@ -915,10 +1085,11 @@ function NicknameSheet({ onClose, onSaved }) {
   const [value, setValue] = useState("");
   const [dupState, setDupState] = useState("idle"); // idle | checking | ok | error
   const [saving, setSaving] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const hasInput = value.trim().length > 0;
   const isFormatError = hasInput && !isValidNickname(value);
-  const isError = dupState === "error" || isFormatError;
+  const isError = dupState === "error" || isFormatError || Boolean(apiError);
   const canCheck = hasInput && !isFormatError && dupState !== "checking";
   const keyboard = useKeyboardAwareInput();
 
@@ -933,28 +1104,39 @@ function NicknameSheet({ onClose, onSaved }) {
   const handleChange = (e) => {
     setValue(e.target.value);
     setDupState("idle");
+    setApiError("");
   };
 
   const handleCheck = async () => {
     if (!canCheck) return;
     setDupState("checking");
+    setApiError("");
     try {
       await checkNickname(value.trim());
       setDupState("ok");
-    } catch {
+    } catch (error) {
       setDupState("error");
+      setApiError(error?.message ?? "");
     }
   };
 
   const handleSave = async () => {
     if (dupState !== "ok") return;
-    setSaving(true);
-    try {
-      await updateUser(userId, { nickname: value.trim() });
-      localStorage.setItem("nickname", value.trim());
-      onSaved(value.trim());
-    } catch {
+    if (!userId) {
       setDupState("error");
+      setApiError("로그인 정보가 없습니다.");
+      return;
+    }
+
+    setSaving(true);
+    setApiError("");
+
+    try {
+      const profile = await updateStoredUserProfile(userId, { nickname: value.trim() });
+      onSaved(profile);
+    } catch (error) {
+      setDupState("error");
+      setApiError(error?.message ?? "회원 정보 수정에 실패했습니다.");
     } finally {
       setSaving(false);
     }
@@ -1016,6 +1198,11 @@ function NicknameSheet({ onClose, onSaved }) {
                 ? "사용 가능한 닉네임입니다."
                 : NICKNAME_RULE_MESSAGE}
           </p>
+          {apiError && (
+            <p className="mypage__sheet-hint mypage__sheet-hint--error">
+              {apiError}
+            </p>
+          )}
           <button
             type="button"
             className="mypage__sheet-save"
@@ -1065,6 +1252,52 @@ function LogoutModal({ onCancel, onConfirm }) {
             onClick={onConfirm}
           >
             확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DeleteAccountModal({
+  error = "",
+  confirming = false,
+  onCancel,
+  onConfirm,
+}) {
+  return (
+    <div className="mypage__overlay mypage__overlay--center">
+      <div className="mypage__logout-modal">
+        <img
+          className="mypage__logout-modal-icon"
+          src="/assets/alert-02.svg"
+          alt=""
+          aria-hidden="true"
+        />
+        <h2 className="mypage__logout-modal-title">회원탈퇴</h2>
+        <p
+          className={`mypage__logout-modal-sub${
+            error ? " mypage__logout-modal-sub--error" : ""
+          }`}
+        >
+          {error || "회원탈퇴 하시겠습니까?"}
+        </p>
+        <div className="mypage__logout-modal-btns">
+          <button
+            type="button"
+            className="mypage__logout-modal-btn mypage__logout-modal-btn--cancel"
+            onClick={onCancel}
+            disabled={confirming}
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            className="mypage__logout-modal-btn mypage__logout-modal-btn--confirm"
+            onClick={onConfirm}
+            disabled={confirming}
+          >
+            {confirming ? "탈퇴 중..." : "확인"}
           </button>
         </div>
       </div>
@@ -1165,6 +1398,7 @@ function BirthdayEditor({ value, onBack, onSave }) {
   const [month, setMonth] = useState(initial.month);
   const [day, setDay] = useState(initial.day);
   const [saving, setSaving] = useState(false);
+  const [apiError, setApiError] = useState("");
   const days = Array.from(
     { length: getDaysInMonth(year, month) },
     (_, index) => index + 1,
@@ -1177,18 +1411,22 @@ function BirthdayEditor({ value, onBack, onSave }) {
 
   const handleSave = async () => {
     const birthday = formatBirthday({ year, month, day });
+    const birthdayForApi = formatBirthdayForApi({ year, month, day });
+    if (!userId) {
+      setApiError("로그인 정보가 없습니다.");
+      return;
+    }
+
     setSaving(true);
+    setApiError("");
 
     try {
-      if (userId) {
-        await updateUser(userId, { birthday });
-      }
+      const profile = await updateStoredUserProfile(userId, { birthday: birthdayForApi });
+      onSave(profile);
     } catch (error) {
-      console.warn("생년월일 서버 저장에 실패해 로컬 상태만 갱신합니다.", error);
+      setApiError(error?.message ?? "회원 정보 수정에 실패했습니다.");
     } finally {
-      localStorage.setItem("birthday", birthday);
       setSaving(false);
-      onSave(birthday);
     }
   };
 
@@ -1244,6 +1482,9 @@ function BirthdayEditor({ value, onBack, onSave }) {
             </select>
           </label>
         </div>
+        {apiError && (
+          <p className="mypage__api-error">{apiError}</p>
+        )}
         <button
           type="button"
           className="mypage__birthday-save"
@@ -1259,74 +1500,147 @@ function BirthdayEditor({ value, onBack, onSave }) {
 
 // ── 계정 뷰 ──────────────────────────────────────────────────────────────────
 
-function AccountView({ onBack }) {
+function AccountView({
+  profile = getStoredProfileSnapshot(),
+  onBack,
+  onProfileChange = () => {},
+}) {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState(
-    localStorage.getItem("nickname") ?? "",
-  );
-  const email =
-    localStorage.getItem("email") ?? localStorage.getItem("userId") ?? "";
-  const userId = Number(localStorage.getItem("userId"));
+  const email = profile.email || (profile.userId ? String(profile.userId) : "");
+  const userId = profile.userId;
+  const [nickname, setNickname] = useState(profile.nickname ?? "");
   const [isEditing, setIsEditing] = useState(false);
-  const [birthday, setBirthday] = useState(
-    localStorage.getItem("birthday") ?? "",
-  );
-  const [gender, setGender] = useState(
-    normalizeGender(localStorage.getItem("gender")),
-  );
+  const [birthday, setBirthday] = useState(profile.birthday ?? "");
+  const [gender, setGender] = useState(normalizeGender(profile.gender));
   const [pendingGender, setPendingGender] = useState(
-    normalizeGender(localStorage.getItem("gender")) || "Male",
+    normalizeGender(profile.gender) || "Male",
   );
   const [showSheet, setShowSheet] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [showGenderSheet, setShowGenderSheet] = useState(false);
   const [showGenderConfirm, setShowGenderConfirm] = useState(false);
   const [showBirthdayEditor, setShowBirthdayEditor] = useState(false);
   const [savingGender, setSavingGender] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    localStorage.getItem("profileImage") ?? null,
-  );
+  const [genderError, setGenderError] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState("");
+  const [profileImage, setProfileImage] = useState(profile.profileImage || null);
+  const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
+  const [profileImageError, setProfileImageError] = useState("");
   const [nicknameCopyMessage, setNicknameCopyMessage] = useState("");
   const fileInputRef = useRef(null);
+
+  const setLocalProfile = (nextProfile) => {
+    const nextGender = normalizeGender(nextProfile.gender);
+
+    setNickname(nextProfile.nickname ?? "");
+    setBirthday(nextProfile.birthday ?? "");
+    setGender(nextGender);
+    setPendingGender(nextGender || "Male");
+    setProfileImage(nextProfile.profileImage || null);
+  };
+
+  const applyProfile = (nextProfile) => {
+    setLocalProfile(nextProfile);
+    onProfileChange(nextProfile);
+  };
+
+  useEffect(() => {
+    setLocalProfile(profile);
+  }, [
+    profile.userId,
+    profile.email,
+    profile.nickname,
+    profile.birthday,
+    profile.gender,
+    profile.profileImage,
+  ]);
 
   const handleLogout = () => {
     clearAuthStorage();
     navigate(ROUTES.LOGIN, { replace: true });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
+  const openDeleteAccountConfirm = () => {
+    setDeleteAccountError("");
+    setShowDeleteAccount(true);
+  };
+
+  const closeDeleteAccountConfirm = () => {
+    if (deletingAccount) return;
+    setDeleteAccountError("");
+    setShowDeleteAccount(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!userId) {
+      setDeleteAccountError("로그인 정보가 없습니다.");
+      return;
+    }
+
+    setDeletingAccount(true);
+    setDeleteAccountError("");
+
+    try {
+      await deleteAccount(userId);
+      clearAuthStorage();
+      navigate(ROUTES.LOGIN, { replace: true });
+    } catch (error) {
+      setDeleteAccountError(error?.message ?? "회원 탈퇴에 실패했습니다.");
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const dataUrl = evt.target.result;
-      localStorage.setItem("profileImage", dataUrl);
-      setProfileImage(dataUrl);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
+
+    if (!userId) {
+      setProfileImageError("로그인 정보가 없습니다.");
+      return;
+    }
+
+    setUploadingProfileImage(true);
+    setProfileImageError("");
+
+    try {
+      const uploadFile = await prepareProfileImageFile(file);
+      const profile = await updateStoredProfileImage(userId, uploadFile);
+      applyProfile(profile);
+    } catch (error) {
+      setProfileImageError(error?.message ?? "프로필 사진 수정에 실패했습니다.");
+    } finally {
+      setUploadingProfileImage(false);
+    }
   };
 
   const openGenderSheet = () => {
     setPendingGender(gender || "Male");
+    setGenderError("");
     setShowGenderSheet(true);
   };
 
   const handleGenderConfirm = async () => {
+    if (!userId) {
+      setGenderError("로그인 정보가 없습니다.");
+      return;
+    }
+
     setSavingGender(true);
+    setGenderError("");
 
     try {
-      if (userId) {
-        await updateUser(userId, { gender: pendingGender });
-      }
-    } catch (error) {
-      console.warn("성별 서버 저장에 실패해 로컬 상태만 갱신합니다.", error);
-    } finally {
-      localStorage.setItem("gender", pendingGender);
-      setGender(pendingGender);
-      setSavingGender(false);
+      const profile = await updateStoredUserProfile(userId, { gender: pendingGender });
+      applyProfile(profile);
       setShowGenderConfirm(false);
       setShowGenderSheet(false);
+    } catch (error) {
+      setGenderError(error?.message ?? "회원 정보 수정에 실패했습니다.");
+    } finally {
+      setSavingGender(false);
     }
   };
 
@@ -1354,14 +1668,14 @@ function AccountView({ onBack }) {
 
   if (showBirthdayEditor) {
     return (
-      <BirthdayEditor
-        value={birthday}
-        onBack={() => setShowBirthdayEditor(false)}
-        onSave={(nextBirthday) => {
-          setBirthday(nextBirthday);
-          setShowBirthdayEditor(false);
-        }}
-      />
+        <BirthdayEditor
+          value={birthday}
+          onBack={() => setShowBirthdayEditor(false)}
+          onSave={(nextProfile) => {
+            applyProfile(nextProfile);
+            setShowBirthdayEditor(false);
+          }}
+        />
     );
   }
 
@@ -1389,10 +1703,12 @@ function AccountView({ onBack }) {
                 profileImage ? " mypage__profile-avatar--custom" : ""
               }`}
               onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingProfileImage}
               aria-label="프로필 사진 변경"
             >
               <img
-                src={profileImage ?? "/assets/prince-portrait.svg"}
+                src={profileImage || "/assets/prince-portrait.svg"}
+                onError={handleProfileImageError}
                 alt=""
                 aria-hidden="true"
               />
@@ -1420,7 +1736,7 @@ function AccountView({ onBack }) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,image/heic,image/heif"
               style={{ display: "none" }}
               onChange={handleImageChange}
             />
@@ -1445,6 +1761,16 @@ function AccountView({ onBack }) {
             {nicknameCopyMessage && (
               <p className="mypage__profile-copy-message" role="status">
                 {nicknameCopyMessage}
+              </p>
+            )}
+            {(uploadingProfileImage || profileImageError) && (
+              <p
+                className={`mypage__profile-copy-message${
+                  profileImageError ? " mypage__profile-copy-message--error" : ""
+                }`}
+                role="status"
+              >
+                {profileImageError || "프로필 사진 저장 중..."}
               </p>
             )}
             <button
@@ -1542,14 +1868,21 @@ function AccountView({ onBack }) {
             />
             <span>로그아웃</span>
           </button>
+          <button
+            type="button"
+            className="mypage__acct-delete-btn"
+            onClick={openDeleteAccountConfirm}
+          >
+            회원탈퇴
+          </button>
         </div>
       </div>
 
       {showSheet && (
         <NicknameSheet
           onClose={() => setShowSheet(false)}
-          onSaved={(name) => {
-            setNickname(name);
+          onSaved={(nextProfile) => {
+            applyProfile(nextProfile);
             setShowSheet(false);
           }}
         />
@@ -1558,16 +1891,22 @@ function AccountView({ onBack }) {
       {showGenderSheet && (
         <GenderSheet
           value={pendingGender}
-          onChange={setPendingGender}
+          onChange={(nextGender) => {
+            setPendingGender(nextGender);
+            setGenderError("");
+          }}
           onClose={() => setShowGenderSheet(false)}
-          onSave={() => setShowGenderConfirm(true)}
+          onSave={() => {
+            setGenderError("");
+            setShowGenderConfirm(true);
+          }}
         />
       )}
 
       {showGenderConfirm && (
         <ProfileConfirmModal
           title="프로필 성별 변경"
-          description="변경 시 2주간 변경할 수 없습니다."
+          description={genderError || "변경 시 2주간 변경할 수 없습니다."}
           confirming={savingGender}
           onCancel={() => setShowGenderConfirm(false)}
           onConfirm={handleGenderConfirm}
@@ -1578,6 +1917,15 @@ function AccountView({ onBack }) {
         <LogoutModal
           onCancel={() => setShowLogout(false)}
           onConfirm={handleLogout}
+        />
+      )}
+
+      {showDeleteAccount && (
+        <DeleteAccountModal
+          error={deleteAccountError}
+          confirming={deletingAccount}
+          onCancel={closeDeleteAccountConfirm}
+          onConfirm={handleDeleteAccount}
         />
       )}
     </div>
@@ -1920,6 +2268,7 @@ function MemoView({ onBack }) {
 
 export default function MyPage() {
   const [view, setView] = useState("main");
+  const [profileSnapshot, setProfileSnapshot] = useState(getStoredProfileSnapshot);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [libraryBooks, setLibraryBooks] = useState(() =>
     getCurrentUserId() ? [] : getBooksWithInfo(),
@@ -1928,6 +2277,89 @@ export default function MyPage() {
     Boolean(getCurrentUserId()),
   );
   const [libraryError, setLibraryError] = useState("");
+
+  const refreshProfileSnapshot = () => {
+    setProfileSnapshot(getStoredProfileSnapshot());
+  };
+
+  const applyProfileSnapshot = (nextProfile) => {
+    const storedProfile = getStoredProfileSnapshot();
+    const hasProfileImage = Object.prototype.hasOwnProperty.call(
+      nextProfile ?? {},
+      "profileImage",
+    );
+
+    setProfileSnapshot({
+      ...storedProfile,
+      ...nextProfile,
+      gender: normalizeGender(nextProfile?.gender ?? storedProfile.gender),
+      profileImage: hasProfileImage
+        ? nextProfile.profileImage
+        : storedProfile.profileImage,
+    });
+  };
+
+  const syncLatestProfile = () => {
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+      refreshProfileSnapshot();
+      return Promise.resolve(null);
+    }
+
+    return fetchAndSyncUserProfile(userId)
+      .then((profile) => {
+        applyProfileSnapshot(profile);
+        return profile;
+      })
+      .catch(() => {
+        refreshProfileSnapshot();
+        return null;
+      });
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+      refreshProfileSnapshot();
+      return undefined;
+    }
+
+    fetchAndSyncUserProfile(userId)
+      .then((profile) => {
+        if (!cancelled) applyProfileSnapshot(profile);
+      })
+      .catch(() => {
+        if (!cancelled) refreshProfileSnapshot();
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncVisibleProfile = () => {
+      if (!cancelled) syncLatestProfile();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") syncVisibleProfile();
+    };
+
+    window.addEventListener("focus", syncVisibleProfile);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", syncVisibleProfile);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     const userId = getCurrentUserId();
@@ -1963,7 +2395,18 @@ export default function MyPage() {
   }, []);
 
   if (view === "report") return <ReportView onBack={() => setView("main")} />;
-  if (view === "account") return <AccountView onBack={() => setView("main")} />;
+
+  if (view === "account")
+    return (
+      <AccountView
+        onBack={() => {
+          refreshProfileSnapshot();
+          setView("main");
+        }}
+        profile={profileSnapshot}
+        onProfileChange={applyProfileSnapshot}
+      />
+    );
   if (view === "memo") return <MemoView onBack={() => setView("main")} />;
   if (view === "install")
     return <InstallGuidePage onBack={() => setView("main")} />;
@@ -1979,11 +2422,15 @@ export default function MyPage() {
     );
   return (
     <MainView
+      profile={profileSnapshot}
       libraryBooks={libraryBooks}
       libraryLoading={libraryLoading}
       libraryError={libraryError}
       onReport={() => setView("report")}
-      onAccount={() => setView("account")}
+      onAccount={() => {
+        syncLatestProfile();
+        setView("account");
+      }}
       onLibrary={(category) => {
         setSelectedCategory(category);
         setView("library");

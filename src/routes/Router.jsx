@@ -17,7 +17,13 @@ import ChatPage from '../pages/ChatPage/ChatPage'
 import SearchPage from '../pages/SearchPage/SearchPage'
 import ShopPage from '../pages/ShopPage/ShopPage'
 import { ROUTES } from '../constants/routes'
-import { isAuthenticated } from '../utils/authStorage'
+import {
+  clearAuthStorage,
+  clearBackgroundSession,
+  isAuthenticated,
+  isBackgroundSessionExpired,
+  markBackgroundSessionStarted,
+} from '../utils/authStorage'
 
 const PROTECTED_PATH_PREFIXES = [
   ROUTES.HOME,
@@ -44,23 +50,46 @@ function AuthNavigationGuard() {
 
   useEffect(() => {
     const verifyCurrentRoute = () => {
+      if (isBackgroundSessionExpired()) {
+        clearAuthStorage()
+        navigate(ROUTES.LOGIN, { replace: true })
+        return
+      }
+
+      if (document.visibilityState === 'visible') {
+        clearBackgroundSession()
+      }
+
       if (isProtectedPath(window.location.pathname) && !isAuthenticated()) {
         navigate(ROUTES.LOGIN, { replace: true })
       }
     }
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        markBackgroundSessionStarted()
+        return
+      }
+
+      verifyCurrentRoute()
+    }
+
     verifyCurrentRoute()
 
     window.addEventListener('pageshow', verifyCurrentRoute)
+    window.addEventListener('pagehide', markBackgroundSessionStarted)
     window.addEventListener('popstate', verifyCurrentRoute)
     window.addEventListener('focus', verifyCurrentRoute)
-    document.addEventListener('visibilitychange', verifyCurrentRoute)
+    window.addEventListener('blur', markBackgroundSessionStarted)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       window.removeEventListener('pageshow', verifyCurrentRoute)
+      window.removeEventListener('pagehide', markBackgroundSessionStarted)
       window.removeEventListener('popstate', verifyCurrentRoute)
       window.removeEventListener('focus', verifyCurrentRoute)
-      document.removeEventListener('visibilitychange', verifyCurrentRoute)
+      window.removeEventListener('blur', markBackgroundSessionStarted)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [location.pathname, navigate])
 

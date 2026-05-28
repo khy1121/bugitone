@@ -5,7 +5,7 @@ import { login } from '../../api/userApi'
 import Input from '../../components/common/Input/Input'
 import Button from '../../components/common/Button/Button'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
-import { isAuthenticated } from '../../utils/authStorage'
+import { isAuthenticated, storeUserProfile } from '../../utils/authStorage'
 import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -60,9 +60,7 @@ export default function LoginPage() {
       if (!profile?.userId) {
         throw new Error('로그인 응답에 사용자 정보가 없습니다.')
       }
-      localStorage.setItem('userId', String(profile.userId))
-      localStorage.setItem('nickname', profile.nickname ?? '')
-      localStorage.setItem('email', profile.email ?? email)
+      storeUserProfile(profile, { email })
       navigate(ROUTES.HOME, { replace: true })
     } catch (err) {
       setApiError(getLoginErrorMessage(err))

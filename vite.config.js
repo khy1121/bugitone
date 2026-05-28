@@ -5,9 +5,16 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:8080'
+  const uploadsProxyTarget = getProxyOrigin(
+    env.VITE_UPLOADS_PROXY_TARGET || env.UPLOADS_PROXY_TARGET || apiProxyTarget
+  )
   const apiProxy = {
     '/api': {
       target: apiProxyTarget,
+      changeOrigin: true,
+    },
+    '/uploads': {
+      target: uploadsProxyTarget,
       changeOrigin: true,
     },
   }
@@ -81,3 +88,11 @@ export default defineConfig(({ mode }) => {
   },
   }
 })
+
+function getProxyOrigin(value) {
+  try {
+    return new URL(value).origin
+  } catch {
+    return value
+  }
+}

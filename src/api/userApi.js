@@ -37,5 +37,17 @@ export const checkEmail = (email) =>
 export const deleteAccount = (userId) =>
   axiosInstance.delete(`/user/${userId}`).then(unwrap)
 
+export const getUserProfile = (userId) =>
+  axiosInstance.get(`/user/${userId}`).then(unwrap)
+
 export const updateUser = (userId, body) =>
-  axiosInstance.patch(`/user/update/${userId}`, body).then(unwrap)
+  axiosInstance.patch(`/user/update/${userId}`, { userId, ...body }).then(unwrap)
+
+export const updateProfileImage = (userId, file) => {
+  const formData = new FormData()
+  formData.append('profileImg', file)
+
+  return axiosInstance
+    .post(`/user/updateimg/${userId}`, formData)
+    .then(unwrap)
+}

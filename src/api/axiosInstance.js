@@ -1,5 +1,9 @@
 import axios from 'axios'
 import { normalizeApiError } from '../utils/normalizeApiError'
+import {
+  clearAuthStorage,
+  isBackgroundSessionExpired,
+} from '../utils/authStorage'
 
 const DEFAULT_API_BASE_URL = '/api'
 const INSECURE_HTTP_URL = /^http:\/\//i
@@ -29,7 +33,26 @@ const axiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use((config) => {
+  if (isBackgroundSessionExpired()) {
+    clearAuthStorage()
+
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.replace('/login')
+    }
+
+    throw new axios.CanceledError('Background session expired')
+  }
+
   const token = localStorage.getItem('accessToken')
+
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (typeof config.headers?.delete === 'function') {
+      config.headers.delete('Content-Type')
+    } else if (config.headers) {
+      delete config.headers['Content-Type']
+      delete config.headers['content-type']
+    }
+  }
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
