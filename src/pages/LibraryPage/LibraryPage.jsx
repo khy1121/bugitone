@@ -86,7 +86,7 @@ function normalizeStatus(status) {
   if (status === 'WISHLIST' || status === 'WISH' || status === 'FAVORITE') return '찜한 책'
   if (status === 'READING') return '읽고 있는 책'
   if (status === 'DONE' || status === 'COMPLETED') return '다 읽은 책'
-  return status || '읽고 있는 책'
+  return status || ''
 }
 
 function getUserId() {
@@ -529,12 +529,14 @@ export default function LibraryPage() {
                       <p className="library__search-author">{book.author}</p>
                       <p className="library__search-meta">{book.category} ㅣ {book.publisher}</p>
                       <div className="library__search-chips">
-                        <span className={`library__search-chip library__search-chip--${statusKind}`}>
-                          <span className="library__search-chip-icon" aria-hidden="true">
-                            {statusKind === 'favorite' ? '♥' : <CheckIcon size={10} color="#8E8B7E" />}
+                        {book.status && (
+                          <span className={`library__search-chip library__search-chip--${statusKind}`}>
+                            <span className="library__search-chip-icon" aria-hidden="true">
+                              {statusKind === 'favorite' ? '♥' : <CheckIcon size={10} color="#8E8B7E" />}
+                            </span>
+                            {book.status}
                           </span>
-                          {book.status}
-                        </span>
+                        )}
                         {dateLabel && (
                           <span className="library__search-chip library__search-chip--date">
                             <img src="/assets/library/calendar-01.svg" alt="" aria-hidden="true" />
