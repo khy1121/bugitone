@@ -584,7 +584,6 @@ export default function ResultPage() {
   const [loading, setLoading] = useState(initialAnalysis ? false : initialLoading);
   const [coinBanner, setCoinBanner] = useState(null);
   const [analysis, setAnalysis] = useState(initialAnalysis);
-  const [apiError, setApiError] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
   const [savingImage, setSavingImage] = useState(false);
   const [loadingQuoteIndex, setLoadingQuoteIndex] = useState(() =>
@@ -623,7 +622,15 @@ export default function ResultPage() {
           if (!cancelled) setAnalysis(result);
         })
         .catch((error) => {
-          if (!cancelled) setApiError(error?.message ?? "감정 분석에 실패했습니다.");
+          if (cancelled) return;
+          // 분석 실패 시 기본 캐릭터를 실제 결과처럼 보여주지 않고 오류 화면으로 이동
+          navigate(ROUTES.CHARACTER_ERROR, {
+            replace: true,
+            state: {
+              message: error?.message ?? "감정 분석에 실패했습니다.",
+              retryTo: ROUTES.ANALYZE,
+            },
+          });
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -639,7 +646,7 @@ export default function ResultPage() {
     }, 30000);
 
     return () => window.clearTimeout(timer);
-  }, [comfort, emotions, loading, prompt]);
+  }, [comfort, emotions, loading, navigate, prompt]);
 
   useEffect(() => {
     if (!loading) return undefined;
@@ -659,6 +666,7 @@ export default function ResultPage() {
   }, [emotions]);
 
   const displayAnalysis = analysis ?? FALLBACK_ANALYSIS;
+  const isFallbackResult = analysis?.fallback === true;
   const character = displayAnalysis.character ?? {};
   const characterName = character.characterName || FALLBACK_ANALYSIS.character.characterName;
   const bookQuote = character.bookQuote || FALLBACK_ANALYSIS.character.bookQuote;
@@ -721,7 +729,7 @@ export default function ResultPage() {
         characterImage,
         bookQuote,
         moodTags,
-        methodReason: apiError || methodReason,
+        methodReason,
         characterTheme,
       });
 
@@ -910,6 +918,13 @@ export default function ResultPage() {
           <p>{displayName}님의 상태를 정독한 결과에요.</p>
         </section>
 
+        {isFallbackResult && (
+          <p className="result__fallback-notice" role="status">
+            AI 분석이 원활하지 않아 임의로 추천된 캐릭터예요. 아래 다시 만들기로
+            재분석할 수 있어요.
+          </p>
+        )}
+
         <section
           className="result__book-card"
           style={{ "--result-character-bg": characterTheme.cssBackground }}
@@ -957,7 +972,7 @@ export default function ResultPage() {
           </div>
 
           <div className="result__piece-card">
-            <p>{apiError || methodReason}</p>
+            <p>{methodReason}</p>
           </div>
         </section>
 

@@ -283,6 +283,19 @@
     pointer-events: none;
   }
 
+  &__fallback-notice {
+    margin: -32px 0 32px;
+    padding: 10px 14px;
+
+    border-radius: 12px;
+    background: rgba(255, 244, 214, 0.95);
+    border: 1px solid rgba(214, 164, 58, 0.5);
+
+    color: #6b4f0f;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
   &__intro {
     margin-bottom: 48px;
 

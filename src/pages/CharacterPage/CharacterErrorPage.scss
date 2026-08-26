@@ -43,4 +43,14 @@
     line-height: 24px;
     letter-spacing: -0.4px;
   }
+
+  &__retry {
+    margin-top: 28px;
+    padding: 12px 32px !important;
+    border-radius: 999px;
+    background: #282723 !important;
+    color: #fefefe !important;
+    font-size: 15px;
+    font-weight: 600;
+  }
 }
