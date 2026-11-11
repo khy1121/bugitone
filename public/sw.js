@@ -3,7 +3,7 @@ const APP_SHELL = [
   '/',
   '/manifest.webmanifest',
   '/pwa-icon.svg',
-  '/assets/onBoarding/onboardMain.svg',
+  '/assets/onBoarding/onboardMain.webp',
   '/assets/fonts/TropiLand.ttf',
   '/assets/fonts/tvNEnjoystoriesOTF.ttf',
 ]

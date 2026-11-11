@@ -6,11 +6,11 @@ import Loading from "../../components/common/LoadingSpinner/LoadingSpinner";
 import { resolveRemoteAssetUrl } from "../../utils/resolveAssetUrl";
 import "./ResultPage.scss";
 
-const LOAD_CHAR_SRC = "/assets/character/LoadChar.svg";
-const LITTLE_PRINCE_SRC = "/assets/character/LittlePrince.svg";
+const LOAD_CHAR_SRC = "/assets/character/LoadChar.webp";
+const LITTLE_PRINCE_SRC = "/assets/character/LittlePrince.webp";
 const PRINCE_SHADOW_SRC = "/assets/character/PrinceShadow.svg";
-const RESULT_PIECE_CHAR_SRC = "/assets/character/resultChar.svg";
-const COIN_SRC = "/assets/shop/coin.png";
+const RESULT_PIECE_CHAR_SRC = "/assets/character/resultChar.webp";
+const COIN_SRC = "/assets/shop/coin.webp";
 const REGENERATE_COIN_COST = 2;
 const RESULT_IMAGE_WIDTH = 393;
 const RESULT_IMAGE_PADDING_X = 20;

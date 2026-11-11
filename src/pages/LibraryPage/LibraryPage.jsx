@@ -9,7 +9,7 @@ import './LibraryPage.scss'
 
 const CHOSUNG = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
 const CHOSUNG_SET = new Set(CHOSUNG)
-const FALLBACK_COVER = '/assets/library/book.svg'
+const FALLBACK_COVER = '/assets/library/book.webp'
 const LIBRARY_SCROLL_KEY = 'libraryScrollTop'
 const LIBRARY_VISIBLE_ROWS_KEY = 'libraryVisibleRows'
 const RECENT_SEARCHES_KEY = 'libraryRecentSearches'
@@ -434,7 +434,7 @@ export default function LibraryPage() {
         <div className="library__content" ref={contentRef}>
           <div className="library__banner">
             <img
-              src="/assets/library/book.svg"
+              src="/assets/library/book.webp"
               className="library__banner-img"
               alt=""
               aria-hidden="true"

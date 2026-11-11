@@ -17,7 +17,7 @@ import {
 import { ROUTES } from '../../constants/routes'
 import './ChatPage.scss'
 
-const LANDING_CHAR_IMG = '/assets/character/character.svg'
+const LANDING_CHAR_IMG = '/assets/character/character.webp'
 const CHAT_CHAR_IMG = '/assets/chatPage/chat_char.svg'
 const MAX_INPUT_HEIGHT = 380
 const QUICK_ACTIONS = [

@@ -45,7 +45,7 @@ export default function ShopPage() {
             <strong>{coinCount}개</strong>
           </div>
           <img
-            src="/assets/shop/character.svg"
+            src="/assets/shop/character.webp"
             alt=""
             className="shop-balance__character"
             aria-hidden="true"
@@ -92,7 +92,7 @@ export default function ShopPage() {
                     {Array.from({ length: coins }).map((_, index) => (
                       <img
                         key={index}
-                        src="/assets/shop/coin.png"
+                        src="/assets/shop/coin-sm.webp"
                         alt=""
                         className="shop-daily__coin"
                       />
@@ -119,7 +119,7 @@ export default function ShopPage() {
             <ul className="shop-packages">
               {PACKAGES.map(({ coins, price }) => (
                 <li key={coins} className="shop-package">
-                  <img src="/assets/shop/coin.png" alt="" className="shop-package__coin" />
+                  <img src="/assets/shop/coin-sm.webp" alt="" className="shop-package__coin" />
                   <span className="shop-package__name">다독코인 {coins}개</span>
                   <button className="shop-buy-btn" type="button">
                     {price}

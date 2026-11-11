@@ -26,7 +26,7 @@ export default function CharacterPage() {
           <span className="char-landing__glow" />
           <img
             className="char-landing__character"
-            src="/assets/character/character.svg"
+            src="/assets/character/character.webp"
             alt=""
           />
         </div>
