@@ -4,13 +4,17 @@
 
 | 파일 | 원본 | 포함 글자 |
 |---|---|---|
-| `TropiLand-subset.woff2` | TropiLand.ttf (77KB) | 기본 라틴 문자 (U+0020-007E) |
+| `TropiLand-subset.woff2` | TropiLand.ttf (77KB) | 기본 라틴 문자 (U+0020-007E) + 대체 글자·합자 글리프 (U+F000-F06B) |
 | `tvNEnjoystories-subset.woff2` | tvNEnjoystoriesOTF.ttf (2.9MB) | "펼치는 순간, 나를 다독이다" + 기본 라틴 문자 |
+
+로고 `NADOK`은 코드에 ``(Tropi Land의 NA 합자 글리프) + `DOK`으로 들어 있습니다. 눈에 보이지 않는 문자라 지우지 않도록 주의하고, Tropi Land 서브셋에서 U+F000-F06B 범위를 빼면 로고가 `DOK`으로만 보입니다.
 
 tvN 폰트로 표시하는 문구를 바꾸면 원본 ttf로 다시 만들어야 합니다 (원본은 git 기록에 있습니다).
 
 ```bash
 pip install fonttools brotli
+python -m fontTools.subset TropiLand.ttf \n  --unicodes="U+0020-007E,U+F000-F06B" \n  --flavor=woff2 --layout-features='*' --output-file=TropiLand-subset.woff2
+
 python -m fontTools.subset tvNEnjoystoriesOTF.ttf \
   --text="펼치는 순간, 나를 다독이다" --unicodes="U+0020-007E" \
   --flavor=woff2 --layout-features='*' --output-file=tvNEnjoystories-subset.woff2

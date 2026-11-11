@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'Tropi Land';
-  // 로고(영문)만 쓰므로 기본 라틴 문자만 남긴 서브셋
+  // 로고용: 기본 라틴 문자 + 대체 글자·합자(U+F000-F06B, 로고의 NA 합자 U+F046 포함)만 남긴 서브셋
   src: url('/assets/fonts/TropiLand-subset.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
