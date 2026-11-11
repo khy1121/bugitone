@@ -926,7 +926,7 @@ function ReportCharacterCard({ character, index, onOpen }) {
 
   return (
     <article
-      className={`mypage__report-character mypage__report-character--${(index % 3) + 1}`}
+      className={`mypage__report-character mypage__report-character--${(index % 4) + 1}`}
     >
       <div className="mypage__report-character-media">
         <img
@@ -937,14 +937,57 @@ function ReportCharacterCard({ character, index, onOpen }) {
         />
       </div>
       <div className="mypage__report-character-body">
-        <h2>{character.characterName}
-          {character.author ? <p>{character.author}</p> : <p>루이스 캐럴</p>}
-        </h2>
+        <h3 className="mypage__report-character-name">
+          {character.characterName}
+        </h3>
+        <p className="mypage__report-character-author">
+          {character.author || "루이스 캐럴"}
+        </p>
         <button type="button" onClick={() => onOpen(character)}>
           보러가기
         </button>
       </div>
     </article>
+  );
+}
+
+// 피그마 Emojis 컴포넌트(Very Good ~ Very Bad) 5종에 감정 태그를 매핑합니다.
+const REPORT_EMOTION_INFO = {
+  신나는: { label: "신남", type: "very-good", desc: "설레는 일이 가득했던 날들" },
+  행복한: { label: "행복함", type: "very-good", desc: "작은 일에도 웃음이 났던 날들" },
+  뿌듯한: { label: "뿌듯함", type: "good", desc: "성과가 있어 보람이 느껴지는 오늘" },
+  차분한: { label: "차분함", type: "good", desc: "마음이 고요하게 가라앉은 하루" },
+  공허한: { label: "공허함", type: "neutral", desc: "아무것도 하지 않았다는 공허한 생각" },
+  슬픈: { label: "슬픔", type: "bad", desc: "마음 한구석이 시렸던 날들" },
+  우울: { label: "우울감", type: "bad", desc: "뿌듯함과 지침이 동시에 느껴지는 오늘" },
+  피곤한: { label: "피곤함", type: "very-bad", desc: "쉬어도 쉬어지지 않았던 날들" },
+  스트레스: { label: "스트레스", type: "very-bad", desc: "해야 할 일에 마음이 무거웠던 날들" },
+  분노: { label: "분노", type: "very-bad", desc: "참기 어려운 일이 있었던 날들" },
+};
+
+function getReportEmotionInfo(emotion) {
+  return (
+    REPORT_EMOTION_INFO[emotion] ?? {
+      label: emotion,
+      type: "neutral",
+      desc: "이번 달 자주 기록한 감정이에요",
+    }
+  );
+}
+
+function ReportEmotionItem({ emotion }) {
+  const { label, type, desc } = getReportEmotionInfo(emotion);
+
+  return (
+    <li className="mypage__report-emotion">
+      <span className="mypage__report-emotion-icon" aria-hidden="true">
+        <img src={`/assets/emotions/${type}.webp`} alt="" />
+      </span>
+      <span className="mypage__report-emotion-text">
+        <strong>{label}</strong>
+        <span>{desc}</span>
+      </span>
+    </li>
   );
 }
 
@@ -1019,7 +1062,9 @@ function ReportView({ onBack }) {
   return (
     <div className="mypage mypage--report">
       <div className="mypage__header">
-        <BackButton onClick={onBack} />
+        <button type="button" className="mypage__back-text" onClick={onBack}>
+          ← 나가기
+        </button>
         <h1 className="mypage__header-title">{CURRENT_MONTH}월 리포트</h1>
       </div>
 
@@ -1046,24 +1091,20 @@ function ReportView({ onBack }) {
           )}
         </section>
 
-        <section className="mypage__report-emotion-card">
-          <h2>{displayName}님이 자주 느낀 감정</h2>
+        <section className="mypage__report-section">
+          <h2 className="mypage__report-section-title mypage__report-section-title--emotion">
+            {displayName}님이 자주 느낀 감정
+          </h2>
           {loading ? (
-            <p className="mypage__report-empty mypage__report-empty--in-card">
-              감정을 불러오는 중이에요.
-            </p>
+            <p className="mypage__report-empty">감정을 불러오는 중이에요.</p>
           ) : emotions.length > 0 ? (
-            <div className="mypage__report-emotions">
+            <ul className="mypage__report-emotions">
               {emotions.map((emotion) => (
-                <span key={emotion} className="mypage__report-emotion">
-                  # {emotion}
-                </span>
+                <ReportEmotionItem key={emotion} emotion={emotion} />
               ))}
-            </div>
+            </ul>
           ) : (
-            <p className="mypage__report-empty mypage__report-empty--in-card">
-              아직 기록된 감정이 없어요.
-            </p>
+            <p className="mypage__report-empty">아직 기록된 감정이 없어요.</p>
           )}
         </section>
 
