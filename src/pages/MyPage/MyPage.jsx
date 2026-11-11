@@ -10,7 +10,7 @@ import {
   LibraryCheckIcon,
   LibraryExcIcon,
 } from "../../assets/icons";
-import libraryBannerImage from "../../assets/banner.svg";
+import libraryBannerImage from "../../assets/banner.webp";
 import { ROUTES } from "../../constants/routes";
 import {
   getUserProfile,
@@ -50,9 +50,9 @@ const CATEGORY_TO_TAB = {
   "찜한 책": "wishlist",
 };
 
-const FALLBACK_BOOK_COVER = "/assets/library/book.svg";
+const FALLBACK_BOOK_COVER = "/assets/library/book.webp";
 const ALERT_CIRCLE_SRC = "/assets/character/alert-circle.svg";
-const DEFAULT_CHARACTER_IMAGE = "/assets/character/LittlePrince.svg";
+const DEFAULT_CHARACTER_IMAGE = "/assets/character/LittlePrince.webp";
 const DEFAULT_BIRTHDAY = "2002.03.21";
 const PROFILE_IMAGE_MAX_DIMENSION = 1024;
 const PROFILE_IMAGE_QUALITY = 0.86;
@@ -597,7 +597,7 @@ function ProfileAvatar({ image, size = "sm", editable = false }) {
   return (
     <span className={className}>
       <img
-        src={image || "/assets/prince-portrait.svg"}
+        src={image || "/assets/prince-portrait.webp"}
         onError={handleProfileImageError}
         alt=""
         aria-hidden="true"
@@ -729,7 +729,7 @@ function BackButton({ onClick }) {
 
 function handleProfileImageError(event) {
   event.currentTarget.onerror = null;
-  event.currentTarget.src = "/assets/prince-portrait.svg";
+  event.currentTarget.src = "/assets/prince-portrait.webp";
 }
 
 function MainView({
@@ -1748,7 +1748,7 @@ function AccountView({
               aria-label="프로필 사진 변경"
             >
               <img
-                src={profileImage || "/assets/prince-portrait.svg"}
+                src={profileImage || "/assets/prince-portrait.webp"}
                 onError={handleProfileImageError}
                 alt=""
                 aria-hidden="true"

@@ -190,7 +190,7 @@ export default function SignupPage() {
             <div className="signup-onboard__spinner" aria-hidden="true" />
             <img
               className="signup-onboard__loading-character"
-              src="/assets/character/LoadChar.svg"
+              src="/assets/character/LoadChar.webp"
               alt=""
               aria-hidden="true"
             />

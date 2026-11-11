@@ -164,3 +164,45 @@ http://<backend-origin>/uploads/image.svg
 -> /uploads/image.svg
 -> UPLOADS_PROXY_TARGET/image.svg
 ```
+
+## 성능 개선
+
+이미지가 늦게 뜨고 첫 로딩이 무거웠던 문제를 개선했습니다. 수치는 `npm run build` 결과 기준입니다.
+
+| 항목 | 개선 전 | 개선 후 |
+|---|---|---|
+| 서비스워커 사전 캐시 전체 용량 | 23MB | 2.3MB |
+| 첫 로딩 JS (메인 번들) | 796KB (gzip 261KB) | 245KB (gzip 86KB) |
+| 캐릭터·배경·책 이미지 12종 | 약 15.7MB | 약 190KB |
+| 마이페이지 배너 | 1.9MB | 19KB |
+| 코인 이미지 | 721KB | 28KB / 2KB |
+| 장식 폰트 (tvN 즐거운이야기 / Tropi Land) | 2.9MB / 77KB | 26KB / 23KB |
+
+### 1. PNG를 감싼 SVG를 WebP로 변환
+
+피그마에서 내보낸 SVG 대부분이 벡터가 아니라 2~3천 px 크기의 PNG를 base64로 품고 있었습니다. 예를 들어 `resultChar`는 화면에 43×48px로 보이지만 안에 1299×1443 PNG가 들어 있어 1.3MB였습니다.
+
+- 표시 크기의 3배 해상도 WebP로 변환하고 참조를 교체했습니다.
+- SVG 안의 크롭(pattern transform), 좌우 반전, 회전은 원본과 동일하게 재현했고, 원본 SVG를 브라우저로 렌더링한 결과와 픽셀 비교로 확인했습니다.
+- 새 이미지를 추가할 때는 **SVG로 감싼 PNG 대신 WebP를 쓰고, 표시 크기의 2~3배 해상도**로 넣어 주세요.
+
+### 2. 사용하지 않는 이미지 삭제
+
+코드에서 참조하지 않지만 서비스워커가 미리 캐시하던 파일(약 13MB)을 삭제했습니다.
+
+### 3. 폰트 경량화
+
+- tvN 즐거운이야기는 태그라인 "펼치는 순간, 나를 다독이다"에만 쓰여 해당 글자만 남긴 woff2 서브셋을 사용합니다. **문구를 바꾸면 서브셋을 다시 만들어야 합니다** (`public/assets/fonts/README.md`).
+- Tropi Land는 영문 로고용이라 기본 라틴 문자만 남겼습니다.
+- 두 폰트는 `index.html`에서 preload합니다.
+- Pretendard는 페이지에 필요한 글자 묶음만 받는 `pretendard-dynamic-subset` CSS를 사용합니다.
+
+### 4. 화면별 코드 분할
+
+- 스플래시·로그인을 제외한 화면을 `React.lazy`로 분리했습니다 (`src/routes/Router.jsx`). 메모 편집기(tiptap)처럼 무거운 의존성이 첫 로드에서 빠집니다.
+- 첫 화면이 뜬 뒤 `requestIdleCallback`으로 나머지 화면 코드를 미리 받아 두므로, 화면을 넘길 때 기다림이 없습니다.
+
+### 5. 그 밖에
+
+- 서비스워커 사전 캐시 대상에 `webp`를 추가했습니다 (`vite.config.js`).
+- 첫 화면(스플래시) 배경은 CSS `background-image`라 늦게 요청되므로 `index.html`에서 preload합니다.

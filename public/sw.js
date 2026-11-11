@@ -3,9 +3,9 @@ const APP_SHELL = [
   '/',
   '/manifest.webmanifest',
   '/pwa-icon.svg',
-  '/assets/onBoarding/onboardMain.svg',
-  '/assets/fonts/TropiLand.ttf',
-  '/assets/fonts/tvNEnjoystoriesOTF.ttf',
+  '/assets/onBoarding/onboardMain.webp',
+  '/assets/fonts/TropiLand-subset.woff2',
+  '/assets/fonts/tvNEnjoystories-subset.woff2',
 ]
 
 self.addEventListener('install', (event) => {

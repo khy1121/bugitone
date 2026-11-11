@@ -27,7 +27,7 @@ const EDIT_ICON_SRC = '/assets/library/edit.svg'
 const MEMO_WRITE_ICON_SRC = '/assets/library/pencil-edit-02.svg'
 const MEMO_CARD_ICON_SRC = '/assets/library/edit.svg'
 const SAVE_ICON_SRC = '/assets/library/save.svg'
-const BOOK_CHAT_CHARACTER_SRC = '/assets/shop/character.svg'
+const BOOK_CHAT_CHARACTER_SRC = '/assets/shop/character.webp'
 const DEFAULT_HERO_RGB = '184, 215, 189'
 
 const BOOK_STATUS = {
@@ -44,7 +44,13 @@ const TABS = [
 
 const STATUS_OPTIONS = [BOOK_STATUS.finished, BOOK_STATUS.reading, BOOK_STATUS.favorite]
 const SAVED_KEY = 'savedBookIds'
-const FALLBACK_COVER = '/assets/library/book.svg'
+const FALLBACK_COVER = '/assets/library/book.webp'
+
+// 표지 URL이 깨졌을 때 기본 표지로 대체
+const handleCoverError = (event) => {
+  event.currentTarget.onerror = null
+  event.currentTarget.src = FALLBACK_COVER
+}
 
 const toInputDate = (str) => {
   if (!str) return ''
@@ -951,7 +957,7 @@ export default function BookDetailPage() {
           )}
         </div>
 
-        <img className="book-detail__cover" src={book.cover} alt={book.title} />
+        <img className="book-detail__cover" src={book.cover} alt={book.title} onError={handleCoverError} />
 
         <div className="book-detail__hero-info">
           <div className="book-detail__summary">

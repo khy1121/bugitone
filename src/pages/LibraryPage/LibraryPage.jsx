@@ -9,7 +9,13 @@ import './LibraryPage.scss'
 
 const CHOSUNG = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
 const CHOSUNG_SET = new Set(CHOSUNG)
-const FALLBACK_COVER = '/assets/library/book.svg'
+const FALLBACK_COVER = '/assets/library/book.webp'
+
+// 표지 URL이 깨졌을 때 기본 표지로 대체
+const handleCoverError = (event) => {
+  event.currentTarget.onerror = null
+  event.currentTarget.src = FALLBACK_COVER
+}
 const LIBRARY_SCROLL_KEY = 'libraryScrollTop'
 const LIBRARY_VISIBLE_ROWS_KEY = 'libraryVisibleRows'
 const RECENT_SEARCHES_KEY = 'libraryRecentSearches'
@@ -434,7 +440,7 @@ export default function LibraryPage() {
         <div className="library__content" ref={contentRef}>
           <div className="library__banner">
             <img
-              src="/assets/library/book.svg"
+              src="/assets/library/book.webp"
               className="library__banner-img"
               alt=""
               aria-hidden="true"
@@ -458,7 +464,7 @@ export default function LibraryPage() {
                         onClick={() => openBookDetail(book)}
                         aria-label={book.title}
                       >
-                        <img className="library__cover" src={book.cover} alt={book.title} />
+                        <img className="library__cover" src={book.cover} alt={book.title} onError={handleCoverError} />
                       </button>
                     ))}
                     {row.length < 3 &&
@@ -523,7 +529,7 @@ export default function LibraryPage() {
                       openBookDetail(book, { fromSearch: true })
                     }}
                   >
-                    <img className="library__search-cover" src={book.cover} alt={book.title} />
+                    <img className="library__search-cover" src={book.cover} alt={book.title} onError={handleCoverError} />
                     <div className="library__search-info">
                       <p className="library__search-title">{book.title}</p>
                       <p className="library__search-author">{book.author}</p>

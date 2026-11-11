@@ -53,8 +53,8 @@ export default defineConfig(({ mode }) => {
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,woff2}'],
-        globIgnores: ['**/assets/shop/event.svg', '**/icons/*.png'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
+        globIgnores: ['**/icons/*.png'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
