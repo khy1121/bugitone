@@ -4,7 +4,8 @@
 
 @font-face {
   font-family: 'Tropi Land';
-  src: url('/assets/fonts/TropiLand.ttf') format('truetype');
+  // 로고(영문)만 쓰므로 기본 라틴 문자만 남긴 서브셋
+  src: url('/assets/fonts/TropiLand-subset.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -12,7 +13,9 @@
 
 @font-face {
   font-family: 'tvN EnjoystoriesOTF';
-  src: url('/assets/fonts/tvNEnjoystoriesOTF.ttf') format('truetype');
+  // 태그라인 '펼치는 순간, 나를 다독이다'에만 쓰므로 해당 글자 + 기본 라틴 문자만 남긴 서브셋
+  // 문구를 바꾸면 fontTools로 다시 서브셋해야 합니다 (public/assets/fonts/README.md)
+  src: url('/assets/fonts/tvNEnjoystories-subset.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
