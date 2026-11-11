@@ -34,6 +34,33 @@
     white-space: nowrap;
   }
 
+  // 더미 데이터 모드 안내 (로고와 입력 폼 사이)
+  &__demo-notice {
+    position: absolute;
+    top: 223px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    width: max-content;
+    max-width: calc(100% - 40px);
+    margin: 0;
+    padding: 5px 14px;
+    border-radius: 12px;
+    background: $main-0;
+    color: $main-800;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: $letter-spacing-base;
+    text-align: center;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+
   &__form {
     position: absolute;
     top: 273px;
