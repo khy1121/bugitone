@@ -22,16 +22,25 @@ export default function useVisualViewportHeight() {
       const visualWidth = Math.round(viewport?.width ?? window.innerWidth)
       const visualOffsetTop = Math.max(0, Math.round(viewport?.offsetTop ?? 0))
 
-      if (visualHeight > stableViewportHeight) {
+      // 입력 중(키보드가 올라올 수 있는 상태)에만 이전 높이를 유지하고,
+      // 그 외에는 실제 보이는 높이를 따라감. 예전처럼 '지금까지 본 가장 큰 높이'를 계속 유지하면
+      // 카카오톡 인앱 브라우저·사파리에서 툴바가 나중에 나타나 화면이 줄어들 때
+      // 앱이 줄지 않아 하단(시작하기 버튼, 하단 메뉴)이 툴바 아래로 가려짐.
+      const activeElement = document.activeElement
+      const isEditableFocused = Boolean(
+        activeElement &&
+          (activeElement.isContentEditable ||
+            /^(INPUT|TEXTAREA|SELECT)$/.test(activeElement.tagName)),
+      )
+
+      if (!isEditableFocused) {
+        stableViewportHeight = Math.round(window.innerHeight)
+      } else if (visualHeight > stableViewportHeight) {
         stableViewportHeight = visualHeight
       }
 
-      const keyboardHeight = Math.max(0, stableViewportHeight - visualHeight)
+      const keyboardHeight = isEditableFocused ? Math.max(0, stableViewportHeight - visualHeight) : 0
       const isKeyboardOpen = keyboardHeight > KEYBOARD_MIN_HEIGHT
-
-      if (!isKeyboardOpen) {
-        stableViewportHeight = Math.max(stableViewportHeight, visualHeight, window.innerHeight)
-      }
 
       const root = document.documentElement
 
