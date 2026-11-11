@@ -87,7 +87,6 @@ Vite로 빌드하며, Vercel 배포 환경에서는 백엔드 API와 업로드 �
 
 <p>
   <img src="https://img.shields.io/badge/Lighthouse-%EC%84%B1%EB%8A%A5%20%EC%B8%A1%EC%A0%95-F44B21?style=flat-square&logo=lighthouse&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Vercel-Speed%20Insights-000000?style=flat-square&logo=vercel&logoColor=white"/>
 </p>
 
 ---
@@ -298,15 +297,6 @@ navigator.serviceWorker.getRegistrations()
 | 가독이 챗 | 85 → **93** | 3.62s → **2.45s** |
 
 > 측정 방법: Lighthouse 모바일(시뮬레이션 slow 4G, CPU 4배 느리게). 로그인이 필요한 화면은 puppeteer로 데모 계정 로그인 상태를 넣고 측정. 개선 전은 1회, 개선 후는 3회 측정 중앙값입니다.
-
-### 실사용자 측정 (Vercel Speed Insights)
-
-Lighthouse는 실험실 환경 측정이라, 실제 사용자 기기에서의 체감 속도는 **Vercel Speed Insights**로 수집합니다.
-
-- 실제 방문자의 Core Web Vitals(LCP, INP, CLS, FCP, TTFB)와 이를 종합한 Real Experience Score를 화면별로 확인할 수 있습니다.
-- `src/routes/Router.jsx`의 `SpeedInsightsTracker`가 현재 화면 경로를 함께 보내고, 책 상세(`/book/1`, `/book/2` …)는 `/book/[id]` 한 화면으로 묶습니다.
-- Vercel 대시보드 > 프로젝트 > **Speed Insights** 탭에서 확인합니다. (처음 한 번 탭에서 Enable 필요, Hobby 플랜 무료 범위 내 수집)
-- `vercel.json`의 SPA rewrite에서 `/_vercel/*`를 제외해 측정 데이터 전송이 막히지 않게 했습니다.
 
 ### 1. PNG를 감싼 SVG를 WebP로 변환
 
