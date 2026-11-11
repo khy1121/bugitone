@@ -46,6 +46,12 @@ const STATUS_OPTIONS = [BOOK_STATUS.finished, BOOK_STATUS.reading, BOOK_STATUS.f
 const SAVED_KEY = 'savedBookIds'
 const FALLBACK_COVER = '/assets/library/book.webp'
 
+// 표지 URL이 깨졌을 때 기본 표지로 대체
+const handleCoverError = (event) => {
+  event.currentTarget.onerror = null
+  event.currentTarget.src = FALLBACK_COVER
+}
+
 const toInputDate = (str) => {
   if (!str) return ''
   const [year, month, day] = String(str).match(/\d+/g) || []
@@ -951,7 +957,7 @@ export default function BookDetailPage() {
           )}
         </div>
 
-        <img className="book-detail__cover" src={book.cover} alt={book.title} />
+        <img className="book-detail__cover" src={book.cover} alt={book.title} onError={handleCoverError} />
 
         <div className="book-detail__hero-info">
           <div className="book-detail__summary">
