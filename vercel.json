@@ -10,7 +10,7 @@
       "destination": "/api/proxy?__proxy_target=uploads&__proxy_path=:path*"
     },
     {
-      "source": "/((?!api(?:/|$)|uploads(?:/|$)).*)",
+      "source": "/((?!api(?:/|$)|uploads(?:/|$)|assets/|.*\\.(?:js|css|map)$).*)",
       "destination": "/index.html"
     }
   ]
