@@ -398,7 +398,7 @@ html.keyboard-open .memo-edit .memo-toolbar {
 
 .memo-title-sheet {
   position: relative;
-  width: min(100vw, var(--design-width, 393px));
+  width: min(calc(var(--app-vw, 1vw) * 100), var(--design-width, 393px));
   height: calc(280px + env(safe-area-inset-bottom, 0px));
   padding: 0 20px calc(30px + env(safe-area-inset-bottom, 0px));
 

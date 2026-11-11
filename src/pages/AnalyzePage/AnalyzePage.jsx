@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { toDesignPx } from "../../utils/appScale";
 import { ROUTES } from "../../constants/routes";
 import { validateEmotionInput } from "../../api/emotionApi";
 import useKeyboardAwareInput from "../../hooks/useKeyboardAwareInput";
@@ -249,8 +250,9 @@ export default function AnalyzePage() {
     const viewportBottom = visualViewport
       ? visualViewport.offsetTop + visualViewport.height
       : window.innerHeight;
+    // 화면 좌표(실제 px)로 남은 높이를 구한 뒤 디자인 px로 변환
     const availableHeight =
-      viewportBottom - diaryTop - DIARY_COUNTER_SPACE - DIARY_VIEWPORT_MARGIN;
+      toDesignPx(viewportBottom - diaryTop) - DIARY_COUNTER_SPACE - DIARY_VIEWPORT_MARGIN;
 
     return Math.min(
       DIARY_MAX_HEIGHT,
@@ -267,8 +269,9 @@ export default function AnalyzePage() {
     const groupRect = group.getBoundingClientRect();
     const visibleBottom =
       window.visualViewport?.height ?? document.documentElement.clientHeight;
-    const groupBottom = groupRect.bottom - pageRect.top;
-    const targetBottom = visibleBottom - DIARY_VIEWPORT_MARGIN;
+    // 화면 좌표(실제 px) → 디자인 px
+    const groupBottom = toDesignPx(groupRect.bottom - pageRect.top);
+    const targetBottom = toDesignPx(visibleBottom) - DIARY_VIEWPORT_MARGIN;
 
     if (groupBottom > targetBottom) {
       page.scrollTo({

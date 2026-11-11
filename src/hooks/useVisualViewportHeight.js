@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { computeAppScale } from '../utils/appScale'
 
 const KEYBOARD_MIN_HEIGHT = 120
 // 데스크탑 핸드폰 프레임 전체 높이(_reset.scss의 $device-height)와 위아래 여백
@@ -43,20 +44,26 @@ export default function useVisualViewportHeight() {
       const isKeyboardOpen = keyboardHeight > KEYBOARD_MIN_HEIGHT
 
       const root = document.documentElement
+      const isDesktop = window.matchMedia(DESKTOP_MEDIA_QUERY).matches
+      // 모바일: 화면 폭에 맞춰 앱 전체를 비례 확대·축소 (393px = 1, 0.92 ~ 1.2)
+      const appScale = computeAppScale(window.innerWidth, isDesktop)
+      const toDesign = (px) => px / appScale
 
-      // iOS 100vh is unstable with the keyboard; keep app sizing tied to visualViewport.
+      // 실제 px: 앱 바깥(body, #root)과 앱 프레임 크기 계산에 사용
       root.classList.toggle('keyboard-open', isKeyboardOpen)
-      root.style.setProperty('--vh', `${stableViewportHeight * 0.01}px`)
-      root.style.setProperty('--visual-vh', `${visualHeight * 0.01}px`)
+      root.style.setProperty('--app-scale', appScale.toFixed(4))
       root.style.setProperty('--app-height', `${stableViewportHeight}px`)
-      root.style.setProperty('--visual-height', `${visualHeight}px`)
-      root.style.setProperty('--keyboard-height', `${keyboardHeight}px`)
-      root.style.setProperty('--visual-offset-top', `${visualOffsetTop}px`)
-      root.style.setProperty('--viewport-width', `${visualWidth}px`)
-      root.style.setProperty('--app-scale', '1')
+      root.style.setProperty('--app-visual-height', `${visualHeight}px`)
+      // 디자인 px: 앱 안의 화면(페이지 CSS)에서 사용 — 배율로 나눠 둠
+      root.style.setProperty('--vh', `${toDesign(stableViewportHeight) * 0.01}px`)
+      root.style.setProperty('--visual-vh', `${toDesign(visualHeight) * 0.01}px`)
+      root.style.setProperty('--visual-height', `${toDesign(visualHeight)}px`)
+      root.style.setProperty('--keyboard-height', `${toDesign(keyboardHeight)}px`)
+      root.style.setProperty('--visual-offset-top', `${toDesign(visualOffsetTop)}px`)
+      root.style.setProperty('--viewport-width', `${toDesign(visualWidth)}px`)
+      root.style.setProperty('--app-vw', `${toDesign(window.innerWidth) * 0.01}px`)
 
       // 데스크탑에서 화면 높이가 프레임보다 낮으면 핸드폰 프레임 전체를 축소
-      const isDesktop = window.matchMedia(DESKTOP_MEDIA_QUERY).matches
       const deviceScale = isDesktop
         ? Math.max(0.5, Math.min(1, (window.innerHeight - DEVICE_STAGE_PADDING) / DEVICE_FRAME_HEIGHT))
         : 1

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { toDesignPx } from '../../utils/appScale'
 import { useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '../../components/common/BottomNav/BottomNav'
 import ChatLoadingDots from '../../components/common/ChatLoadingDots/ChatLoadingDots'
@@ -322,7 +323,7 @@ function ChatRoom({ initialChat, bookId: propBookId, onOpenDrawer, onBack }) {
     if (!room || !inputWrap) return
 
     // Keep the message area reserved space matched to the real textarea height.
-    const height = Math.ceil(inputWrap.getBoundingClientRect().height)
+    const height = Math.ceil(toDesignPx(inputWrap.getBoundingClientRect().height))
     room.style.setProperty('--chat-input-height', `${height}px`)
   }
 

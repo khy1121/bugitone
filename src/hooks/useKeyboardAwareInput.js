@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { toDesignPx } from '../utils/appScale'
 
 export const KEYBOARD_BLUR_DELAY = 420
 export const KEYBOARD_INPUT_LOCK_CLASS = 'keyboard-input-lock'
@@ -166,7 +167,8 @@ export default function useKeyboardAwareInput({
     if (scrollContainer) {
       if (targetRect.bottom > visibleBottom) {
         scrollContainer.scrollTo({
-          top: scrollContainer.scrollTop + targetRect.bottom - visibleBottom,
+          // 화면 좌표(실제 px) 차이를 앱 안 스크롤 위치(디자인 px)로 변환
+          top: scrollContainer.scrollTop + toDesignPx(targetRect.bottom - visibleBottom),
           behavior: 'smooth',
         })
         return
@@ -174,7 +176,7 @@ export default function useKeyboardAwareInput({
 
       if (targetRect.top < visibleTop) {
         scrollContainer.scrollTo({
-          top: Math.max(0, scrollContainer.scrollTop - (visibleTop - targetRect.top)),
+          top: Math.max(0, scrollContainer.scrollTop - toDesignPx(visibleTop - targetRect.top)),
           behavior: 'smooth',
         })
       }

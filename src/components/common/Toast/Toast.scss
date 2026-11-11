@@ -12,7 +12,7 @@
   display: flex;
   align-items: center;
   gap: $spacing-md;
-  max-width: min(360px, calc(100vw - 32px));
+  max-width: min(360px, calc(var(--app-vw, 1vw) * 100 - 32px));
   padding: $spacing-md $spacing-lg;
   border-radius: $radius-md;
   box-shadow: $shadow-md;
