@@ -48,7 +48,9 @@ export default function registerPwaUpdate() {
   let updateSW = () => {}
 
   updateSW = registerSW({
-    immediate: true,
+    // 페이지 load 이후 등록: 첫 방문 때 서비스워커가 전체 파일(약 2.3MB)을 미리 받는 작업이
+    // 지금 보고 있는 화면의 JS·이미지 다운로드와 경쟁하지 않게 함
+    immediate: false,
     onNeedRefresh() {
       announceUpdateReady(updateSW)
     },
