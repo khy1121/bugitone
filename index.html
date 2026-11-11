@@ -22,18 +22,27 @@
       })()
     </script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <!-- 첫 화면(스플래시) 배경: CSS background-image라 늦게 발견되므로 미리 요청.
-         스플래시('/')로 들어올 때만 요청해 다른 화면에서 'preload 후 미사용' 경고가 나지 않게 함 -->
+    <!-- 화면별 가장 큰 요소(LCP)인 배경 이미지는 CSS background-image라 JS·CSS가 로드된 뒤에야 요청되므로,
+         들어온 주소에 맞는 배경만 HTML에서 미리 요청 (다른 화면에서는 요청하지 않아 'preload 후 미사용' 경고 없음) -->
     <script>
-      if (location.pathname === '/') {
-        var splashBg = document.createElement('link')
-        splashBg.rel = 'preload'
-        splashBg.as = 'image'
-        splashBg.type = 'image/webp'
-        splashBg.href = '/assets/onBoarding/onboardMain.webp'
-        splashBg.setAttribute('fetchpriority', 'high')
-        document.head.appendChild(splashBg)
-      }
+      ;(function () {
+        var backgrounds = {
+          '/': '/assets/onBoarding/onboardMain.webp',
+          '/home': '/assets/library/library_main.webp',
+          '/search': '/assets/library/library_main.webp',
+          '/character': '/assets/character/bg.webp',
+          '/chat': '/assets/chatPage/chat_bg2.webp',
+        }
+        var href = backgrounds[location.pathname]
+        if (!href) return
+        var link = document.createElement('link')
+        link.rel = 'preload'
+        link.as = 'image'
+        link.type = 'image/webp'
+        link.href = href
+        link.setAttribute('fetchpriority', 'high')
+        document.head.appendChild(link)
+      })()
     </script>
     <link rel="preload" href="/assets/fonts/TropiLand-subset.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/assets/fonts/tvNEnjoystories-subset.woff2" as="font" type="font/woff2" crossorigin />

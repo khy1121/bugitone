@@ -8,7 +8,8 @@ import { matchRoute, MockError } from './handlers'
 
 export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK === 'true'
 
-const NETWORK_DELAY_MS = 250
+// 실제 네트워크가 없으므로 인위적인 지연을 두지 않음 (예전 250ms는 매 요청마다 화면 표시를 늦췄음)
+const NETWORK_DELAY_MS = 0
 
 function parseBody(data) {
   if (typeof data !== 'string') return data

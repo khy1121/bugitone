@@ -47,11 +47,60 @@ const ChatPage = lazyPage(pageLoaders.ChatPage)
 const SearchPage = lazyPage(pageLoaders.SearchPage)
 const ShopPage = lazyPage(pageLoaders.ShopPage)
 
-// 첫 화면을 그린 뒤 브라우저가 한가할 때 나머지 화면 청크를 미리 받아 둠 (화면 전환 시 대기 없음)
+// 현재 주소의 화면 청크를 앱 시작과 동시에 요청 (React 렌더링을 기다리지 않음)
+const ROUTE_LOADER_KEYS = [
+  [ROUTES.HOME, 'LibraryPage'],
+  [ROUTES.MYPAGE, 'MyPage'],
+  [ROUTES.CHAT, 'ChatPage'],
+  [ROUTES.CHARACTER_ERROR, 'CharacterErrorPage'],
+  [ROUTES.CHARACTER, 'CharacterPage'],
+  [ROUTES.ANALYZE, 'AnalyzePage'],
+  [ROUTES.RESULT, 'ResultPage'],
+  [ROUTES.SEARCH, 'SearchPage'],
+  [ROUTES.SHOP, 'ShopPage'],
+  [ROUTES.MEMO_EDIT, 'MemoEditPage'],
+  [ROUTES.NICKNAME, 'NicknamePage'],
+  [ROUTES.SIGNUP, 'SignupPage'],
+  [ROUTES.INSTALL_GUIDE, 'InstallGuidePage'],
+  ['/book/', 'BookDetailPage'],
+]
+
+function preloadCurrentRoute() {
+  const { pathname } = window.location
+  const match = ROUTE_LOADER_KEYS.find(([path]) => pathname === path || pathname.startsWith(path))
+  if (match) pageLoaders[match[1]]().catch(() => {})
+}
+preloadCurrentRoute()
+
+// 나머지 화면 청크는 페이지 load 이후 한가할 때 하나씩 미리 받음
+// (지금 화면의 JS·이미지와 대역폭을 나눠 쓰지 않도록 가벼운 화면부터 하나씩.
+//  메모 편집기(tiptap)는 실행 비용이 커서 제외: 서비스워커가 백그라운드에서 파일을 미리 캐시해 둠)
+const PREFETCH_ORDER = [
+  'LibraryPage', 'CharacterPage', 'ChatPage', 'MyPage', 'AnalyzePage', 'ResultPage',
+  'BookDetailPage', 'SearchPage', 'ShopPage', 'SignupPage', 'NicknamePage',
+  'CharacterErrorPage', 'InstallGuidePage',
+]
+
+function shouldSkipPrefetch() {
+  const connection = navigator.connection
+  return Boolean(connection?.saveData || /(^|-)2g$|^3g$/.test(connection?.effectiveType ?? ''))
+}
+
 function prefetchPages() {
-  const run = () => Object.values(pageLoaders).forEach((load) => load().catch(() => {}))
-  if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 3000 })
-  else window.setTimeout(run, 1500)
+  if (shouldSkipPrefetch()) return
+
+  const runSequentially = async () => {
+    for (const key of PREFETCH_ORDER) {
+      await pageLoaders[key]().catch(() => {})
+    }
+  }
+  const scheduleIdle = () => {
+    if ('requestIdleCallback' in window) window.requestIdleCallback(runSequentially, { timeout: 4000 })
+    else window.setTimeout(runSequentially, 2000)
+  }
+
+  if (document.readyState === 'complete') scheduleIdle()
+  else window.addEventListener('load', scheduleIdle, { once: true })
 }
 
 function PageFallback() {
