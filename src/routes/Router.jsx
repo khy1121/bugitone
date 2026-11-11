@@ -103,6 +103,14 @@ function prefetchPages() {
   else window.addEventListener('load', scheduleIdle, { once: true })
 }
 
+// Vercel Speed Insights: 실제 사용자 기기에서 측정한 Core Web Vitals(LCP·INP·CLS 등)를 화면별로 수집
+// 책 상세(/book/1, /book/2 …)는 한 화면으로 묶어 집계
+function SpeedInsightsTracker() {
+  const { pathname } = useLocation()
+  const route = pathname.startsWith('/book/') ? '/book/[id]' : pathname
+  return <SpeedInsights route={route} />
+}
+
 function PageFallback() {
   return <div style={{ minHeight: '100%', background: '#fefefe' }} aria-busy="true" />
 }
@@ -110,6 +118,7 @@ function PageFallback() {
 import { ROUTES } from '../constants/routes'
 import { reloadForStaleChunk } from '../utils/staleChunkReload'
 import PageTopColorSync from '../components/common/PageTopColorSync'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import {
   clearAuthStorage,
   clearBackgroundSession,
@@ -218,6 +227,7 @@ export default function Router() {
     <BrowserRouter>
       <AuthNavigationGuard />
       <PageTopColorSync />
+      <SpeedInsightsTracker />
       <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path={ROUTES.MAIN} element={<SplashPage />} />
