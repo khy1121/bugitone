@@ -320,6 +320,9 @@
     img {
       width: 130%;
       height: 130%;
+      // 세로로 긴 캐릭터 이미지도 찌그러지지 않게 원 안을 채우고 얼굴(위쪽) 기준으로 자름
+      object-fit: cover;
+      object-position: center top;
       transform: translateY(5px);
     }
   }
