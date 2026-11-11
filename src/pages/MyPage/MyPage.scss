@@ -1893,7 +1893,7 @@ html.keyboard-open .mypage__overlay {
     align-items: center;
     justify-content: center;
     color: $gray-400;
-    font-size: 11px;
+    font-size: 12px; // 최소 글자 크기 12px (배율 0.92에서도 약 11px)
     line-height: 1;
 
     svg {

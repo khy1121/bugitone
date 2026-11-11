@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { getAppScale } from '../utils/appScale'
 
 const DRAG_THRESHOLD_PX = 5
 
@@ -24,6 +25,7 @@ export default function useDragScroll() {
     let dragging = false
     let suppressClick = false
     let savedSnapType = ''
+    let scale = 1
 
     const endDrag = () => {
       if (pointerId === null) return
@@ -42,6 +44,7 @@ export default function useDragScroll() {
       pointerId = event.pointerId
       startX = event.clientX
       startScrollLeft = element.scrollLeft
+      scale = getAppScale()
       dragging = false
       suppressClick = false
     }
@@ -62,7 +65,8 @@ export default function useDragScroll() {
       }
 
       event.preventDefault()
-      element.scrollLeft = startScrollLeft - deltaX
+      // 마우스 이동(실제 px)을 앱 안 스크롤 위치(디자인 px)로 변환
+      element.scrollLeft = startScrollLeft - deltaX / scale
     }
 
     const handleClickCapture = (event) => {

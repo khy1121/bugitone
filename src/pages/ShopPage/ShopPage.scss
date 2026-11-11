@@ -292,7 +292,7 @@
   left: 50%;
   transform: translateX(-50%);
   color: #8e8b7e;
-  font-size: 11px;
+  font-size: 12px; // 최소 글자 크기 12px (배율 0.92에서도 약 11px)
   font-weight: 400;
   line-height: 18px;
   letter-spacing: -0.275px;
