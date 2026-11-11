@@ -67,13 +67,19 @@
 
 > 사이트에 들어가서 로그인 버튼만 누르면 체험용 계정으로 바로 써 볼 수 있습니다.
 
-1. 휴대폰이나 컴퓨터에서 **https://bugitone.vercel.app** 에 접속합니다.
-2. **시작하기**를 누릅니다.
-3. 로그인 화면에서 아무것도 입력하지 않고 **로그인** 버튼만 누르면 체험용 계정으로 바로 들어갑니다.
+<p align="center">
+  <a href="https://bugitone.vercel.app">
+    <img src="https://img.shields.io/badge/NADOK%20%EB%B0%94%EB%A1%9C%20%EC%8D%A8%EB%B3%B4%EA%B8%B0-bugitone.vercel.app-F8BC0A?style=for-the-badge&logo=vercel&logoColor=white"/>
+  </a>
+</p>
 
-> 지금 공개된 사이트는 **체험용 데모 모드**로 운영 중입니다. 실제 서버 없이 미리 준비된 예시 데이터로 동작하고, 입력한 내용은 내 브라우저에만 저장되어 다른 사람에게 보이지 않습니다.
+<p align="center">
+  <b>접속</b> &nbsp;→&nbsp; <b>시작하기</b> &nbsp;→&nbsp; <b>로그인 버튼만 누르기</b>
+</p>
 
-컴퓨터로 접속하면 화면이 휴대폰 모양 틀 안에 표시됩니다.
+<p align="center">
+  <sub>체험용 데모 모드로 운영 중이라 실제 서버 없이 예시 데이터로 동작하며, 입력한 내용은 내 브라우저에만 저장됩니다.<br/>컴퓨터로 접속하면 휴대폰 모양 틀 안에 표시됩니다.</sub>
+</p>
 
 ---
 
@@ -130,62 +136,63 @@
 
 > 화면은 React로 만들고, Vercel로 인터넷에 올리며, 휴대폰에 앱처럼 설치할 수 있게(PWA) 했습니다.
 
-### 화면 만들기 (Frontend)
+### Frontend
 
 <p>
   <img src="https://skillicons.dev/icons?i=react,vite,js,sass,html,css"/>
 </p>
 
+### Library
+
 <p>
-  <img src="https://img.shields.io/badge/React%20Router-6-CA4245?style=flat-square&logo=reactrouter&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Axios-1.x-5A29E4?style=flat-square&logo=axios&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Tiptap-3-000000?style=flat-square&logo=tiptap&logoColor=white"/>
-  <img src="https://img.shields.io/badge/DOMPurify-3-1E90FF?style=flat-square"/>
+  <img src="https://img.shields.io/badge/React%20Router-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Tiptap-000000?style=for-the-badge&logo=tiptap&logoColor=white"/>
+  <img src="https://img.shields.io/badge/DOMPurify-1E90FF?style=for-the-badge"/>
 </p>
 
-| 기술 | 설명 |
-|---|---|
-| React | 화면을 부품(컴포넌트)처럼 나눠 만드는 도구 |
-| Vite | 만든 코드를 웹사이트용 파일로 묶어 주는 도구 |
-| React Router | 주소(`/home`, `/mypage` 등)에 맞는 화면을 보여 주는 도구 |
-| Axios | 서버와 데이터를 주고받는 도구 |
-| Sass(SCSS) | 화면 디자인(색, 크기, 배치)을 작성하는 언어 |
-| Tiptap | 메모 작성에 쓰는 글쓰기 편집기 |
-| DOMPurify | 사용자가 쓴 글에서 위험한 코드를 걸러 내는 보안 도구 |
-
-### 배포 · 앱 설치 (PWA / Deploy)
+### Deploy / PWA
 
 <p>
   <img src="https://skillicons.dev/icons?i=vercel"/>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/vite--plugin--pwa-Workbox-5A0FC8?style=flat-square&logo=pwa&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Vercel-Functions-000000?style=flat-square&logo=vercel&logoColor=white"/>
+  <img src="https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Vercel%20Functions-000000?style=for-the-badge&logo=vercel&logoColor=white"/>
 </p>
 
-| 기술 | 설명 |
-|---|---|
-| Vercel | 웹사이트를 인터넷에 올려 누구나 접속할 수 있게 해 주는 서비스 |
-| PWA (vite-plugin-pwa) | 웹사이트를 휴대폰 홈 화면에 앱처럼 추가할 수 있게 해 주는 기술 |
-
-### 도구 (Tools)
+### Tools
 
 <p>
   <img src="https://skillicons.dev/icons?i=git,github,figma"/>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Lighthouse-%EC%84%B1%EB%8A%A5%20%EC%B8%A1%EC%A0%95-F44B21?style=flat-square&logo=lighthouse&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Vercel-Speed%20Insights-000000?style=flat-square&logo=vercel&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Lighthouse-F44B21?style=for-the-badge&logo=lighthouse&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Speed%20Insights-000000?style=for-the-badge&logo=vercel&logoColor=white"/>
 </p>
 
-| 기술 | 설명 |
-|---|---|
-| Git · GitHub | 코드 변경 기록을 남기고 팀원과 함께 관리하는 도구 |
-| Figma | 화면 디자인 시안을 만드는 도구 |
-| Lighthouse | 구글이 만든 웹사이트 속도 측정 도구 |
-| Vercel Speed Insights | 실제 방문자 기기에서 체감 속도를 모아 보여 주는 도구 |
+<details>
+<summary>기술별 설명 보기</summary>
+
+| 분야 | 기술 | 설명 |
+|---|---|---|
+| Frontend | React | 화면을 부품(컴포넌트)처럼 나눠 만드는 도구 |
+| Frontend | Vite | 만든 코드를 웹사이트용 파일로 묶어 주는 도구 |
+| Frontend | Sass(SCSS) | 화면 디자인(색, 크기, 배치)을 작성하는 언어 |
+| Library | React Router | 주소(`/home`, `/mypage` 등)에 맞는 화면을 보여 주는 도구 |
+| Library | Axios | 서버와 데이터를 주고받는 도구 |
+| Library | Tiptap | 메모 작성에 쓰는 글쓰기 편집기 |
+| Library | DOMPurify | 사용자가 쓴 글에서 위험한 코드를 걸러 내는 보안 도구 |
+| Deploy / PWA | Vercel | 웹사이트를 인터넷에 올려 누구나 접속할 수 있게 해 주는 서비스 |
+| Deploy / PWA | PWA (vite-plugin-pwa) | 웹사이트를 휴대폰 홈 화면에 앱처럼 추가할 수 있게 해 주는 기술 |
+| Tools | Git · GitHub | 코드 변경 기록을 남기고 팀원과 함께 관리하는 도구 |
+| Tools | Figma | 화면 디자인 시안을 만드는 도구 |
+| Tools | Lighthouse | 구글이 만든 웹사이트 속도 측정 도구 |
+| Tools | Vercel Speed Insights | 실제 방문자 기기에서 체감 속도를 모아 보여 주는 도구 |
+
+</details>
 
 ---
 
