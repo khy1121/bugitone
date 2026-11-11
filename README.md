@@ -2,7 +2,7 @@
 <!--                     PROJECT HEADER                    -->
 <!-- ===================================================== -->
 
-<h1 align="center">📚 NADOK Frontend</h1>
+<h1 align="center">NADOK Frontend</h1>
 
 <p align="center">
   <b>펼치는 순간, 나를 다독이다</b><br/>
@@ -18,7 +18,7 @@
 
 ---
 
-## 📑 목차
+## 목차
 
 1. [프로젝트 소개](#about)
 2. [기술 스택](#tech-stack)
@@ -37,15 +37,15 @@
 
 <a id="about"></a>
 
-## 📖 프로젝트 소개
+## 프로젝트 소개
 
 NADOK은 독서 기록, 감정 분석, 캐릭터 추천, 채팅 기능을 제공하는 React 기반 프론트엔드입니다.
 
-- 📚 **서재** — 읽은 책·읽고 있는 책·찜한 책 관리, 도서 검색
-- 📝 **메모** — 책별 독서 메모 작성 (Tiptap 에디터)
-- 💛 **감정 분석** — 오늘의 일기와 감정으로 어울리는 책 속 캐릭터 추천
-- 💬 **가독이 챗** — 책 내용을 바탕으로 AI 챗봇과 토론
-- 📊 **월간 리포트** — 이 달 만난 캐릭터와 자주 느낀 감정
+- **서재** — 읽은 책·읽고 있는 책·찜한 책 관리, 도서 검색
+- **메모** — 책별 독서 메모 작성 (Tiptap 에디터)
+- **감정 분석** — 오늘의 일기와 감정으로 어울리는 책 속 캐릭터 추천
+- **가독이 챗** — 책 내용을 바탕으로 AI 챗봇과 토론
+- **월간 리포트** — 이 달 만난 캐릭터와 자주 느낀 감정
 
 Vite로 빌드하며, Vercel 배포 환경에서는 백엔드 API와 업로드 이미지를 Vercel Function 프록시로 호출합니다.
 
@@ -53,7 +53,7 @@ Vite로 빌드하며, Vercel 배포 환경에서는 백엔드 API와 업로드 �
 
 <a id="tech-stack"></a>
 
-## 🛠 기술 스택
+## 기술 스택
 
 ### Frontend
 
@@ -93,7 +93,7 @@ Vite로 빌드하며, Vercel 배포 환경에서는 백엔드 API와 업로드 �
 
 <a id="getting-started"></a>
 
-## 🚀 시작하기
+## 시작하기
 
 ```bash
 npm install
@@ -112,7 +112,7 @@ npm run dev
 
 <a id="env"></a>
 
-## ⚙️ 환경변수
+## 환경변수
 
 로컬 개발 시 `.env.example`을 참고해 `.env`를 생성합니다.
 
@@ -132,13 +132,13 @@ VITE_USE_MOCK=false
 | `UPLOADS_PROXY_TARGET` | Vercel Function이 업로드 이미지 요청을 전달할 백엔드 업로드 경로 |
 | `VITE_USE_MOCK` | `true`면 백엔드 없이 더미 데이터로 동작 ([데모 모드](#mock-mode)) |
 
-> ⚠️ 실제 서버 주소는 GitHub에 커밋하지 말고 Vercel 환경변수에만 등록합니다.
+> 실제 서버 주소는 GitHub에 커밋하지 말고 Vercel 환경변수에만 등록합니다.
 
 ---
 
 <a id="mock-mode"></a>
 
-## 🧪 데모(더미 데이터) 모드
+## 데모(더미 데이터) 모드
 
 `VITE_USE_MOCK=true`이면 백엔드 서버 없이 화면이 정상 동작합니다. 현재 배포 사이트는 이 모드로 운영 중입니다.
 
@@ -154,7 +154,7 @@ VITE_USE_MOCK=false
 
 <a id="structure"></a>
 
-## 📁 디렉터리 구조
+## 디렉터리 구조
 
 ```txt
 api/                Vercel Function 프록시
@@ -175,7 +175,7 @@ src/utils/          공통 유틸리티
 
 <a id="routing"></a>
 
-## 🧭 라우팅
+## 라우팅
 
 주요 화면 경로는 `src/constants/routes.js`에서 관리합니다. 스플래시·로그인을 제외한 화면은 `React.lazy`로 분리되어 필요할 때 불러옵니다.
 
@@ -193,7 +193,7 @@ src/utils/          공통 유틸리티
 
 <a id="api-proxy"></a>
 
-## 🔌 API 프록시 구조
+## API 프록시 구조
 
 배포 환경에서는 브라우저가 백엔드 서버를 직접 호출하지 않습니다. 모든 API 요청은 같은 도메인의 `/api/*`로 보내고, Vercel Function이 백엔드로 전달합니다.
 
@@ -214,7 +214,7 @@ http://<backend-origin>/uploads/image.svg -> /uploads/image.svg -> UPLOADS_PROXY
 
 <a id="deploy"></a>
 
-## ☁️ Vercel 배포
+## Vercel 배포
 
 ```txt
 Framework Preset: Vite
@@ -237,7 +237,7 @@ UPLOADS_PROXY_TARGET=<backend-origin>/uploads
 
 <a id="pwa"></a>
 
-## 📱 PWA · 서비스워커
+## PWA · 서비스워커
 
 - 서비스워커는 페이지 `load` 이후 등록되며, 모든 파일에 내용 기반 revision을 붙여 **같은 이름으로 교체한 이미지·폰트도 업데이트**됩니다 (`vite.config.js`).
 - 새 배포가 감지되면 "새 버전이 있어요" 안내가 뜨고, 업데이트를 누르면 최신 버전이 적용됩니다.
@@ -257,7 +257,7 @@ navigator.serviceWorker.getRegistrations()
 
 <a id="mobile"></a>
 
-## 📐 모바일 대응
+## 모바일 대응
 
 | 항목 | 내용 |
 |---|---|
@@ -271,11 +271,11 @@ navigator.serviceWorker.getRegistrations()
 
 <a id="performance"></a>
 
-## ⚡ 성능 개선
+## 성능 개선
 
 이미지가 늦게 뜨고 첫 로딩이 무거웠던 문제를 측정하고 개선했습니다.
 
-### 📊 결과 요약
+### 결과 요약
 
 **용량** (`npm run build` 기준)
 
