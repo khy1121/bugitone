@@ -22,20 +22,30 @@ const pageLoaders = {
   ShopPage: () => import('../pages/ShopPage/ShopPage'),
 }
 
-const SignupPage = lazy(pageLoaders.SignupPage)
-const NicknamePage = lazy(pageLoaders.NicknamePage)
-const LibraryPage = lazy(pageLoaders.LibraryPage)
-const BookDetailPage = lazy(pageLoaders.BookDetailPage)
-const MemoEditPage = lazy(pageLoaders.MemoEditPage)
-const CharacterPage = lazy(pageLoaders.CharacterPage)
-const CharacterErrorPage = lazy(pageLoaders.CharacterErrorPage)
-const AnalyzePage = lazy(pageLoaders.AnalyzePage)
-const ResultPage = lazy(pageLoaders.ResultPage)
-const InstallGuidePage = lazy(pageLoaders.InstallGuidePage)
-const MyPage = lazy(pageLoaders.MyPage)
-const ChatPage = lazy(pageLoaders.ChatPage)
-const SearchPage = lazy(pageLoaders.SearchPage)
-const ShopPage = lazy(pageLoaders.ShopPage)
+// 청크 로드에 실패하면(이전 배포의 파일) 한 번 새로고침해 최신 버전을 받음
+function lazyPage(loader) {
+  return lazy(() =>
+    loader().catch((error) => {
+      if (reloadForStaleChunk()) return new Promise(() => {})
+      throw error
+    }),
+  )
+}
+
+const SignupPage = lazyPage(pageLoaders.SignupPage)
+const NicknamePage = lazyPage(pageLoaders.NicknamePage)
+const LibraryPage = lazyPage(pageLoaders.LibraryPage)
+const BookDetailPage = lazyPage(pageLoaders.BookDetailPage)
+const MemoEditPage = lazyPage(pageLoaders.MemoEditPage)
+const CharacterPage = lazyPage(pageLoaders.CharacterPage)
+const CharacterErrorPage = lazyPage(pageLoaders.CharacterErrorPage)
+const AnalyzePage = lazyPage(pageLoaders.AnalyzePage)
+const ResultPage = lazyPage(pageLoaders.ResultPage)
+const InstallGuidePage = lazyPage(pageLoaders.InstallGuidePage)
+const MyPage = lazyPage(pageLoaders.MyPage)
+const ChatPage = lazyPage(pageLoaders.ChatPage)
+const SearchPage = lazyPage(pageLoaders.SearchPage)
+const ShopPage = lazyPage(pageLoaders.ShopPage)
 
 // 첫 화면을 그린 뒤 브라우저가 한가할 때 나머지 화면 청크를 미리 받아 둠 (화면 전환 시 대기 없음)
 function prefetchPages() {
@@ -49,6 +59,7 @@ function PageFallback() {
 }
 
 import { ROUTES } from '../constants/routes'
+import { reloadForStaleChunk } from '../utils/staleChunkReload'
 import {
   clearAuthStorage,
   clearBackgroundSession,
