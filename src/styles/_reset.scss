@@ -26,6 +26,20 @@ body {
   overscroll-behavior: none;
 }
 
+// ── 스크롤바 숨김 ──────────────────────────────────────────────────────
+// 앱 전체에서 스크롤바를 보이지 않게 함 (데스크탑 마우스 환경 포함).
+// 스크롤 자체(휠·트랙패드·터치·키보드)는 그대로 동작합니다.
+* {
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // 구형 Edge
+}
+
+*::-webkit-scrollbar {
+  display: none; // Chrome, Safari, Edge
+  width: 0;
+  height: 0;
+}
+
 // ── CSS 커스텀 프로퍼티 ────────────────────────────────────────────────
 :root {
   --design-width: #{$design-width};
