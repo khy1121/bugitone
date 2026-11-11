@@ -537,6 +537,24 @@
     &::-webkit-scrollbar {
       display: none;
     }
+
+    // 마우스로 끌어서 넘기기 (useDragScroll)
+    @media (hover: hover) and (pointer: fine) {
+      cursor: grab;
+    }
+
+    &.is-dragging {
+      cursor: grabbing;
+      user-select: none;
+
+      button {
+        cursor: grabbing;
+      }
+    }
+
+    img {
+      -webkit-user-drag: none;
+    }
   }
 
   .mypage__report-character {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import useDragScroll from "../../hooks/useDragScroll";
 import BottomNav from "../../components/common/BottomNav/BottomNav";
 import Chip from "../../components/common/Chip/Chip";
 import DuplicateCheckButton from "../../components/common/DuplicateCheckButton/DuplicateCheckButton";
@@ -998,6 +999,7 @@ function ReportView({ onBack }) {
   const [emotions, setEmotions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState("");
+  const characterListRef = useDragScroll();
 
   useEffect(() => {
     const userId = getCurrentUserId();
@@ -1074,7 +1076,7 @@ function ReportView({ onBack }) {
           {loading ? (
             <p className="mypage__report-empty">캐릭터를 불러오는 중이에요.</p>
           ) : characters.length > 0 ? (
-            <div className="mypage__report-character-list">
+            <div className="mypage__report-character-list" ref={characterListRef}>
               {characters.map((character, index) => (
                 <ReportCharacterCard
                   key={character.characterId}
