@@ -461,19 +461,46 @@
 
 // ── 월 리포트 뷰 ──────────────────────────────────────────────────────────────
 
+// 피그마 '리포트' 프레임(1666:1800) 기준
 .mypage--report {
   display: flex;
   flex-direction: column;
   background: #f5f4f3;
 
+  // 헤더: "← 나가기" (Body1, Gray_800, left 20px)
+  .mypage__back-text {
+    position: absolute;
+    left: 20px;
+    top: calc(var(--app-status-height, max(env(safe-area-inset-top, 0px), 60px)) + 22px);
+    transform: translateY(-50%);
+    padding: 10px 0;
+    border: none;
+    background: none;
+    color: $gray-800;
+    font-family: $font-family-base;
+    font-size: $font-size-body1;
+    font-weight: $font-weight-body1;
+    line-height: normal;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   .mypage__report-content {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 24px 0 36px;
+    // 헤더 하단(104) → 첫 섹션 제목(125)
+    padding: 21px 0 36px;
     display: flex;
     flex-direction: column;
-    gap: 26px;
+    // 캐릭터 카드 하단(431) → 감정 제목(459) = 28px, 카드 그림자 여백 6px 제외
+    gap: 22px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .mypage__report-section {
@@ -482,21 +509,28 @@
   }
 
   .mypage__report-section-title {
-    margin: 0 20px 4px;
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 30px;
+    // 제목 하단(155) → 카드 상단(191) = 36px, 캐릭터 이미지 돌출 여백 21px 제외
+    margin: 0 20px 15px;
     color: $gray-900;
+    font-size: $font-size-h2;
+    font-weight: $font-weight-h2;
+    line-height: $line-height-h2;
     letter-spacing: $letter-spacing-base;
+  }
+
+  // 감정 제목 하단(489) → 첫 감정 행(513)
+  .mypage__report-section-title--emotion {
+    margin-bottom: 24px;
   }
 
   .mypage__report-character-list {
     display: flex;
-    gap: 16px;
+    gap: 20.8px;
     overflow-x: auto;
-    overflow-y: visible;
-    padding: 0px 20px 0;
+    // 이미지가 카드 위로 20.28px 돌출, 하단은 drop-shadow 여백
+    padding: 21px 20px 6px;
     scroll-snap-type: x proximity;
+    scroll-padding: 0 20px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
 
@@ -506,24 +540,28 @@
   }
 
   .mypage__report-character {
-    flex: 0 0 152px;
-    width: 152px;
+    position: relative;
+    flex: 0 0 200px;
+    width: 200px;
+    height: 240px;
     scroll-snap-align: start;
+    filter: drop-shadow(4px 4px 2.75px rgba(59, 59, 59, 0.06));
   }
 
   .mypage__report-character-media {
-    height: 90px;
-    margin: 20px 0 0 0;
-    border-radius: 16px 16px 0 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+    position: absolute;
+    inset: 0 0 1px;
+    border-radius: 21.84px;
     background: linear-gradient(0deg, #FFE8A3 73.53%, #FFD968 109.15%), #FFF;
-    position: relative;
+
     img {
-      height: 112px;
-      transform: translateY(5px);
+      position: absolute;
+      top: -20.28px;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 146.64px;
       width: auto;
+      max-width: none;
     }
   }
 
@@ -535,113 +573,141 @@
     background: linear-gradient(0deg, #FFEAC3 73.53%, #FFD78C 109.15%), #FFF;
   }
 
+  .mypage__report-character--4 .mypage__report-character-media {
+    background: linear-gradient(0deg, #E0F8C7 73.53%, #B3E184 109.15%), #FFF;
+  }
+
   .mypage__report-character-body {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 86.25px;
+    height: 154px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    position: relative;
-    min-height: 118px;
-    margin-top: -24px;
-    padding: 12px 10px 12px;
-    border-radius: 16px;
-    background: $gray-0;
+    padding: 20px 12px 0;
+    border-radius: 21.84px;
+    background: #FEFEFE;
     text-align: center;
-    box-shadow: 0 8px 20px rgba(40, 39, 35, 0.03);
-
-    h2 {
-      color: #000;
-      font-family: Pretendard;
-      font-size: 16px;
-      font-style: normal;
-      font-weight: 600;
-      line-height: 160%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      letter-spacing: $letter-spacing-base;
-      margin: 0;
-
-      p {
-        color: $gray-700;
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 18px; /* 150% */
-        margin: 0;
-        margin-top: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        letter-spacing: $letter-spacing-base;
-      }
-    }
+    overflow: hidden;
 
     button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 96px;
-      height: 36px;
+      width: 124px;
+      height: 45.92px;
+      margin-top: auto;
+      margin-bottom: 19px;
+      padding: 9.1px 31.2px;
       border: 0;
-      border-radius: 12px;
+      border-radius: 15.6px;
       background: $main-0;
       color: $main-700;
       font-family: $font-family-base;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 20px;
-      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.6;
       letter-spacing: $letter-spacing-base;
+      white-space: nowrap;
+      cursor: pointer;
       -webkit-tap-highlight-color: transparent;
 
-      &:hover {
-        cursor: pointer;
-      }
       &:active {
         transform: translateY(1px);
       }
     }
   }
 
-  .mypage__report-emotion-card {
-    min-height: 118px;
-    margin: 0 20px;
-    padding: 18px 20px 14px;
-    border-radius: 18px;
-    background: $gray-0;
-    box-shadow: 0 8px 20px rgba(40, 39, 35, 0.03);
+  .mypage__report-character-name {
+    max-width: 100%;
+    margin: 0;
+    color: $gray-900;
+    font-size: $font-size-h3;
+    font-weight: $font-weight-h3;
+    line-height: $line-height-h3;
+    letter-spacing: $letter-spacing-base;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    h2 {
-      margin: 0 0 18px;
-      color: $gray-900;
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 30px;
-      letter-spacing: $letter-spacing-base;
-    }
+  .mypage__report-character-author {
+    max-width: 100%;
+    margin: 2px 0 0;
+    color: $gray-600;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: $letter-spacing-base;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .mypage__report-emotions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0 20px;
+    padding: 0;
+    list-style: none;
   }
 
   .mypage__report-emotion {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    min-width: 82px;
-    min-height: 40px;
-    padding: 9px 20px;
+    gap: 20px;
+    padding: 14px 24px;
+    border-radius: 20px;
+    background: $gray-0;
+    overflow: hidden;
+  }
+
+  .mypage__report-emotion-icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
     border-radius: 20px;
     background: $gray-50;
-    color: $gray-700;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 160%;
-    letter-spacing: $letter-spacing-base;
-    white-space: nowrap;
+    overflow: hidden;
+
+    img {
+      position: absolute;
+      left: 10px;
+      top: 11px;
+      width: 44px;
+      height: 44px;
+      opacity: 0.74;
+    }
+  }
+
+  .mypage__report-emotion-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+
+    strong {
+      color: $gray-900;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 26px;
+      letter-spacing: $letter-spacing-base;
+    }
+
+    span {
+      color: $gray-500;
+      font-size: $font-size-body2;
+      font-weight: $font-weight-body2;
+      line-height: 23px;
+      letter-spacing: $letter-spacing-base;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .mypage__report-empty {
@@ -655,15 +721,8 @@
     letter-spacing: $letter-spacing-base;
   }
 
-  .mypage__report-empty--in-card {
-    margin: 0;
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
-  }
-
   .mypage__api-error--report {
-    margin: -10px 20px 0;
+    margin: 0 20px;
     text-align: left;
   }
 }
