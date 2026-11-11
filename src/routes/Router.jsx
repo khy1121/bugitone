@@ -60,6 +60,7 @@ function PageFallback() {
 
 import { ROUTES } from '../constants/routes'
 import { reloadForStaleChunk } from '../utils/staleChunkReload'
+import PageTopColorSync from '../components/common/PageTopColorSync'
 import {
   clearAuthStorage,
   clearBackgroundSession,
@@ -167,6 +168,7 @@ export default function Router() {
   return (
     <BrowserRouter>
       <AuthNavigationGuard />
+      <PageTopColorSync />
       <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path={ROUTES.MAIN} element={<SplashPage />} />
