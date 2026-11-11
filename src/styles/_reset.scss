@@ -107,6 +107,16 @@ body {
   align-items: stretch;
 }
 
+// ── Device (데스크탑 핸드폰 프레임) ─────────────────────────────────
+// 모바일: display: contents로 레이아웃에서 사라지고 장식 요소는 숨김
+.device {
+  display: contents;
+}
+
+.device__deco {
+  display: none;
+}
+
 // ── App Frame ─────────────────────────────────────────────────────────
 // useVisualViewportHeight가 window.innerHeight(iOS standalone 포함 전체 화면)를 기준으로
 // --app-height를 계산. 100dvh는 iOS standalone에서 safe-area-inset-bottom을
@@ -148,17 +158,23 @@ body {
 }
 
 // ── 데스크탑 레이아웃 (≥768px) ──────────────────────────────────────
-// 앱 컨테이너를 393×852 고정 프레임으로 중앙에 띄움
+// 앱(393×852)을 핸드폰 모양 프레임 안에 넣어 화면 중앙에 띄움.
+// 화면 높이가 낮으면 useVisualViewportHeight가 계산한 --device-scale로 전체를 축소.
+$device-bezel: 12px;
+$device-rim: 2px;
+$device-height: $design-height + ($device-bezel + $device-rim) * 2; // 880px
+$device-stage-bg: #ebe7e2;
+
 @media (min-width: $breakpoint-mobile) {
   html {
-    overflow: auto; // 데스크탑에서 페이지 스크롤 허용 (프레임 높이 > 화면 높이인 경우)
+    overflow: auto; // 프레임이 화면보다 클 때 대비
   }
 
   body {
     height: auto;
     min-height: 100vh;
     overflow: auto;
-    background: #d9d9d9;
+    background: $device-stage-bg;
   }
 
   #root {
@@ -171,9 +187,85 @@ body {
     min-height: 100vh;
     align-items: center;
     justify-content: center;
-    background: #d9d9d9;
-    overflow: auto;
+    background: $device-stage-bg;
+    overflow: hidden;
     padding: 24px 0;
+  }
+
+  .device {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    padding: $device-bezel;
+    border: $device-rim solid #9a9da1;
+    border-radius: 64px;
+    background: #0d0d0e;
+    box-shadow:
+      inset 0 0 0 2px #2c2d30,
+      inset 0 0 0 4px #0d0d0e,
+      0 32px 70px rgba(25, 25, 25, 0.22),
+      0 10px 22px rgba(25, 25, 25, 0.12);
+    transform: scale(var(--device-scale, 1));
+    transform-origin: center;
+    // transform은 레이아웃 크기를 줄이지 않으므로 줄어든 만큼 위아래 여백을 당김
+    margin-block: calc((var(--device-scale, 1) - 1) * #{$device-height * 0.5});
+  }
+
+  .device__deco {
+    display: block;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  // 옆면 버튼
+  .device__button {
+    width: 4px;
+    background: linear-gradient(90deg, #5c5f63, #2b2c2e);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
+
+    &--action,
+    &--volume-up,
+    &--volume-down {
+      left: -$device-rim - 4px;
+      border-radius: 3px 0 0 3px;
+    }
+
+    &--action { top: 118px; height: 32px; }
+    &--volume-up { top: 176px; height: 58px; }
+    &--volume-down { top: 248px; height: 58px; }
+
+    &--power {
+      right: -$device-rim - 4px;
+      top: 200px;
+      height: 92px;
+      border-radius: 0 3px 3px 0;
+      background: linear-gradient(270deg, #5c5f63, #2b2c2e);
+    }
+  }
+
+  // 다이내믹 아일랜드: 앱 상단 상태바 영역(60px) 위에 겹침
+  .device__island {
+    top: $device-bezel + 11px;
+    left: 50%;
+    z-index: 1000;
+    width: 122px;
+    height: 36px;
+    border-radius: 20px;
+    background: #000;
+    transform: translateX(-50%);
+
+    // 카메라 렌즈
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #3b4a6b 0%, #141824 55%, #050608 100%);
+      transform: translateY(-50%);
+    }
   }
 
   .app-frame {
@@ -181,8 +273,7 @@ body {
     height: $design-height;
     min-height: $design-height;
     flex-shrink: 0;
-    border-radius: 40px;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    border-radius: 50px;
     overflow: hidden;
 
     // position: fixed 자식(BottomNav 등)이 뷰포트 대신 이 프레임을 기준으로 배치됨
