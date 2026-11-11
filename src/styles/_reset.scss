@@ -67,6 +67,17 @@ body {
   --bottom-nav-offset: calc(var(--bottom-nav-height) + var(--app-home-indicator-height));
 }
 
+// ── 모바일 브라우저(사파리·카카오톡 인앱 등)에서 상태바·홈 인디케이터 여백 축소 ─────
+// 60px 상태바 / 33px 홈 인디케이터 여백은 홈 화면에 설치한 앱(standalone)처럼 화면 전체를 쓸 때만 필요.
+// 브라우저에서는 브라우저 UI가 그 자리를 차지하므로 빈 띠가 생기고 내용이 아래로 밀려 찌그러져 보임.
+// html.is-browser 클래스는 index.html에서 standalone 여부를 보고 붙임.
+@media (max-width: #{$breakpoint-mobile - 1px}) {
+  html.is-browser {
+    --app-status-height: max(var(--safe-top), 16px);
+    --app-home-indicator-height: max(var(--safe-bottom), 8px);
+  }
+}
+
 // ── Body / Root ────────────────────────────────────────────────────────
 body {
   height: calc(var(--app-height) + var(--safe-bottom));

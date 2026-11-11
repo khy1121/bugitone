@@ -12,6 +12,15 @@
     <link rel="icon" href="/pwa-icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <title>NADOK</title>
+    <!-- 홈 화면에 설치한 앱(standalone)인지 브라우저인지 표시: 상태바·홈 인디케이터 여백 결정 (_reset.scss) -->
+    <script>
+      (function () {
+        var standalone =
+          (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+          window.navigator.standalone === true
+        document.documentElement.classList.add(standalone ? 'is-standalone' : 'is-browser')
+      })()
+    </script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <!-- 첫 화면(스플래시) 배경: CSS background-image라 늦게 발견되므로 미리 요청.
          스플래시('/')로 들어올 때만 요청해 다른 화면에서 'preload 후 미사용' 경고가 나지 않게 함 -->
