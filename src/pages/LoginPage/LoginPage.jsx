@@ -7,6 +7,8 @@ import Button from '../../components/common/Button/Button'
 import PasswordVisibilityButton from '../../components/common/PasswordVisibilityButton/PasswordVisibilityButton'
 import useKeyboardAwareInput from '../../hooks/useKeyboardAwareInput'
 import { isAuthenticated, storeUserProfile } from '../../utils/authStorage'
+import { IS_MOCK_MODE } from '../../mock'
+import { DEMO_ACCOUNT } from '../../mock/db'
 import './LoginPage.scss'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -41,7 +43,9 @@ export default function LoginPage() {
   const emailError = emailBlurred && !emailValid
   const passwordError = passwordBlurred && !passwordValid
 
-  const canSubmit = emailValid && passwordValid && !submitting
+  const inputValid = emailValid && passwordValid
+  // 더미 데이터 모드에서는 입력 없이도 로그인 버튼으로 데모 계정에 바로 들어감
+  const canSubmit = (inputValid || IS_MOCK_MODE) && !submitting
   const keyboard = useKeyboardAwareInput({
     scrollRef: pageRef,
     resetScrollOnFocus: true,
@@ -57,12 +61,16 @@ export default function LoginPage() {
     if (!canSubmit) return
     setSubmitting(true)
     setApiError('')
+    // 더미 데이터 모드에서 입력이 비었거나 형식이 맞지 않으면 데모 계정으로 로그인
+    const credentials = IS_MOCK_MODE && !inputValid
+      ? { email: DEMO_ACCOUNT.email, password: DEMO_ACCOUNT.password }
+      : { email, password }
     try {
-      const profile = await login({ email, password })
+      const profile = await login(credentials)
       if (!profile?.userId) {
         throw new Error('로그인 응답에 사용자 정보가 없습니다.')
       }
-      storeUserProfile(profile, { email })
+      storeUserProfile(profile, { email: credentials.email })
       navigate(ROUTES.HOME, { replace: true })
     } catch (err) {
       setApiError(getLoginErrorMessage(err))
@@ -90,6 +98,13 @@ export default function LoginPage() {
     >
       <div className="onboard-login__inner">
         <h1 className="onboard-login__logo">DOK</h1>
+
+        {IS_MOCK_MODE && (
+          <p className="onboard-login__demo-notice" role="note">
+            <strong>체험용 데모 모드</strong>
+            <span>로그인 버튼만 누르면 데모 계정으로 바로 들어가요</span>
+          </p>
+        )}
 
         <div className="onboard-login__form">
           <Input
