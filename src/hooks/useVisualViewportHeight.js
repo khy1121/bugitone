@@ -1,6 +1,10 @@
 import { useEffect } from 'react'
 
 const KEYBOARD_MIN_HEIGHT = 120
+// 데스크탑 핸드폰 프레임 전체 높이(_reset.scss의 $device-height)와 위아래 여백
+const DEVICE_FRAME_HEIGHT = 880
+const DEVICE_STAGE_PADDING = 48
+const DESKTOP_MEDIA_QUERY = '(min-width: 768px)'
 
 export default function useVisualViewportHeight() {
   useEffect(() => {
@@ -41,6 +45,13 @@ export default function useVisualViewportHeight() {
       root.style.setProperty('--visual-offset-top', `${visualOffsetTop}px`)
       root.style.setProperty('--viewport-width', `${visualWidth}px`)
       root.style.setProperty('--app-scale', '1')
+
+      // 데스크탑에서 화면 높이가 프레임보다 낮으면 핸드폰 프레임 전체를 축소
+      const isDesktop = window.matchMedia(DESKTOP_MEDIA_QUERY).matches
+      const deviceScale = isDesktop
+        ? Math.max(0.5, Math.min(1, (window.innerHeight - DEVICE_STAGE_PADDING) / DEVICE_FRAME_HEIGHT))
+        : 1
+      root.style.setProperty('--device-scale', deviceScale.toFixed(4))
     }
 
     const scheduleApply = () => {
