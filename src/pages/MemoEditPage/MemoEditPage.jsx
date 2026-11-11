@@ -68,16 +68,16 @@ function getMemoContent(memo) {
   return escaped || EMPTY_CONTENT
 }
 
+// 보기 화면 상단 요약: 피그마처럼 메모 안의 소제목(제목 스타일 문단)만 모은 목차.
+// 예전에는 본문 첫 3줄을 그대로 보여줘서, 소제목 없는 메모는 내용이 위아래로 두 번 보였음.
 function getMemoSummary(content) {
-  const textWithBreaks = getMemoContent({ content })
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|li|h1|h2|blockquote)>/gi, '\n')
+  const html = getMemoContent({ content })
+  if (!/<h[1-3][\s>]/i.test(html)) return []
 
-  return stripHtml(textWithBreaks)
-    .split(/\n+/)
-    .map((line) => line.trim())
+  const doc = new DOMParser().parseFromString(DOMPurify.sanitize(html), 'text/html')
+  return [...doc.querySelectorAll('h1, h2, h3')]
+    .map((heading) => heading.textContent.trim())
     .filter(Boolean)
-    .slice(0, 3)
 }
 
 function mergeMemoResult(result, fallback) {
@@ -592,8 +592,8 @@ export default function MemoEditPage() {
           {summaryItems.length > 0 && (
             <section className="memo-view__summary" aria-label="메모 요약">
               <ol>
-                {summaryItems.map((line) => (
-                  <li key={line}>{line}</li>
+                {summaryItems.map((line, index) => (
+                  <li key={`${index}-${line}`}>{line}</li>
                 ))}
               </ol>
             </section>
