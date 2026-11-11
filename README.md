@@ -48,6 +48,8 @@
 
 ## NADOK은 어떤 서비스인가요?
 
+> 쉽게 말하면: 읽은 책을 기록하고, 오늘의 감정에 어울리는 책 속 캐릭터에게 위로와 조언을 받는 독서 앱입니다.
+
 책을 읽고 나서 느낀 점을 기록하고, 오늘 하루의 감정을 들려주면 그 감정에 어울리는 **책 속 캐릭터**를 추천해 주는 서비스입니다.
 
 - 읽은 책과 메모를 한곳에 모아 둘 수 있어요.
@@ -63,6 +65,8 @@
 
 ## 바로 써보기
 
+> 쉽게 말하면: 사이트에 들어가서 로그인 버튼만 누르면 체험용 계정으로 바로 써 볼 수 있습니다.
+
 1. 휴대폰이나 컴퓨터에서 **https://bugitone.vercel.app** 에 접속합니다.
 2. **시작하기**를 누릅니다.
 3. 로그인 화면에서 아무것도 입력하지 않고 **로그인** 버튼만 누르면 체험용 계정으로 바로 들어갑니다.
@@ -76,6 +80,8 @@
 <a id="features"></a>
 
 ## 주요 기능
+
+> 쉽게 말하면: 서재, 메모, 감정 분석, AI 채팅, 월간 리포트까지 책과 관련된 기록을 한곳에서 할 수 있습니다.
 
 | 기능 | 할 수 있는 일 |
 |---|---|
@@ -91,6 +97,8 @@
 <a id="results"></a>
 
 ## 이렇게 빨라졌어요
+
+> 쉽게 말하면: 이미지와 코드를 가볍게 만들고 받는 순서를 바꿔서, 첫 화면이 뜨는 시간을 약 1.2초 줄였습니다.
 
 처음에는 이미지가 늦게 뜨고 첫 화면이 무거웠습니다. 원인을 하나씩 측정하고 고쳐서 아래처럼 개선했습니다.
 
@@ -119,6 +127,8 @@
 <a id="tech-stack"></a>
 
 ## 사용한 기술
+
+> 쉽게 말하면: 화면은 React로 만들고, Vercel로 인터넷에 올리며, 휴대폰에 앱처럼 설치할 수 있게(PWA) 했습니다.
 
 ### 화면 만들기 (Frontend)
 
@@ -185,6 +195,9 @@
 
 > 쉽게 말하면: 코드를 내려받은 뒤 두 줄의 명령어로 내 컴퓨터에서 사이트를 띄워 볼 수 있습니다. ([Node.js](https://nodejs.org) 설치 필요)
 
+<details>
+<summary>자세히 보기</summary>
+
 ```bash
 npm install
 npm run dev
@@ -198,6 +211,8 @@ npm run dev
 | `npm run build` | 실제 배포용 파일 만들기 (`dist/` 폴더) |
 | `npm run preview` | 배포용 파일을 내 컴퓨터에서 미리 확인 |
 
+</details>
+
 ---
 
 <a id="env"></a>
@@ -205,6 +220,9 @@ npm run dev
 ## 환경변수
 
 > 쉽게 말하면: 서버 주소처럼 환경마다 달라지는 설정값입니다. 코드에 직접 적지 않고 별도 파일이나 Vercel 설정에 넣습니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 로컬 개발 시 `.env.example`을 참고해 `.env`를 만듭니다.
 
@@ -226,6 +244,8 @@ VITE_USE_MOCK=false
 
 > 실제 서버 주소는 GitHub에 올리지 말고 Vercel 환경변수에만 등록합니다.
 
+</details>
+
 ---
 
 <a id="mock-mode"></a>
@@ -233,6 +253,9 @@ VITE_USE_MOCK=false
 ## 데모(더미 데이터) 모드
 
 > 쉽게 말하면: 실제 서버가 없어도 미리 준비한 예시 데이터로 모든 화면을 체험할 수 있게 하는 모드입니다. 지금 공개된 사이트가 이 모드로 동작합니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 - `VITE_USE_MOCK=true`일 때만 켜집니다.
 - 기존 API 코드(`src/api/*`)와 화면 코드는 그대로 두고, 서버 대신 응답하는 부분(`axiosInstance`의 adapter)만 바꿉니다 (`src/mock/`).
@@ -243,6 +266,8 @@ VITE_USE_MOCK=false
 
 자세한 내용은 [`src/mock/README.md`](src/mock/README.md)를 참고하세요.
 
+</details>
+
 ---
 
 <a id="structure"></a>
@@ -250,6 +275,9 @@ VITE_USE_MOCK=false
 ## 폴더 구조
 
 > 쉽게 말하면: 코드가 역할별로 어느 폴더에 들어 있는지 정리한 지도입니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 ```txt
 api/                Vercel Function 프록시 (서버 요청 전달)
@@ -266,6 +294,8 @@ src/styles/         공통 디자인(색, 글자 크기 등)
 src/utils/          공통 도구 함수
 ```
 
+</details>
+
 ---
 
 <a id="routing"></a>
@@ -273,6 +303,9 @@ src/utils/          공통 도구 함수
 ## 화면 주소
 
 > 쉽게 말하면: 각 화면이 어떤 주소로 열리는지 정리한 표입니다. 주소 목록은 `src/constants/routes.js`에서 관리합니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 | 주소 | 화면 | 주소 | 화면 |
 |---|---|---|---|
@@ -286,6 +319,8 @@ src/utils/          공통 도구 함수
 
 시작 화면과 로그인을 뺀 나머지 화면은 처음에 다 받지 않고, 그 화면에 들어갈 때 필요한 만큼만 불러옵니다(`React.lazy`).
 
+</details>
+
 ---
 
 <a id="api-proxy"></a>
@@ -293,6 +328,9 @@ src/utils/          공통 도구 함수
 ## 서버와 통신하는 방법
 
 > 쉽게 말하면: 브라우저가 백엔드 서버에 직접 연결하지 않고, 같은 사이트 주소(`/api`)로 요청하면 Vercel이 대신 서버에 전달합니다. 보안 경고 없이 안전하게 통신하기 위한 구조입니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 ```txt
 브라우저 -> https://<vercel-domain>/api/user/login   -> /api/proxy -> API_PROXY_TARGET/user/login
@@ -307,6 +345,8 @@ HTTPS(보안 연결) 사이트에서 HTTP(일반 연결) 이미지나 API를 바
 http://<backend-origin>/uploads/image.svg -> /uploads/image.svg -> UPLOADS_PROXY_TARGET/image.svg
 ```
 
+</details>
+
 ---
 
 <a id="deploy"></a>
@@ -314,6 +354,9 @@ http://<backend-origin>/uploads/image.svg -> /uploads/image.svg -> UPLOADS_PROXY
 ## 배포
 
 > 쉽게 말하면: GitHub의 `master` 브랜치에 코드가 합쳐지면 Vercel이 자동으로 사이트를 새로 만들어 올립니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 ```txt
 Framework Preset: Vite
@@ -332,6 +375,8 @@ UPLOADS_PROXY_TARGET=<backend-origin>/uploads
 - 환경변수를 추가하거나 고친 뒤에는 **다시 배포해야** 적용됩니다.
 - `vercel.json`은 앱 주소만 `index.html`로 보내고, 없는 `/assets/*`·`.js`·`.css` 파일은 404로 응답합니다. 이전 배포의 파일을 찾다가 생기는 오류를 막기 위한 설정입니다.
 
+</details>
+
 ---
 
 <a id="pwa"></a>
@@ -339,6 +384,9 @@ UPLOADS_PROXY_TARGET=<backend-origin>/uploads
 ## 앱처럼 설치하기 (PWA)
 
 > 쉽게 말하면: 휴대폰 홈 화면에 아이콘을 추가해 앱처럼 쓸 수 있고, 한 번 방문하면 필요한 파일을 저장해 두어 다음부터 더 빨리 열립니다. 새 버전이 나오면 "새 버전이 있어요" 안내가 뜹니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 - 파일 저장(서비스워커)은 첫 화면이 다 뜬 뒤에 시작해 처음 접속을 느리게 하지 않습니다.
 - 모든 파일에 내용 기반 버전 표시(revision)를 붙여, 같은 이름으로 교체한 이미지·폰트도 업데이트됩니다 (`vite.config.js`).
@@ -354,6 +402,8 @@ navigator.serviceWorker.getRegistrations()
   .then(() => location.reload())
 ```
 
+</details>
+
 ---
 
 <a id="mobile"></a>
@@ -361,6 +411,9 @@ navigator.serviceWorker.getRegistrations()
 ## 모바일 대응
 
 > 쉽게 말하면: 휴대폰 크기나 브라우저(사파리, 카카오톡 등)가 달라도 화면이 깨지지 않고 보기 좋게 맞춰지도록 한 부분입니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 | 항목 | 내용 |
 |---|---|
@@ -370,6 +423,8 @@ navigator.serviceWorker.getRegistrations()
 | 키보드 대응 | 글자를 입력할 때만 화면 높이를 유지하고, 브라우저 툴바가 나타나거나 사라지면 실제 보이는 높이에 맞춤 |
 | 컴퓨터 화면 | 768px 이상에서는 휴대폰 모양 틀 안에 표시 |
 
+</details>
+
 ---
 
 <a id="performance"></a>
@@ -377,6 +432,9 @@ navigator.serviceWorker.getRegistrations()
 ## 성능 개선 자세히 보기
 
 > 쉽게 말하면: 사이트가 느렸던 원인을 측정 도구로 찾아내고, 이미지·글꼴·코드를 가볍게 만들고, 꼭 필요한 것부터 먼저 받도록 순서를 바꿨습니다. 결과 요약은 [이렇게 빨라졌어요](#results)에 있습니다.
+
+<details>
+<summary>자세히 보기</summary>
 
 ### 어떻게 측정했나요?
 
@@ -422,11 +480,15 @@ navigator.serviceWorker.getRegistrations()
 - 앱이 미리 저장하는 파일에 WebP 이미지를 포함했습니다 (`vite.config.js`).
 - 스크롤바는 앱 전체에서 숨기고 스크롤은 그대로 됩니다 (`src/styles/_reset.scss`).
 
+</details>
+
 ---
 
 <a id="glossary"></a>
 
 ## 용어 풀이
+
+> 쉽게 말하면: 이 문서에 나오는 낯선 용어를 한 줄씩 풀어 둔 사전입니다.
 
 | 용어 | 뜻 |
 |---|---|
